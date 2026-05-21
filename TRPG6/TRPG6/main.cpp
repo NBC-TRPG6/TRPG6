@@ -1,0 +1,77 @@
+﻿// 공식 라이브러리 ==========================================
+#include <iostream>
+#include <thread>
+#include <vector>
+#include <string>
+
+// 우리들만의~ 라이브러리 ====================================
+#include "Utils.h" // 윈도우 API 유틸리티
+#include "DATABASE.h" // 전역 참조하는 헤더 데이터 파일
+#include "Renderer.h" // 게임 렌더링
+#include "Controller.h" // 입력 처리
+#include "GameManager.h" // 게임 상태 관리
+// 게임상태 ================================================
+#include "IGameState.h"
+#include "GameStartState.h"
+
+int main() {
+#pragma region INIT
+	// 컨트롤러 생성
+    Controller controller;
+    Renderer::Init();
+    GameManager::GetInstance().SetCurrentState(new GameStartState());
+
+    // 초기 화면 클리어
+    std::cout << "\033[2J";
+    HideCursor();
+#pragma endregion
+
+#pragma region MAIN_LOOP
+    while (GameManager::GetInstance().GetIsGameRunning()) {
+        // 1. 프레임 초기화
+        // UIManager::DisplayASCIIAnimation(); // 재미용 아스키아트
+        auto frameStart = std::chrono::steady_clock::now();
+
+        // 2. UI 렌더링
+        Renderer::Render();
+
+        // 3. 유저 입력 처리
+        controller.ProcessInput();
+
+        // 4. 입력 파싱 (중복 코드 제거)
+        int ch = -1;
+        if (!lastCommand.empty()) {
+            try {
+                ch = std::stoi(lastCommand);
+            }
+            catch (const std::invalid_argument&) {
+                ch = -1;
+            }
+            catch (const std::out_of_range&) {
+                ch = -1;
+            }
+        }
+
+        // 5. 상태 변화
+		// 이곳에서 여러분들의 코드가 실제로 진행됩니다.
+        IGameState* currentState = GameManager::GetInstance().GetCurrentState();
+        if (currentState != nullptr) {
+            currentState->Update(ch, lastCommand);
+        }
+
+        // 6. 명령어 클리어
+        lastCommand.clear();
+
+        // 7. 프레임 제약
+        auto frameEnd = std::chrono::steady_clock::now();
+        auto elapsed = frameEnd - frameStart;
+        if (elapsed < FRAME_DURATION) {
+            std::this_thread::sleep_for(FRAME_DURATION - elapsed);
+        }
+    }
+#pragma endregion
+
+	// 게임 종료
+    std::cout << "\033[2J\033[1;1 HExit Game" << std::endl;
+    return 0;
+}
