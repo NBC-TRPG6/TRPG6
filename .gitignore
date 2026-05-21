@@ -23,7 +23,6 @@
 *.dll
 *.so.*
 
-
 # Fortran module files
 *.mod
 *.smod
@@ -66,4 +65,13 @@ vcpkg_installed/
 
 # test output & cache
 Testing/
-.cache/
+.cache/ 
+
+.vs/
+*.user
+*.suo
+*.sdf
+*.opensdf
+
+.DS_Store
+Thumbs.db
