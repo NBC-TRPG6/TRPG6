@@ -43,9 +43,4 @@ public:
     void LevelUp();
 
     void PrintStatus() const;
-
-
-protected:
-    int Hp;
-    int Attack;
 };
