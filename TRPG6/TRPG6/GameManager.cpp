@@ -1,13 +1,14 @@
 ﻿#include "GameManager.h"
 #include "IGameState.h"
+#include "Player.h"
 
 GameManager::GameManager() {
-	// 생성자
-	// 게임에서 제일 빨리 실행되는 부분입니다.(UIManager 제외)
+    // 생성자
+    // 게임에서 제일 빨리 실행되는 부분입니다.(UIManager 제외)
 }
 
 GameManager::~GameManager() {
-	// 파괴자
+    // 파괴자
     delete CURRENT_STATE;
     CURRENT_STATE = nullptr;
 }
@@ -43,12 +44,22 @@ IGameState* GameManager::GetCurrentState() {
     return CURRENT_STATE;
 }
 
+void GameManager::SetPlayer(Player* p)
+{
+    player = p;
+}
+
+Player* GameManager::GetPlayer() const
+{
+    return player;
+}
+
 bool GameManager::GetIsGameRunning() const
 {
-	return IsGameRunning;
+    return IsGameRunning;
 }
 
 void GameManager::SetIsGameRunning(bool isRunning)
 {
-	IsGameRunning = isRunning;
+    IsGameRunning = isRunning;
 }
