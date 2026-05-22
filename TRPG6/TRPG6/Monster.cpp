@@ -68,7 +68,7 @@ Item* Monster::DropItem(int percent)
 
     if (rand() % 100 < percent)
     {
-        return new Item(MonsterItems[num], ItemType::HP_POTION, 50, 20);
+        return new Item(MonsterItems[num], ItemType::MONSTER_PART, 50, 20);
     }
 
     return nullptr;
