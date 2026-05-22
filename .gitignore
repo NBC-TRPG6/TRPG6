@@ -42,6 +42,10 @@
 build/
 Build/
 build-*/
+x64/
+x86/
+[Dd]ebug/
+[Rr]elease/
 
 # CMake generated files
 CMakeFiles/
@@ -51,9 +55,20 @@ Makefile
 install_manifest.txt
 compile_commands.json
 
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.tlog
+*.idb
+*.recipe
+*.lastbuildstate
+*.log
+
 # Temporary files
 *.tmp
-*.log
 *.bak
 *.swp
 
@@ -66,12 +81,6 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/ 
-
-.vs/
-*.user
-*.suo
-*.sdf
-*.opensdf
 
 .DS_Store
 Thumbs.db
