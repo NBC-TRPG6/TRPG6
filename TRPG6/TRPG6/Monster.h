@@ -61,7 +61,7 @@ public:
             RandomMoney(playerLevel))
     {}
 
-    Monster(int playerLevel = 1, float multiyState = 1):
+    Monster(int playerLevel, float multiyState = 1):
         Character(
             RandomName(),
             RandomHp(playerLevel, multiyState),
