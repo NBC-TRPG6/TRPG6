@@ -28,24 +28,21 @@ void Shop::ShowStock() const
  * @brief 아이템 구매 메서드
  * @param player 아이템을 구매하는 플레이어
  * @param itemName 구매할 아이템 이름
+ * @return 아이템 구매 성공 여부(true - 성공 / false - 실패)
  */
 bool Shop::BuyItem(Player* player, const std::string& itemName)
 {
     // 상점 재고에서 아이템 찾기
-    const auto& slots = stock.GetSlots();
-    auto it = std::find_if(slots.begin(), slots.end(), [&](const auto& slot)
-    {
-        return slot.item->GetName() == itemName;
-    });
+    auto* slot = stock.GetItemSlot(itemName);
 
     // 재고 확인
-    if (it == slots.end() || it->count <= 0)
+    if (!slot || slot->count <= 0)
     {
         std::cout << "상점에 '" << itemName << "' 아이템이 없거나 품절되었습니다." << std::endl;
         return false;
     }
 
-    Item* shopItem = it->item;
+    Item* shopItem = slot->item;
     int price = shopItem->GetPrice();
 
     // 플레이어 잔고 확인
@@ -60,5 +57,35 @@ bool Shop::BuyItem(Player* player, const std::string& itemName)
     player->GetInventory().AddItem(shopItem, 1);
     stock.UseItem(nullptr, itemName, 1);
     std::cout << "'" << itemName << "'을(를) 구매했습니다! (-" << price << "G)" << std::endl;
+    return true;
+}
+
+/*
+ * @brief 아이템 판매 메서드
+ * @param player 아이템을 판매하는 플레이어
+ * @param itemName 판매할 아이템 이름
+ * @param amount 판매할 아이템 수량
+ * @return 아이템 판매 성공 여부(true - 성공 / false - 실패)
+ */
+bool Shop::SellItem(Player* player, const std::string& itemName, int amount = 1)
+{
+    // 플레이어 인벤토리에 해당 아이템이 실제로 있는지 확인
+    auto* slot = player->GetInventory().GetItemSlot(itemName);
+
+    if (!slot || slot->count < amount)
+    {
+        std::cout << "판매할 아이템이 없습니다." << std::endl;
+        return false;
+    }
+
+    // 판매 금액
+    int sellPrice = slot->item->GetSellPrice() * amount;
+
+
+    // 판매 진행
+    player->GetInventory().UseItem(nullptr, itemName, amount);
+    player->SetMoney(player->GetMoney() + sellPrice);
+    stock.AddItem(new Item(*(slot->item)), amount);
+
     return true;
 }

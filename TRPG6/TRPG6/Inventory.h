@@ -57,29 +57,35 @@ public:
     bool UseItem(Character* target, std::string itemName, int amount = 1)
     {
         // 아이템 찾기
-        auto it = std::find_if(slots.begin(), slots.end(), [&](const auto& slot)
-            {
-                return slot.item->GetName() == itemName;
-            });
+        auto* slot = GetItemSlot(itemName);
 
         // 아이템이 없거나 수량이 부족할 경우
-        if (it == slots.end() || it->count < amount)
+        if (!slot || slot->count < amount)
         {
             std::cout << "아이템 보유 여부와 개수를 확인해주세요." << std::endl;
             return false;
         }
 
         // 효과 적용
-        for (int i = 0; i < amount; ++i)
+        if (target != nullptr)
         {
-            it->item->Use(target);
+            for (int i = 0; i < amount; ++i)
+            {
+                slot->item->Use(target);
+            }
         }
 
         // 수량 관리
-        it->count -= amount;
-        if (it->count <= 0)
+        slot->count -= amount;
+        if (slot->count <= 0)
         {
-            slots.erase(it);
+            // 슬롯 삭제를 위해 iterator를 찾아야 함
+            auto it = std::find_if(slots.begin(), slots.end(), [&](const auto& s) {
+                return s.item->GetName() == itemName;
+            });
+            if (it != slots.end()) {
+                slots.erase(it);
+            }
         }
 
         return true;
@@ -102,6 +108,23 @@ public:
         {
             formatter(slot.item, slot.count);
         }
+    }
+
+    /*
+     * @brief 이름으로 아이템 슬롯을 찾아 반환하는 메서드
+     * @param itemName 찾을 아이템 이름
+     * @return 찾으면 슬롯의 포인터, 못 찾으면 nullptr
+     */
+    InventorySlot<T>* GetItemSlot(const std::string& itemName)
+    {
+        for (auto& slot : slots)
+        {
+            if (slot.item->GetName() == itemName)
+            {
+                return &slot;
+            }
+        }
+        return nullptr;
     }
 
     const std::vector<InventorySlot<T>>& GetSlots() const { return slots; } 
