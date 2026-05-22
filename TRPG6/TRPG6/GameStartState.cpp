@@ -3,13 +3,23 @@
 #include "Renderer.h"
 
 void GameStartState::Update(int ch, std::string& lastCommand) {
-    Renderer::DisplayUI(UIPart::Top, 0, "Hello, World");
-    Renderer::DisplayUI(UIPart::CenterLeft, 0, "1번 라인");
-    Renderer::DisplayUI(UIPart::CenterLeft, 1, "2번 라인");
-    Renderer::DisplayUI(UIPart::CenterLeft, 2, "3번 라인");
-    Renderer::DisplayUI(UIPart::CenterLeft, 3, "4번 라인");
-    Renderer::DisplayUI(UIPart::CenterLeft, 4, "5번 라인");
-    Renderer::DisplayUI(UIPart::CenterLeft, 5, "6번 라인");
+    // 예시: 상태 진입 후 처음 한 번만 실행되도록 플래그 처리
+    static bool isInit = false;
+    if (!isInit)
+    {
+        Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "1번 라인 (1초 뒤 사라짐)", 1.0f);
+        Renderer::DisplayUITimed(UIPart::CenterLeft, 1, "2번 라인 (2초 뒤 사라짐)", 2.0f);
+        Renderer::DisplayUITimed(UIPart::CenterLeft, 2, "3번 라인 (3초 뒤 사라짐)", 3.0f);
+        isInit = true;
+    }
+
+    //Renderer::DisplayUI(UIPart::Top, 0, "Hello, World");
+    //Renderer::DisplayUI(UIPart::CenterLeft, 0, "1번 라인");
+    //Renderer::DisplayUI(UIPart::CenterLeft, 1, "2번 라인");
+    //Renderer::DisplayUI(UIPart::CenterLeft, 2, "3번 라인");
+    //Renderer::DisplayUI(UIPart::CenterLeft, 3, "4번 라인");
+    //Renderer::DisplayUI(UIPart::CenterLeft, 4, "5번 라인");
+    //Renderer::DisplayUI(UIPart::CenterLeft, 5, "6번 라인");
 
     //// 상태 전환
     //switch (ch) {

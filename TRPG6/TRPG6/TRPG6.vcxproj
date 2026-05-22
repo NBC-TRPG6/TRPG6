@@ -22,6 +22,7 @@
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameStartState.cpp" />
+    <ClCompile Include="IGameState.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="Player.cpp" />
