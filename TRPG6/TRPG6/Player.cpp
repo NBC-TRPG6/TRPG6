@@ -21,9 +21,9 @@ void Player::LevelUp()
 
 void Player::PrintStatus() const
 {
-    Renderer::DisplayUI(UIPart::CenterLeft, 0, "[ 캐릭터 정보 ]");
-    Renderer::DisplayUI(UIPart::CenterLeft, 1, "이름: " + Name);
-    Renderer::DisplayUI(UIPart::CenterLeft, 2, "레벨: " + std::to_string(Level) + "경험치: " + std::to_string(Exp) + "/100");
-    Renderer::DisplayUI(UIPart::CenterLeft, 3, "HP: " + std::to_string(Hp) + "/" + std::to_string(MaxHp));
-    Renderer::DisplayUI(UIPart::CenterLeft, 4, "공격력: " + std::to_string(Attack) + "방어력: " + std::to_string(Defense));
+    Renderer::DisplayUI(UIPart::CenterRight, 0, "[ 캐릭터 정보 ]");
+    Renderer::DisplayUI(UIPart::CenterRight, 1, "이름: " + Name);
+    Renderer::DisplayUI(UIPart::CenterRight, 2, "레벨: " + std::to_string(Level) + "경험치: " + std::to_string(Exp) + "/100");
+    Renderer::DisplayUI(UIPart::CenterRight, 3, "HP: " + std::to_string(Hp) + "/" + std::to_string(MaxHp));
+    Renderer::DisplayUI(UIPart::CenterRight, 4, "공격력: " + std::to_string(Attack) + "방어력: " + std::to_string(Defense));
 }
