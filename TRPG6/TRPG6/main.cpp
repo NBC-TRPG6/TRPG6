@@ -18,12 +18,14 @@ int main() {
 #pragma region INIT
 	// 컨트롤러 생성
     Controller controller;
-    Renderer::Init();
     GameManager::GetInstance().SetCurrentState(new GameStartState());
 
-    // 초기 화면 클리어
+    // 화면 세팅
     std::cout << "\033[2J";
     HideCursor();
+    auto art = LoadImageAsASCII("..\\..\\Resources\\mashutan.png");
+    Renderer::SetTopASCIIImage(art); // 여기서 이미지를 등록하고 내부 Height를 계산함
+    Renderer::Init();
 #pragma endregion
 
 #pragma region MAIN_LOOP
