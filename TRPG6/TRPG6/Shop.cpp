@@ -54,7 +54,7 @@ bool Shop::BuyItem(Player* player, const std::string& itemName)
 
     // 구매 진행
     player->SetMoney(player->GetMoney() - price);
-    player->GetInventory().AddItem(shopItem, 1);
+    player->GetInventory().AddItem(new Item(*shopItem), 1);
     stock.UseItem(nullptr, itemName, 1);
     std::cout << "'" << itemName << "'을(를) 구매했습니다! (-" << price << "G)" << std::endl;
     return true;

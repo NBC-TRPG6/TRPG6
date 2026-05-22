@@ -23,7 +23,14 @@ class Inventory
 {
 public:
     Inventory() {}
-    ~Inventory() {}
+    ~Inventory()
+    {
+        for (auto& slot : slots)
+        {
+            delete slot.item;
+        }
+        slots.clear();
+    }
 
     /*
      * @brief 아이템 추가 메서드
@@ -40,6 +47,7 @@ public:
             if (slot.item->GetName() == newItem->GetName())
             {
                 slot.count += amount;
+                delete newItem;
                 return;
             }
         }
@@ -79,11 +87,13 @@ public:
         slot->count -= amount;
         if (slot->count <= 0)
         {
-            // 슬롯 삭제를 위해 iterator를 찾아야 함
+            // 포인터로는 바로 erase가 불가능하므로, 삭제를 위해 iterator를 찾음
             auto it = std::find_if(slots.begin(), slots.end(), [&](const auto& s) {
                 return s.item->GetName() == itemName;
             });
+            
             if (it != slots.end()) {
+                delete it->item;
                 slots.erase(it);
             }
         }
