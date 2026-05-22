@@ -3,14 +3,23 @@
 
 #pragma once
 #include <chrono>
+#include <filesystem>
 
 // 게임 시스템 설정 =========================================================================
-inline const int TARGET_FPS = 60;
+inline const int TARGET_FPS = 8;
 inline const auto FRAME_DURATION = std::chrono::milliseconds(1000 / TARGET_FPS);
 inline int FRAMECOUNT = 0;
-inline const int SCREEN_WIDTH = 60;
-inline const int SCREEN_HEIGHT = 20;
+inline const int SCREEN_WIDTH = 64;
+inline const int TOP_ASCII_MAX_SIZE = 32;
+inline const int SCREEN_HEIGHT = 20 + TOP_ASCII_MAX_SIZE;
 inline bool READ_MODE = false; // 쓰기 상태 전환(숫자 이외 입력 가능)
+
+// 1. 현재 프로그램이 실행된 위치(Working Directory)를 기준으로 설정
+inline const std::filesystem::path ROOT_DIR = std::filesystem::current_path();
+
+// 2. 프로젝트 루트 아래의 Resources 폴더 경로 정의
+inline const std::filesystem::path RESOURCES_DIR = ROOT_DIR / "Resources";
+
 
 // 게임 내 사용 변수 =========================================================================
 // 입력버퍼(플레이어가 현재 입력한 문자열)을 저장하는 전역 변수입니다.
