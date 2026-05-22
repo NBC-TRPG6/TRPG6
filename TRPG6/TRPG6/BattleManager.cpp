@@ -11,6 +11,13 @@
 /// <param name="player">플레이어 캐릭터</param>
 void BattleManager::StartBattle(Player& player)
 {
+    //dist(0,99)는 분포로, dist(rng)가 된다면 rng의 난수 값을 0~99로 제한합니다.
+    std::uniform_int_distribution<int> dist(0, 99);
+    int nimochance = dist(rng);
+    isNIMO = false;
+
+    bool isPlayerTurn = dist(rng) >= 5; // 95% 확률로 플레이어가 선공, 5% 확률로 몬스터가 선공
+
     if (CurrentBattleState != EBattleState::Ready)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 2, "현재는 전투를 시작할 수 없습니다.");
@@ -26,6 +33,13 @@ void BattleManager::StartBattle(Player& player)
         Monster DEARAGON(player.GetLevel(), "대래래래래곤~~~", 1.5f); // 레벨과 이름을 기반으로 보스 몬스터 생성
         Battle(player, DEARAGON); // 보스 몬스터와 전투 시작
         isBoss = true;
+        isPlayerTurn = false; // 보스몬스터의 선공으로 시작
+    }
+    else if (nimochance <= 10)
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, 2, "!!!!!!!야생의 니모가 나타났다!!!!!!!!");
+        Monster NIMO(player.GetLevel(), "니모", 0.5f); // 체공이 일반몹보다 낮다.
+        isPlayerTurn = false;
     }
     else
     {
@@ -34,9 +48,7 @@ void BattleManager::StartBattle(Player& player)
         Monster monster(player.GetLevel(), 1.f);
         monster.ResetState(player.GetLevel()); //몬스터 상태 초기화
 
-        //dist(0,99)는 분포로, dist(rng)가 된다면 rng의 난수 값을 0~99로 제한합니다.
-        std::uniform_int_distribution<int> dist(0, 99);
-        bool isPlayerTurn = dist(rng) >= 5; // 95% 확률로 플레이어가 선공, 5% 확률로 몬스터가 선공
+
 
         if (!isPlayerTurn)
             Renderer::DisplayUI(UIPart::CenterLeft, 2, monster.GetName() + "에게 기습당했습니다!!!");
@@ -81,6 +93,13 @@ void BattleManager::PlayerTurn(Player& player, Monster& monster)
 {
     Renderer::DisplayUI(UIPart::CenterLeft, 3, player.GetName() + "의 턴!");
     std::uniform_int_distribution<int> dist(0, 99); //0~ 99의 균등 분포 생성
+
+    if (isNIMO)
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, 3, "!!!!!귀여운 강아지를 처치하셧습니다!!!!!!");
+        BattleEnd(player, monster);
+        return;
+    }
 
     bool isplayerUseItem = dist(rng) < 20; // 20% 확률로 아이템 사용
 
@@ -152,6 +171,16 @@ void BattleManager::PlayerTurn(Player& player, Monster& monster)
 /// <param name="monster">몬스터 캐릭터</param>
 void BattleManager::MonsterTurn(Player& player, Monster& monster)
 {
+
+    if (isNIMO)
+    {
+        if (isNIMO)
+        {
+            Renderer::DisplayUI(UIPart::CenterLeft, 3, "!!!니모의 튀어오르기!!!");
+            Renderer::DisplayUI(UIPart::CenterLeft, 4, "그러나 아무 일도 일어나지 않았다!");
+            return;
+        }
+    }
     Renderer::DisplayUI(UIPart::CenterLeft, 3, monster.GetName() + "의 턴!");
 
     std::uniform_int_distribution<int> dist(0, 99); //0~ 99의 균등 분포 생성
@@ -212,7 +241,15 @@ void BattleManager::BattleEnd(Player& player, Monster& monster)
     //몬스터의 소지금 강탈
     player.SetMoney(player.GetMoney() + monster.GetMoney());
 
+
     player.GainExp(50); // 경험치 50 획득
+
+    if (isNIMO)
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, 2, "동물학대를 획득했다!!");
+        return;
+    }
+
 
     Item* item = monster.DropItem(); //30%확률로 아이템 드랍
 

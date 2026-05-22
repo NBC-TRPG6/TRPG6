@@ -28,6 +28,8 @@ private:
     //플레이어의 원래 공격력을 OriginalPlayerAttack 에 저장합니다.
     int OriginalPlayerAttack = 0;
     bool isPlayerTurn = false;
+    bool isNIMO = false;
+
 public:
 
 #pragma region CurrentBattleState &Getters/Setters
