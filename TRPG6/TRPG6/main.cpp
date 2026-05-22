@@ -10,6 +10,7 @@
 #include "Renderer.h" // 게임 렌더링
 #include "Controller.h" // 입력 처리
 #include "GameManager.h" // 게임 상태 관리
+#include "Player.h"
 // 게임상태 ================================================
 #include "IGameState.h"
 #include "GameStartState.h"
@@ -24,6 +25,15 @@ int main() {
     // 초기 화면 클리어
     std::cout << "\033[2J";
     HideCursor();
+
+    // 최초 플레이어 생성
+    std::string name;
+    std::cout << "이름을 입력하세요: ";
+    std::cin >> name;
+
+    GameManager::GetInstance().SetPlayer(new Player(name));
+    
+
 #pragma endregion
 
 #pragma region MAIN_LOOP
@@ -74,5 +84,6 @@ int main() {
 
 	// 게임 종료
     std::cout << "\033[2J\033[1;1 HExit Game" << std::endl;
+
     return 0;
 }

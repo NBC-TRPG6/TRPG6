@@ -12,6 +12,7 @@ private:
     GameManager(); // 싱글턴 구현
     IGameState* CURRENT_STATE = nullptr; // 현재 상태
     bool IsGameRunning = true; // 게임 실행중인지 판단
+    Player* player = nullptr; // 플레이어 넣을 자리
 
 public:
     ~GameManager(); // 싱글턴 구현
@@ -28,20 +29,23 @@ public:
 
     /// <summary>
     /// 현재 상태를 설정합니다.
-	/// 상태 전환 시 반드시 반영해주세요
+    /// 상태 전환 시 반드시 반영해주세요
     /// </summary>
     void SetCurrentState(IGameState* newState);
     IGameState* GetCurrentState();
 
-#pragma region gettedr, setter
-	/// <summary>
-	/// 현재 게임이 실행중인가?
-	/// </summary>
-	bool GetIsGameRunning() const;
+    void SetPlayer(Player* p); //플레이어 생성 함수
+    Player* GetPlayer() const; // 플레이어 가져오는 함수
 
-	/// <summary>
-	/// 현재 게임을 실행할지 말지 설정
-	/// </summary>
-	void SetIsGameRunning(bool isRunning);
+#pragma region gettedr, setter
+    /// <summary>
+    /// 현재 게임이 실행중인가?
+    /// </summary>
+    bool GetIsGameRunning() const;
+
+    /// <summary>
+    /// 현재 게임을 실행할지 말지 설정
+    /// </summary>
+    void SetIsGameRunning(bool isRunning);
 #pragma endregion
 };
