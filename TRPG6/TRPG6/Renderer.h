@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include <string>
+#include <map>
 #include <vector>
+
+// 전방선언
 
 /// <summary>
 /// UI 출력 영역을 태깅합니다.
@@ -20,13 +23,34 @@ public:
 	// 출력 기능
 	
 	/// <summary>
-	/// 특정 영역의 UI를 강제로 출력하고 싶을 때 사용합니다.
+	/// 특정 영역의 UI를 출력하고 싶을 때 사용합니다.
 	/// </summary>
 	/// <param name="part">출력할 UI 영역입니다.</param>
 	/// <param name="lineIdx">출력할 줄 번호입니다.</param>
 	/// <param name="text">출력할 텍스트입니다.</param>
     static void DisplayUI(UIPart part, int lineIdx, const std::string& text);
+
+	/// <summary>
+	/// 특정 영역의 UI를 강제로 출력하고 싶을 때 사용합니다.
+	/// </summary>
+	/// <param name="part">출력할 UI 영역입니다.</param>
+	/// <param name="lineIdx">출력할 줄 번호입니다.</param>
+	/// <param name="text">출력할 텍스트입니다.</param>
     static void ForceDisplayUI(UIPart part, int lineIdx, const std::string& text);
+
+    /// <summary>
+    /// 몇초 동안 특정 영역의 UI를 출력하고 싶을 때 사용합니다.
+    /// </summary>
+    /// <param name="part">출력할 UI 영역입니다.</param>
+    /// <param name="lineIdx">출력할 줄 번호입니다.</param>
+    /// <param name="text">출력할 텍스트입니다.</param>
+    /// <param name="durationSeconds">출력 시간</param>
+    static void DisplayUITimed(UIPart part, int lineIdx, const std::string& text, float durationSeconds);
+
+    /// <summary>
+    /// 매 프레임 호출되어 예약된 UI를 검사하고 지우는 함수
+    /// </summary>
+    static void UpdateTimedUI();
 
 	// 편의 기능
 
@@ -36,7 +60,9 @@ public:
 	/// </summary>
     static void DisplayASCIIAnimation();
 
-
+    /// <summary>
+    /// CenterLeftUI 영역을 초기화할 때 사용합니다.
+    /// </summary>
     static void ClearAllCenterLeftUI();
 
 private:
@@ -44,4 +70,7 @@ private:
     static std::string topStatus;
     static std::vector<std::string> leftLines;
     static std::vector<std::string> rightLines;
+
+    // 비동기 처리용 기록 저장
+    static std::map<std::pair<UIPart, int>, int> timedUIMap;
 };

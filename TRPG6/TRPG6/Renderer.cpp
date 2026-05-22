@@ -1,7 +1,11 @@
-﻿#include "GameManager.h"
+﻿#include <chrono>
+#include <mutex>
+#include "GameManager.h"
 #include "Renderer.h"
 #include "Controller.h"
 #include "DATABASE.h"
+
+std::map<std::pair<UIPart, int>, int> Renderer::timedUIMap;
 
 #pragma region Animation
 void Renderer::DisplayASCIIAnimation()
@@ -113,13 +117,6 @@ void Renderer::DisplayUI(UIPart part, int lineIdx, const std::string& text)
 	}
 }
 
-/// <summary>
-/// 특정 영역의 UI를 강제로 출력하고 싶을 때 사용합니다.
-/// main.cpp의 렌더링 영역과 별개로 출력이 바로 반영됩니다.
-/// </summary>
-/// <param name="part">출력할 UI 영역입니다.</param>
-/// <param name="lineIdx">출력할 줄 번호입니다.</param>
-/// <param name="text">출력할 텍스트입니다.</param>
 void Renderer::ForceDisplayUI(UIPart part, int lineIdx, const std::string& text)
 {
 	int targetY = 0, targetX = 0, targetWidth = 0;
@@ -156,9 +153,6 @@ void Renderer::ForceDisplayUI(UIPart part, int lineIdx, const std::string& text)
 	fflush(stdout);
 }
 
-/// <summary>
-/// CenterLeftUI 영역을 초기화할 때 사용합니다.
-/// </summary>
 void Renderer::ClearAllCenterLeftUI()
 {
 	for (int i = 0; i < 13; i++)
@@ -207,4 +201,36 @@ void Renderer::Render()
 
 	FRAMECOUNT++;
 	fflush(stdout);
+}
+
+
+void Renderer::DisplayUITimed(UIPart part, int lineIdx, const std::string& text, float durationSeconds)
+{
+    // 1. 화면에 텍스트 먼저 출력
+    DisplayUI(part, lineIdx, text);
+
+    // 2. 언제 지워져야 하는지 프레임 계산
+    int expireFrame = FRAMECOUNT + static_cast<int>(durationSeconds * TARGET_FPS);
+
+    // 3. 맵에 등록 (이미 등록된 자리에 덮어쓰면 수명 갱신)
+    timedUIMap[{part, lineIdx}] = expireFrame;
+}
+
+
+void Renderer::UpdateTimedUI()
+{
+    auto it = timedUIMap.begin();
+    while (it != timedUIMap.end())
+    {
+        if (FRAMECOUNT >= it->second)
+        {
+            DisplayUI(it->first.first, it->first.second, "");
+
+            it = timedUIMap.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
