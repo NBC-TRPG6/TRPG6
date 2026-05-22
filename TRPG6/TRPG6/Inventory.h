@@ -1,7 +1,10 @@
 ﻿#pragma once
 #include <vector>
 #include <iostream>
+#include <algorithm>
 #include "Item.h"
+
+class Character;
 
 // 인벤토리의 각 칸을 표현하는 템플릿 구조체 
 template <typename T>
@@ -50,33 +53,35 @@ public:
      * @param amount  사용할 아이템 수량
      * @return 아이템 사용 성공 여부(true - 성공 / false - 실패)
      */
-    bool UseItem(std::string itemName, int amount = 1)
+    bool UseItem(Character* target, std::string itemName, int amount = 1)
     {
-        for (auto it = slots.begin(); it != slots.end(); ++it)
-        {
-            if (it->item->GetName() == itemName)
+        // 아이템 찾기
+        auto it = std::find_if(slots.begin(), slots.end(), [&](const auto& slot)
             {
-                // 수량만 감소
-                if (it->count > amount)
-                {
-                    it->count -= amount;
-                    return true;
-                }
-                // 사용 후 제거
-                else if (it->count == amount)
-                {
-                    slots.erase(it);
-                    return true;
-                }
-                // 사용 불가
-                else
-                {
-                    std::cout << "아이템 보유 개수를 확인해주세요." << std::endl;
-                    return false;
-                }
-            }
+                return slot.item->GetName() == itemName;
+            });
+
+        // 아이템이 없거나 수량이 부족할 경우
+        if (it == slots.end() || it->count < amount)
+        {
+            std::cout << "아이템 보유 여부와 개수를 확인해주세요." << std::endl;
+            return false;
         }
-        return false;
+
+        // 효과 적용
+        for (int i = 0; i < amount; ++i)
+        {
+            it->item->Use(target);
+        }
+
+        // 수량 관리
+        it->count -= amount;
+        if (it->count <= 0)
+        {
+            slots.erase(it);
+        }
+
+        return true;
     }
 
     /*
