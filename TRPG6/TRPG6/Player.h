@@ -1,8 +1,11 @@
 ﻿#pragma once
 #include <string>
 #include "Character.h"
+#include "Inventory.h"
 
 class Player : public Character {
+private:
+    Inventory<Item> inventory;
 public:
     Player(const std::string& name)
         : Character(name), MaxHp(200), Exp(0), MaxExp(100), Level(1) {
@@ -10,6 +13,7 @@ public:
         Attack = 30;
         Defense = 10;
     }
+    Inventory<Item>& GetInventory() { return inventory; }
 
     virtual ~Player() {}
 
