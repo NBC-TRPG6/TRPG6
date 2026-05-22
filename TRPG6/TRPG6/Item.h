@@ -27,6 +27,7 @@ public:
     int GetPrice() const { return price; }
 
     void Use(Character* target);
+    int GetSellPrice() const;
 
 protected:
     std::string name;           // 아이템 이름
