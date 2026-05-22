@@ -16,6 +16,9 @@ void BattleManager::StartBattle(Player& player)
         Renderer::DisplayUI(UIPart::CenterLeft, 2, "현재는 전투를 시작할 수 없습니다.");
         return;
     }
+    //전투 상태 전환
+    CurrentBattleState = EBattleState::InProgress;
+    OriginalPlayerAttack = player.GetAttack(); //플레이어의 원래 공격력을 저장합니다.
 
     if (player.GetLevel() > 9)
     {
@@ -26,10 +29,18 @@ void BattleManager::StartBattle(Player& player)
     }
     else
     {
+
         //몬스터 생성
         Monster monster(player.GetLevel(), 1.f);
         monster.ResetState(player.GetLevel()); //몬스터 상태 초기화
-        Battle(player, monster); //전투 시작
+
+        //dist(0,99)는 분포로, dist(rng)가 된다면 rng의 난수 값을 0~99로 제한합니다.
+        std::uniform_int_distribution<int> dist(0, 99);
+        bool isPlayerTurn = dist(rng) >= 5; // 95% 확률로 플레이어가 선공, 5% 확률로 몬스터가 선공
+
+        if (!isPlayerTurn)
+            Renderer::DisplayUI(UIPart::CenterLeft, 2, monster.GetName() + "에게 기습당했습니다!!!");
+
     }
 
 
@@ -42,55 +53,16 @@ void BattleManager::StartBattle(Player& player)
 /// <param name="monster">몬스터 캐릭터</param>
 void BattleManager::Battle(Player& player, Monster& monster)
 {
-
-    //배틀 상태를 InProgress로 변경합니다.
-    CurrentBattleState = EBattleState::InProgress;
-
-    //플레이어의 원래 공격력을 OriginalPlayerAttack 에 저장합니다.
-    int OriginalPlayerAttack = player.GetAttack();
-
-    //dist(0,99)는 분포로, dist(rng)가 된다면 rng의 난수 값을 0~99로 제한합니다.
-    std::uniform_int_distribution<int> dist(0, 99);
-    bool isPlayerTurn = dist(rng) >= 5; // 95% 확률로 플레이어가 선공, 5% 확률로 몬스터가 선공
-
     if (isBoss)
     {
         isPlayerTurn = false;
     }
 
-    if (!isPlayerTurn && !isBoss)
-        Renderer::DisplayUI(UIPart::CenterLeft, 2, monster.GetName() + "에게 기습당했습니다!!!");
-    else if (!isPlayerTurn && isBoss)
-    {
-        Renderer::DisplayUI(UIPart::CenterLeft, 2, "대래래래래곤에게 기습당할뻔했습니다!!!");
-    }
-    
-    //전투 루프
-    while (!player.IsDead() && !monster.IsDead())
-    {
-        if (isPlayerTurn)
-            PlayerTurn(player, monster);
-        else
-            MonsterTurn(player, monster);
-        isPlayerTurn = !isPlayerTurn;
-    }
-
-    //연속전투 막기
-    CurrentBattleState = EBattleState::Locked;
-    player.SetAttack(OriginalPlayerAttack); //플레이어 공격력을 원래대로 돌려놓습니다.
-
-
-    //플레이어의 승리여부(사망여부)확인
-    if (player.IsDead())
-    {
-        Renderer::DisplayUI(UIPart::CenterLeft, 8, "패배했습니다...");
-    }
+    if (isPlayerTurn)
+        PlayerTurn(player, monster);
     else
-    {
-        Renderer::DisplayUI(UIPart::CenterLeft, 8, "승리했습니다!");
-        //플레이어 보상 받기
-        BattleEnd(player, monster);
-    }
+        MonsterTurn(player, monster);
+    isPlayerTurn = !isPlayerTurn;
 
 }
 
@@ -222,16 +194,21 @@ void BattleManager::MonsterTurn(Player& player, Monster& monster)
 void BattleManager::BattleEnd(Player& player, Monster& monster)
 {
 
+
+    //연속전투 막기
+    CurrentBattleState = EBattleState::Locked;
+
     //대래곤 처치시 엔딩
     if (isBoss)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 2, "대래래래래래래래래래래래곤을 쓰러뜨렸다!!!!!!!!!!!!!!!!!!!!!!!!!");
         Renderer::DisplayUI(UIPart::CenterLeft, 3, "십억을 받았습니다.");
         Renderer::DisplayUI(UIPart::CenterLeft, 4, "-끝-");
-        quick_exit(0); // 게임 종료
+        GameManager::GetInstance().SetIsGameRunning(false); //게임 승리 상태로 전환
         return;
     }
 
+    player.SetAttack(OriginalPlayerAttack); //플레이어 공격력을 원래대로 돌려놓습니다.
     //몬스터의 소지금 강탈
     player.SetMoney(player.GetMoney() + monster.GetMoney());
 
