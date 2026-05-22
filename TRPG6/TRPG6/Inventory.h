@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <functional> 
 #include "Item.h"
 
 class Character;
@@ -86,22 +87,21 @@ public:
 
     /*
      * @brief 인벤토리 출력 메서드
+     * @param formatter 아이템과 수량을 어떻게 출력할지 정의하는 함수
      */
-    void PrintAllItems() const
+    void PrintAllItems(std::function<void(const T*, int)> formatter) const
     {
         // 인벤 비어있는 경우
         if (slots.empty())
         {
-            std::cout << "인벤토리가 비어 있습니다." << std::endl;
+            std::cout << "비어 있습니다." << std::endl;
             return;
         }
 
-        std::cout << "---- 인벤토리 ----" << std::endl;
         for (const auto& slot : slots)
         {
-            std::cout << "[" << slot.item->GetName() << "] x" << slot.count << std::endl;
+            formatter(slot.item, slot.count);
         }
-        std::cout << "------------------" << std::endl;
     }
 
     const std::vector<InventorySlot<T>>& GetSlots() const { return slots; } 
