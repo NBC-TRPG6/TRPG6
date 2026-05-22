@@ -11,6 +11,12 @@
 /// <param name="player">플레이어 캐릭터</param>
 void BattleManager::StartBattle(Player& player)
 {
+    if (CurrentBattleState != EBattleState::Ready)
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, 2, "현재는 전투를 시작할 수 없습니다.");
+        return;
+    }
+
     Monster monster;
     monster.ResetState(player.GetLevel()); //몬스터 상태 초기화
 
@@ -25,6 +31,7 @@ void BattleManager::StartBattle(Player& player)
 /// <param name="monster">몬스터 캐릭터</param>
 void BattleManager::Battle(Player& player, Monster& monster)
 {
+
     //배틀 상태를 InProgress로 변경합니다.
     CurrentBattleState = EBattleState::InProgress;
 

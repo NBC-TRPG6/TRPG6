@@ -26,6 +26,7 @@ private:
 public:
 
 #pragma region CurrentBattleState &Getters/Setters
+
     /// <summary>
     /// 배틀 상태를 반환하는 함수입니다.
     /// </summary>
@@ -69,19 +70,20 @@ public:
     /// <param name="player">플레이어 캐릭터</param>
     void StartBattle(Player& player);
 
-
     /// <summary>
     /// 플레이어 의 차례에 작동하는 함수입니다.
     /// </summary>
     /// <param name="player">플레이어 캐릭터</param>
     /// <param name="monster">몬스터 캐릭터</param>
     void PlayerTurn(Player& player, Monster& monster);
+
     /// <summary>
     /// 몬스터의 차례에 작동하는 함수입니다.
     /// </summary>
     /// <param name="player">플레이어 캐릭터</param>
     /// <param name="monster">몬스터 캐릭터</param>
     void MonsterTurn(Player& player, Monster& monster);
+
     /// <summary>
     /// 배틀종료 후 결과 처리 함수입니다.
     /// </summary>
