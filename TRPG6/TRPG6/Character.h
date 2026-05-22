@@ -33,6 +33,8 @@ public:
     void SetAttack(int attack) { Attack = (attack < 0) ? 0 : attack; }
     void SetMoney(int money) { Money = (money < 0) ? 0 : money; }
 
+    bool IsDead() const { return Hp <= 0; }
+
 
 protected:
     int Hp;
