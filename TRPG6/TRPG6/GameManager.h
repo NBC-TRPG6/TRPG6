@@ -48,4 +48,10 @@ public:
     /// </summary>
     void SetIsGameRunning(bool isRunning);
 #pragma endregion
+
+    /// <summary>
+    /// 현재 게임의 FPS를 설정하는 함수입니다.
+    /// </summary>
+    /// <param name="fps">설정할 FPS 값</param>
+    void SetFps(double fps);
 };
