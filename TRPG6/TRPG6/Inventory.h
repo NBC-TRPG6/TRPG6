@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <functional> 
 #include "Item.h"
+#include "Renderer.h"
 
 class Character;
 
@@ -41,15 +42,14 @@ public:
     {
         if (newItem == nullptr || amount <= 0) { return; }
 
-        for (auto& slot : slots)
+        auto* slot = GetItemSlot(newItem->GetName());
+
+        // 기존에 있는 아이템일 경우
+        if (slot)
         {
-            // 기존에 있는 아이템일 경우
-            if (slot.item->GetName() == newItem->GetName())
-            {
-                slot.count += amount;
-                delete newItem;
-                return;
-            }
+            slot->count += amount;
+            delete newItem;
+            return;
         }
 
         // 기존에 없는 아이템일 경우
@@ -70,7 +70,7 @@ public:
         // 아이템이 없거나 수량이 부족할 경우
         if (!slot || slot->count < amount)
         {
-            std::cout << "아이템 보유 여부와 개수를 확인해주세요." << std::endl;
+            Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "아이템 보유 여부와 개수를 확인해주세요.", 2.0f);
             return false;
         }
 
@@ -105,18 +105,19 @@ public:
      * @brief 인벤토리 출력 메서드
      * @param formatter 아이템과 수량을 어떻게 출력할지 정의하는 함수
      */
-    void PrintAllItems(std::function<void(const T*, int)> formatter) const
+    void PrintAllItems(std::function<void(const T*, int, int)> formatter) const
     {
         // 인벤 비어있는 경우
         if (slots.empty())
         {
-            std::cout << "비어 있습니다." << std::endl;
+            formatter(nullptr, 0, -1);
             return;
         }
 
+        int index = 0;
         for (const auto& slot : slots)
         {
-            formatter(slot.item, slot.count);
+            formatter(slot.item, slot.count, index++);
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿#include "Shop.h"
 #include "Player.h"
+#include "Renderer.h"
 #include <iostream>
 #include <algorithm>
 
@@ -15,12 +16,16 @@ Shop::Shop()
  */
 void Shop::ShowStock() const
 {
-    std::cout << "[상점 재고 목록]" << std::endl;
-    stock.PrintAllItems([](const Item* item, int count)
+    Renderer::DisplayUI(UIPart::CenterLeft, 0, "[상점 재고 목록]");
+    stock.PrintAllItems([](const Item* item, int count, int index)
         {
-            std::cout << "- " << item->GetName()
-                << " | 가격: " << item->GetPrice() << "G"
-                << " | 재고: " << count << "개" << std::endl;
+            if (index == -1)
+            {
+                Renderer::DisplayUI(UIPart::CenterLeft, 1, "상점에 재고가 없습니다.");
+                return;
+            }
+            std::string info = "- " + item->GetName() + " | 가격: " + std::to_string(item->GetPrice()) + "G | 재고: " + std::to_string(count) + "개";
+            Renderer::DisplayUI(UIPart::CenterLeft, index + 1, info);
         });
 }
 
@@ -38,7 +43,7 @@ bool Shop::BuyItem(Player* player, const std::string& itemName)
     // 재고 확인
     if (!slot || slot->count <= 0)
     {
-        std::cout << "상점에 '" << itemName << "' 아이템이 없거나 품절되었습니다." << std::endl;
+        Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "품절된 아이템입니다.", 2.0f);
         return false;
     }
 
@@ -48,7 +53,8 @@ bool Shop::BuyItem(Player* player, const std::string& itemName)
     // 플레이어 잔고 확인
     if (player->GetMoney() < price)
     {
-        std::cout << "골드가 부족합니다! (필요: " << price << "G / 보유: " << player->GetMoney() << "G)" << std::endl;
+        Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "골드가 부족합니다! (필요: " + std::to_string(price) + "G / 보유: "
+            + std::to_string(player->GetMoney()) + "G)", 2.0f);
         return false;
     }
 
@@ -56,7 +62,7 @@ bool Shop::BuyItem(Player* player, const std::string& itemName)
     player->SetMoney(player->GetMoney() - price);
     player->GetInventory().AddItem(new Item(*shopItem), 1);
     stock.UseItem(nullptr, itemName, 1);
-    std::cout << "'" << itemName << "'을(를) 구매했습니다! (-" << price << "G)" << std::endl;
+    Renderer::DisplayUITimed(UIPart::CenterLeft, 0, itemName + "을(를) 구매했습니다! (-" + std::to_string(price) + "G", 2.0f);
     return true;
 }
 
@@ -74,7 +80,7 @@ bool Shop::SellItem(Player* player, const std::string& itemName, int amount = 1)
 
     if (!slot || slot->count < amount)
     {
-        std::cout << "판매할 아이템이 없습니다." << std::endl;
+        Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "판매할 아이템이 없습니다.", 2.0f);
         return false;
     }
 
