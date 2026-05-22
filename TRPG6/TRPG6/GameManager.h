@@ -29,7 +29,7 @@ public:
 
     /// <summary>
     /// 현재 상태를 설정합니다.
-	/// 상태 전환 시 반드시 반영해주세요
+    /// 상태 전환 시 반드시 반영해주세요
     /// </summary>
     void SetCurrentState(IGameState* newState);
     IGameState* GetCurrentState();
@@ -38,14 +38,14 @@ public:
     Player* GetPlayer() const; // 플레이어 가져오는 함수
 
 #pragma region gettedr, setter
-	/// <summary>
-	/// 현재 게임이 실행중인가?
-	/// </summary>
-	bool GetIsGameRunning() const;
+    /// <summary>
+    /// 현재 게임이 실행중인가?
+    /// </summary>
+    bool GetIsGameRunning() const;
 
-	/// <summary>
-	/// 현재 게임을 실행할지 말지 설정
-	/// </summary>
-	void SetIsGameRunning(bool isRunning);
+    /// <summary>
+    /// 현재 게임을 실행할지 말지 설정
+    /// </summary>
+    void SetIsGameRunning(bool isRunning);
 #pragma endregion
 };
