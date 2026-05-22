@@ -73,7 +73,7 @@ bool Shop::BuyItem(Player* player, const std::string& itemName)
  * @param amount 판매할 아이템 수량
  * @return 아이템 판매 성공 여부(true - 성공 / false - 실패)
  */
-bool Shop::SellItem(Player* player, const std::string& itemName, int amount = 1)
+bool Shop::SellItem(Player* player, const std::string& itemName, int amount)
 {
     // 플레이어 인벤토리에 해당 아이템이 실제로 있는지 확인
     auto* slot = player->GetInventory().GetItemSlot(itemName);
