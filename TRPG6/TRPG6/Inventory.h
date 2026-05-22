@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <functional> 
 #include "Item.h"
+#include "Renderer.h"
 
 class Character;
 
@@ -23,7 +24,14 @@ class Inventory
 {
 public:
     Inventory() {}
-    ~Inventory() {}
+    ~Inventory()
+    {
+        for (auto& slot : slots)
+        {
+            delete slot.item;
+        }
+        slots.clear();
+    }
 
     /*
      * @brief 아이템 추가 메서드
@@ -34,14 +42,14 @@ public:
     {
         if (newItem == nullptr || amount <= 0) { return; }
 
-        for (auto& slot : slots)
+        auto* slot = GetItemSlot(newItem->GetName());
+
+        // 기존에 있는 아이템일 경우
+        if (slot)
         {
-            // 기존에 있는 아이템일 경우
-            if (slot.item->GetName() == newItem->GetName())
-            {
-                slot.count += amount;
-                return;
-            }
+            slot->count += amount;
+            delete newItem;
+            return;
         }
 
         // 기존에 없는 아이템일 경우
@@ -57,29 +65,37 @@ public:
     bool UseItem(Character* target, std::string itemName, int amount = 1)
     {
         // 아이템 찾기
-        auto it = std::find_if(slots.begin(), slots.end(), [&](const auto& slot)
-            {
-                return slot.item->GetName() == itemName;
-            });
+        auto* slot = GetItemSlot(itemName);
 
         // 아이템이 없거나 수량이 부족할 경우
-        if (it == slots.end() || it->count < amount)
+        if (!slot || slot->count < amount)
         {
-            std::cout << "아이템 보유 여부와 개수를 확인해주세요." << std::endl;
+            Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "아이템 보유 여부와 개수를 확인해주세요.", 2.0f);
             return false;
         }
 
         // 효과 적용
-        for (int i = 0; i < amount; ++i)
+        if (target != nullptr)
         {
-            it->item->Use(target);
+            for (int i = 0; i < amount; ++i)
+            {
+                slot->item->Use(target);
+            }
         }
 
         // 수량 관리
-        it->count -= amount;
-        if (it->count <= 0)
+        slot->count -= amount;
+        if (slot->count <= 0)
         {
-            slots.erase(it);
+            // 포인터로는 바로 erase가 불가능하므로, 삭제를 위해 iterator를 찾음
+            auto it = std::find_if(slots.begin(), slots.end(), [&](const auto& s) {
+                return s.item->GetName() == itemName;
+            });
+            
+            if (it != slots.end()) {
+                delete it->item;
+                slots.erase(it);
+            }
         }
 
         return true;
@@ -89,19 +105,37 @@ public:
      * @brief 인벤토리 출력 메서드
      * @param formatter 아이템과 수량을 어떻게 출력할지 정의하는 함수
      */
-    void PrintAllItems(std::function<void(const T*, int)> formatter) const
+    void PrintAllItems(std::function<void(const T*, int, int)> formatter) const
     {
         // 인벤 비어있는 경우
         if (slots.empty())
         {
-            std::cout << "비어 있습니다." << std::endl;
+            formatter(nullptr, 0, -1);
             return;
         }
 
+        int index = 0;
         for (const auto& slot : slots)
         {
-            formatter(slot.item, slot.count);
+            formatter(slot.item, slot.count, index++);
         }
+    }
+
+    /*
+     * @brief 이름으로 아이템 슬롯을 찾아 반환하는 메서드
+     * @param itemName 찾을 아이템 이름
+     * @return 찾으면 슬롯의 포인터, 못 찾으면 nullptr
+     */
+    InventorySlot<T>* GetItemSlot(const std::string& itemName)
+    {
+        for (auto& slot : slots)
+        {
+            if (slot.item->GetName() == itemName)
+            {
+                return &slot;
+            }
+        }
+        return nullptr;
     }
 
     const std::vector<InventorySlot<T>>& GetSlots() const { return slots; } 
