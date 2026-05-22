@@ -35,11 +35,14 @@ void BattleManager::StartBattle(Player& player)
         isBoss = true;
         isPlayerTurn = false; // 보스몬스터의 선공으로 시작
     }
-    else if (nimochance <= 10)
+
+    else if (nimochance <= 10 && !NimoDefeated)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 2, "!!!!!!!야생의 니모가 나타났다!!!!!!!!");
         Monster NIMO(player.GetLevel(), "니모", 0.5f); // 체공이 일반몹보다 낮다.
         isPlayerTurn = false;
+        isNIMO = true;
+
     }
     else
     {
@@ -246,7 +249,8 @@ void BattleManager::BattleEnd(Player& player, Monster& monster)
 
     if (isNIMO)
     {
-        Renderer::DisplayUI(UIPart::CenterLeft, 2, "동물학대를 획득했다!!");
+        Renderer::DisplayUI(UIPart::CenterLeft, 2, "동물학대범 타이틀을 획득했다!!");
+        NimoDefeated = true;
         return;
     }
 

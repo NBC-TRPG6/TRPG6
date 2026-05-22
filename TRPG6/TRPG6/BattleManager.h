@@ -29,6 +29,7 @@ private:
     int OriginalPlayerAttack = 0;
     bool isPlayerTurn = false;
     bool isNIMO = false;
+    bool NimoDefeated = false;
 
 public:
 
