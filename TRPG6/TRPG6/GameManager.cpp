@@ -1,6 +1,7 @@
 ﻿#include "GameManager.h"
 #include "IGameState.h"
 #include "Player.h"
+#include "DATABASE.h"
 
 GameManager::GameManager() {
     // 생성자
@@ -62,4 +63,9 @@ bool GameManager::GetIsGameRunning() const
 void GameManager::SetIsGameRunning(bool isRunning)
 {
     IsGameRunning = isRunning;
+}
+
+void GameManager::SetFps(double fps)
+{
+    ApplyFrameDurationFromFps(fps);
 }

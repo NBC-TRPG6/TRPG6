@@ -6,8 +6,9 @@
 #include <filesystem>
 
 // 게임 시스템 설정 =========================================================================
-inline const int TARGET_FPS = 8;
-inline const auto FRAME_DURATION = std::chrono::milliseconds(1000 / TARGET_FPS);
+inline double TARGET_FPS = 8;
+inline std::chrono::steady_clock::duration FRAME_DURATION =
+    std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double, std::milli>(1000.0 / TARGET_FPS));
 inline int FRAMECOUNT = 0;
 inline const int SCREEN_WIDTH = 64;
 inline const int TOP_ASCII_MAX_SIZE = 32;
@@ -20,6 +21,13 @@ inline const std::filesystem::path ROOT_DIR = std::filesystem::current_path();
 // 2. 프로젝트 루트 아래의 Resources 폴더 경로 정의
 inline const std::filesystem::path RESOURCES_DIR = ROOT_DIR / "Resources";
 
+inline void ApplyFrameDurationFromFps(double fps)
+{
+    if (fps <= 0) fps = 0.1f;
+    TARGET_FPS = fps;
+	using Ms = std::chrono::duration<double, std::milli>;
+    FRAME_DURATION = std::chrono::duration_cast<std::chrono::steady_clock::duration>(Ms(1000.0 / TARGET_FPS));
+}
 
 // 게임 내 사용 변수 =========================================================================
 // 입력버퍼(플레이어가 현재 입력한 문자열)을 저장하는 전역 변수입니다.
