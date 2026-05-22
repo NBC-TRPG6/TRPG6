@@ -7,7 +7,8 @@
 
 // 게임 시스템 설정 =========================================================================
 inline double TARGET_FPS = 8;
-inline std::chrono::steady_clock::duration FRAME_DURATION = std::chrono::milliseconds(static_cast<int>(1000 / TARGET_FPS));
+inline std::chrono::steady_clock::duration FRAME_DURATION =
+    std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double, std::milli>(1000.0 / TARGET_FPS));
 inline int FRAMECOUNT = 0;
 inline const int SCREEN_WIDTH = 64;
 inline const int TOP_ASCII_MAX_SIZE = 32;

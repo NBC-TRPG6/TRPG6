@@ -51,6 +51,7 @@ public:
 
     /// <summary>
     /// 현재 게임의 FPS를 설정하는 함수입니다.
+    /// 큰값은 안됩니다 위험해요.
     /// </summary>
     /// <param name="fps">설정할 FPS 값</param>
     void SetFps(double fps);
