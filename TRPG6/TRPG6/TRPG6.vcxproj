@@ -36,6 +36,8 @@
     <ClInclude Include="IGameState.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Inventory.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
