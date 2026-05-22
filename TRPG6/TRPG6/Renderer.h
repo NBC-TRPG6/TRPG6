@@ -65,6 +65,12 @@ public:
     /// </summary>
     static void ClearAllCenterLeftUI();
 
+    /// <summary>
+    /// 게임 화면 상단에 아스키 아트를 출력하는 함수입니다.
+    /// </summary>
+    /// <param name="asciiArt">출력할 아스키 아트입니다.</param>
+    static void SetTopASCIIImage(const std::vector<std::string>& asciiArt);
+
 private:
     // UI 데이터 상태 저장소
     static std::string topStatus;
@@ -73,4 +79,8 @@ private:
 
     // 비동기 처리용 기록 저장
     static std::map<std::pair<UIPart, int>, int> timedUIMap;
+
+    // 상단 아스키 영역 데이터 및 예약된 높이
+    static std::vector<std::string> topAsciiLines;
+    static int reservedAsciiHeight;
 };
