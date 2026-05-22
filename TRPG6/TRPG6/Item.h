@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include <string>
 
+class Character;
+
 enum class ItemType
 {
     HP_POTION,      // 체력 회복
@@ -22,6 +24,8 @@ public:
     ItemType GetType() const { return type; }
     int GetValue() const { return value; }
     int GetPrice() const { return price; }
+
+    void Use(Character* target);
 
 protected:
     std::string name;           // 아이템 이름
