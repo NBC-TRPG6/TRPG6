@@ -43,6 +43,7 @@ int main() {
         auto frameStart = std::chrono::steady_clock::now();
 
         // 2. UI 렌더링
+        Renderer::UpdateTimedUI();
         Renderer::Render();
 
         // 3. 유저 입력 처리
