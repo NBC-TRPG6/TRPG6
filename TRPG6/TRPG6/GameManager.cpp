@@ -1,5 +1,6 @@
 ﻿#include "GameManager.h"
 #include "IGameState.h"
+#include "Player.h"
 
 GameManager::GameManager() {
 	// 생성자
@@ -29,6 +30,16 @@ void GameManager::SetCurrentState(IGameState* newState) {
 /// <returns>현재 게임 상태</returns>	
 IGameState* GameManager::GetCurrentState() {
     return CURRENT_STATE;
+}
+
+void GameManager::SetPlayer(Player* p)
+{
+    player = p;
+}
+
+Player* GameManager::GetPlayer() const
+{
+    return player;
 }
 
 bool GameManager::GetIsGameRunning() const

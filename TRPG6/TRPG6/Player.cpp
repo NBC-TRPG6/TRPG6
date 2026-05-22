@@ -27,3 +27,4 @@ void Player::PrintStatus() const
     Renderer::DisplayUI(UIPart::CenterRight, 3, "HP: " + std::to_string(Hp) + "/" + std::to_string(MaxHp));
     Renderer::DisplayUI(UIPart::CenterRight, 4, "공격력: " + std::to_string(Attack) + "방어력: " + std::to_string(Defense));
 }
+

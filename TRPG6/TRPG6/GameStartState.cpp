@@ -1,8 +1,10 @@
 ﻿#include "GameManager.h"
 #include "GameStartState.h"
 #include "Renderer.h"
+#include "Player.h"
 
 void GameStartState::Update(int ch, std::string& lastCommand) {
+<<<<<<< Updated upstream
     Renderer::DisplayUI(UIPart::Top, 0, "Hello, World");
     Renderer::DisplayUI(UIPart::CenterLeft, 0, "1번 라인");
     Renderer::DisplayUI(UIPart::CenterLeft, 1, "2번 라인");
@@ -10,6 +12,16 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
     Renderer::DisplayUI(UIPart::CenterLeft, 3, "4번 라인");
     Renderer::DisplayUI(UIPart::CenterLeft, 4, "5번 라인");
     Renderer::DisplayUI(UIPart::CenterLeft, 5, "6번 라인");
+=======
+    
+    GameManager::GetInstance().GetPlayer()->PrintStatus();
+
+
+
+
+
+
+>>>>>>> Stashed changes
 
     //// 상태 전환
     //switch (ch) {

@@ -39,6 +39,5 @@ public:
 protected:
     int Hp;
     int Attack;
-    int Defense;
     int Money;
 };

@@ -17,7 +17,8 @@ public:
 
     virtual ~Player() {}
 
-    virtual std::string WhoAmI() = 0;
+    virtual std::string WhoAmI() { return "Player"; }
+
 
     std::string Name;
     int MaxHp;
