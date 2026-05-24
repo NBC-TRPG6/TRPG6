@@ -8,6 +8,7 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     
     <EnableUnitySupport>true</EnableUnitySupport>
+    <UnityFilesDirectory>$(ProjectDir)Unity</UnityFilesDirectory>
   </PropertyGroup> 
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
