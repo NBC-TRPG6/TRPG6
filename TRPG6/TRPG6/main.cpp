@@ -11,11 +11,24 @@
 #include "Controller.h" // 입력 처리
 #include "GameManager.h" // 게임 상태 관리
 #include "Player.h"
+#include "IPCLogger.h"
 // 게임상태 ================================================
 #include "IGameState.h"
 #include "GameStartState.h"
 
-int main() {
+int main(int argc, char*argv[]) {
+#pragma region LOGGING
+    // 1. 자식 프로세스(로그 뷰어) 분기 처리
+    if (argc > 1 && std::string(argv[1]) == "--logviewer")
+    {
+        IPCLogger::GetInstance().RunChild();
+        return 0;
+    }
+
+    // 2. 부모 프로세스(메인 게임) 초기화 및 자식 창 생성
+    IPCLogger::GetInstance().InitParent();
+#pragma endregion
+
 #pragma region INIT
 	// 컨트롤러 생성
     Controller controller;
@@ -27,6 +40,7 @@ int main() {
     auto art = LoadImageAsASCII("..\\..\\Resources\\mashutan.png");
     Renderer::SetTopASCIIImage(art); // 여기서 이미지를 등록하고 내부 Height를 계산함
     Renderer::Init();
+    Renderer::DisplayLog("렌더러 및 게임 시스템 초기화 완료.");
 
     // 최초 플레이어 생성
     std::string name;
@@ -83,6 +97,10 @@ int main() {
 #pragma endregion
 
 	// 게임 종료
+    // 시스템 정상 종료 시 파이프 닫기 (자식 창의 ReadFile 루프가 종료됨)
+    Renderer::DisplayLog("게임 종료 시퀀스 진입...");
+    IPCLogger::GetInstance().Shutdown();
+
     std::cout << "\033[2J\033[1;1 HExit Game" << std::endl;
 
     return 0;
