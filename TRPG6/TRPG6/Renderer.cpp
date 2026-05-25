@@ -175,7 +175,7 @@ void Renderer::Render()
     // 2. 상태 표시줄 섹션 (아스키 이미지 아래에 출력, 3줄)
     for (int x = 0; x < SCREEN_WIDTH; ++x) printf("="); printf("\n");
     char topBuffer[256];
-    snprintf(topBuffer, sizeof(topBuffer), "현재 상태: %s | 시간: %ds",
+    snprintf(topBuffer, sizeof(topBuffer), "현재 상태: %s | 시간: %.1fs",
         topStatus.c_str(), FRAMECOUNT / TARGET_FPS);
     printf("| %s |\n", CenterText(topBuffer, SCREEN_WIDTH - 4).c_str());
     for (int x = 0; x < SCREEN_WIDTH; ++x) printf("="); printf("\n");

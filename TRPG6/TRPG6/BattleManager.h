@@ -1,10 +1,12 @@
-﻿//기본 라이브러리 헤더
+﻿#pragma once
+//기본 라이브러리 헤더
 #include <random>
 
 //커스텀 라이브러리 헤더
 #include "Player.h"
 #include "Monster.h"
 #include "Renderer.h"
+#include "Item.h"
 
 
 /// <summary>
@@ -23,6 +25,13 @@ private:
 
     EBattleState CurrentBattleState = EBattleState::Locked; // 배틀상태 관리용 변수입니다. 배틀이 가능한 상태인지, 진행 중인지 등을 관리합니다.
     std::mt19937 rng{ std::random_device{}() };// random_device는 시드로 사용할 수 있는 난수 생성기입니다. mt19937은 Mersenne Twister 알고리즘을 사용하는 난수 생성기입니다.
+    bool isBoss; //보스면 true
+    //플레이어의 원래 공격력을 OriginalPlayerAttack 에 저장합니다.
+    int OriginalPlayerAttack = 0;
+    bool isPlayerTurn = false;
+    bool isNIMO = false;
+    bool NimoDefeated = false;
+
 public:
 
 #pragma region CurrentBattleState &Getters/Setters
@@ -89,7 +98,7 @@ public:
     /// </summary>
     /// <param name="player">보상을 받을 플레이어</param>
     /// <param name="monster">처치한 몬스터(돈/아이템 제공)</param>
-    void BattleEnd(Player& player, const Monster& monster);
+    void BattleEnd(Player& player, Monster& monster);
 
 #pragma endregion
 

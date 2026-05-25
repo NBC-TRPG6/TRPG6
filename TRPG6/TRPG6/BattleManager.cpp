@@ -11,16 +11,53 @@
 /// <param name="player">플레이어 캐릭터</param>
 void BattleManager::StartBattle(Player& player)
 {
+    //dist(0,99)는 분포로, dist(rng)가 된다면 rng의 난수 값을 0~99로 제한합니다.
+    std::uniform_int_distribution<int> dist(0, 99);
+    int nimochance = dist(rng);
+    isNIMO = false;
+
+    bool isPlayerTurn = dist(rng) >= 5; // 95% 확률로 플레이어가 선공, 5% 확률로 몬스터가 선공
+
     if (CurrentBattleState != EBattleState::Ready)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 2, "현재는 전투를 시작할 수 없습니다.");
         return;
     }
+    //전투 상태 전환
+    CurrentBattleState = EBattleState::InProgress;
+    OriginalPlayerAttack = player.GetAttack(); //플레이어의 원래 공격력을 저장합니다.
 
-    Monster monster;
-    monster.ResetState(player.GetLevel()); //몬스터 상태 초기화
+    if (player.GetLevel() > 9)
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, 2, "이제 일반 몬스터는 상대도 안 된다!");
+        Monster DEARAGON(player.GetLevel(), "대래래래래곤~~~", 1.5f); // 레벨과 이름을 기반으로 보스 몬스터 생성
+        Battle(player, DEARAGON); // 보스 몬스터와 전투 시작
+        isBoss = true;
+        isPlayerTurn = false; // 보스몬스터의 선공으로 시작
+    }
 
-    Battle(player, monster); //전투 시작
+    else if (nimochance <= 10 && !NimoDefeated)
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, 2, "!!!!!!!야생의 니모가 나타났다!!!!!!!!");
+        Monster NIMO(player.GetLevel(), "니모", 0.5f); // 체공이 일반몹보다 낮다.
+        isPlayerTurn = false;
+        isNIMO = true;
+
+    }
+    else
+    {
+
+        //몬스터 생성
+        Monster monster(player.GetLevel(), 1.f);
+        monster.ResetState(player.GetLevel()); //몬스터 상태 초기화
+
+
+
+        if (!isPlayerTurn)
+            Renderer::DisplayUI(UIPart::CenterLeft, 2, monster.GetName() + "에게 기습당했습니다!!!");
+
+    }
+
 
 }
 
@@ -31,46 +68,16 @@ void BattleManager::StartBattle(Player& player)
 /// <param name="monster">몬스터 캐릭터</param>
 void BattleManager::Battle(Player& player, Monster& monster)
 {
-
-    //배틀 상태를 InProgress로 변경합니다.
-    CurrentBattleState = EBattleState::InProgress;
-
-    //플레이어의 원래 공격력을 OriginalPlayerAttack 에 저장합니다.
-    int OriginalPlayerAttack = player.GetAttack();
-
-    //dist(0,99)는 분포로, dist(rng)가 된다면 rng의 난수 값을 0~99로 제한합니다.
-    std::uniform_int_distribution<int> dist(0, 99);
-    bool isPlayerTurn = dist(rng) >= 5; // 95% 확률로 플레이어가 선공, 5% 확률로 몬스터가 선공
-
-    if (!isPlayerTurn)
-        Renderer::DisplayUI(UIPart::CenterLeft, 2, "몬스터에게 기습당했습니다!!!");
-
-    //전투 루프
-    while (!player.IsDead() && !monster.IsDead())
+    if (isBoss)
     {
-        if (isPlayerTurn)
-            PlayerTurn(player, monster);
-        else
-            MonsterTurn(player, monster);
-        isPlayerTurn = !isPlayerTurn;
+        isPlayerTurn = false;
     }
 
-    //연속전투 막기
-    CurrentBattleState = EBattleState::Locked;
-    player.SetAttack(OriginalPlayerAttack); //플레이어 공격력을 원래대로 돌려놓습니다.
-
-
-    //플레이어의 승리여부(사망여부)확인
-    if (player.IsDead())
-    {
-        Renderer::DisplayUI(UIPart::CenterLeft, 8, "패배했습니다...");
-    }
+    if (isPlayerTurn)
+        PlayerTurn(player, monster);
     else
-    {
-        Renderer::DisplayUI(UIPart::CenterLeft, 8, "승리했습니다!");
-        //플레이어 보상 받기
-        BattleEnd(player, monster);
-    }
+        MonsterTurn(player, monster);
+    isPlayerTurn = !isPlayerTurn;
 
 }
 
@@ -89,6 +96,13 @@ void BattleManager::PlayerTurn(Player& player, Monster& monster)
 {
     Renderer::DisplayUI(UIPart::CenterLeft, 3, player.GetName() + "의 턴!");
     std::uniform_int_distribution<int> dist(0, 99); //0~ 99의 균등 분포 생성
+
+    if (isNIMO)
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, 3, "!!!!!귀여운 강아지를 처치하셧습니다!!!!!!");
+        BattleEnd(player, monster);
+        return;
+    }
 
     bool isplayerUseItem = dist(rng) < 20; // 20% 확률로 아이템 사용
 
@@ -137,17 +151,17 @@ void BattleManager::PlayerTurn(Player& player, Monster& monster)
 
     //몬스터 체력 변경
     monster.SetHp(monster.GetHp() - PAttackDamage);
-    Renderer::DisplayUI(UIPart::CenterLeft, 5, "몬스터의 체력이" + std::to_string(PAttackDamage) + "만큼 달았습니다!");
+    Renderer::DisplayUI(UIPart::CenterLeft, 5, monster.GetName() + "의 체력이" + std::to_string(PAttackDamage) + "만큼 달았습니다!");
 
     //몬스터 사망 여부 확인
     if (monster.GetHp() <= 0)
     {
         monster.SetHp(0);
-        Renderer::DisplayUI(UIPart::CenterLeft, 6, "몬스터가 쓰러졌습니다!");
+        Renderer::DisplayUI(UIPart::CenterLeft, 6, monster.GetName() + "가 쓰러졌습니다!");
     }
     else //안죽었다면
     {
-        Renderer::DisplayUI(UIPart::CenterLeft, 6, "몬스터의 남은 체력" + std::to_string(monster.GetHp()));
+        Renderer::DisplayUI(UIPart::CenterLeft, 6, monster.GetName() + "의 남은 체력 : " + std::to_string(monster.GetHp()));
     }
 
 }
@@ -160,7 +174,17 @@ void BattleManager::PlayerTurn(Player& player, Monster& monster)
 /// <param name="monster">몬스터 캐릭터</param>
 void BattleManager::MonsterTurn(Player& player, Monster& monster)
 {
-    Renderer::DisplayUI(UIPart::CenterLeft, 3, "몬스터의 턴!");
+
+    if (isNIMO)
+    {
+        if (isNIMO)
+        {
+            Renderer::DisplayUI(UIPart::CenterLeft, 3, "!!!니모의 튀어오르기!!!");
+            Renderer::DisplayUI(UIPart::CenterLeft, 4, "그러나 아무 일도 일어나지 않았다!");
+            return;
+        }
+    }
+    Renderer::DisplayUI(UIPart::CenterLeft, 3, monster.GetName() + "의 턴!");
 
     std::uniform_int_distribution<int> dist(0, 99); //0~ 99의 균등 분포 생성
 
@@ -199,15 +223,43 @@ void BattleManager::MonsterTurn(Player& player, Monster& monster)
 /// </summary>
 /// <param name="player">보상을 받을 플레이어</param>
 /// <param name="monster">처치한 몬스터(돈/아이템 제공)</param>
-void BattleManager::BattleEnd(Player& player, const Monster& monster)
+void BattleManager::BattleEnd(Player& player, Monster& monster)
 {
 
+
+    //연속전투 막기
+    CurrentBattleState = EBattleState::Locked;
+
+    //대래곤 처치시 엔딩
+    if (isBoss)
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, 2, "대래래래래래래래래래래래곤을 쓰러뜨렸다!!!!!!!!!!!!!!!!!!!!!!!!!");
+        Renderer::DisplayUI(UIPart::CenterLeft, 3, "십억을 받았습니다.");
+        Renderer::DisplayUI(UIPart::CenterLeft, 4, "-끝-");
+        GameManager::GetInstance().SetIsGameRunning(false); //게임 승리 상태로 전환
+        return;
+    }
+
+    player.SetAttack(OriginalPlayerAttack); //플레이어 공격력을 원래대로 돌려놓습니다.
     //몬스터의 소지금 강탈
     player.SetMoney(player.GetMoney() + monster.GetMoney());
 
+
     player.GainExp(50); // 경험치 50 획득
 
+    if (isNIMO)
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, 2, "동물학대범 타이틀을 획득했다!!");
+        NimoDefeated = true;
+        return;
+    }
+
+
+    Item* item = monster.DropItem(); //30%확률로 아이템 드랍
+
     //TODO:: 몬스터가 주는 아이템을 플레이어 인벤토리에 추가(함수 필요, 내함수 X)
+
+
 
     /*
     //TODO:: 배틀 후 획득한 것 표시
