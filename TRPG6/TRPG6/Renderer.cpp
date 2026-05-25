@@ -164,7 +164,7 @@ void Renderer::Render()
     frameOutput += std::string(SCREEN_WIDTH, '=') + "\n";
 
     char topBuffer[256];
-    snprintf(topBuffer, sizeof(topBuffer), "현재 상태: %s | 시간: %.1fs",
+    snprintf(topBuffer, sizeof(topBuffer), "%s | 시간: %.1fs",
         topStatus.c_str(), FRAMECOUNT / TARGET_FPS);
 
     frameOutput += "| " + CenterText(topBuffer, SCREEN_WIDTH - 4) + " |\n";
