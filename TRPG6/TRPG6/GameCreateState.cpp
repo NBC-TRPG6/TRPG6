@@ -2,6 +2,7 @@
 #include "GameLobbyState.h"
 #include "Renderer.h"
 #include "GameManager.h"
+#include "NetworkManager.h"
 #include "DATABASE.h"
 #include "IPCManager.h"
 #include "Player.h"
@@ -56,11 +57,18 @@ void GameCreateState::Update(int ch, std::string& lastCommand)
     }
     else if (createPhase == 1)
     {
-        if (ch == 1)
+        if (ch == 1) // 1. 방 만들기 (SERVER)
         {
             Client::isServer = true;
-            IPCManager::GetInstance().SendLog("서버 모드로 설정을 시작합니다.");
-            GameManager::GetInstance().SetCurrentState(new GameLobbyState());
+            // 지정된 포트(예: 7777)로 서버 오픈 시도
+            if (NetworkManager::GetInstance().StartHost(7777))
+            {
+                GameManager::GetInstance().SetCurrentState(new GameLobbyState());
+            }
+            else
+            {
+                IPCManager::GetInstance().SendLog("[오류] 방 만들기에 실패했습니다.");
+            }
         }
         else if (ch == 2)
         {
@@ -68,9 +76,8 @@ void GameCreateState::Update(int ch, std::string& lastCommand)
             createPhase = 2;
         }
     }
-    else if (createPhase == 2)
+    else if (createPhase == 2) // 2. IP 입력 창
     {
-        // 0 입력 시 뒤로 가기 (이름 입력은 건너뛰고 방 선택 창으로)
         if (lastCommand == "0")
         {
             createPhase = 1;
@@ -78,7 +85,27 @@ void GameCreateState::Update(int ch, std::string& lastCommand)
         }
 
         std::string targetIP = lastCommand;
-        IPCManager::GetInstance().SendLog("서버(" + targetIP + ")에 접속을 시도합니다.");
-        GameManager::GetInstance().SetCurrentState(new GameLobbyState());
+
+        // [방어 코드 1] IP 문자열 내부의 모든 공백, \n, \r 제거
+        targetIP.erase(std::remove(targetIP.begin(), targetIP.end(), '\n'), targetIP.end());
+        targetIP.erase(std::remove(targetIP.begin(), targetIP.end(), '\r'), targetIP.end());
+        targetIP.erase(std::remove(targetIP.begin(), targetIP.end(), ' '), targetIP.end());
+
+        if (targetIP.empty()) return;
+
+        // [방어 코드 2] 연결(블로킹) 시도 전, 게임 화면에 연결 중임을 먼저 알림
+        Renderer::ForceDisplayUI(UIPart::CenterLeft, 6, " > [" + targetIP + "] 연결 시도 중... (최대 수 초 대기)");
+
+        if (NetworkManager::GetInstance().ConnectToServer(targetIP, 7777))
+        {
+            GameManager::GetInstance().SetCurrentState(new GameLobbyState());
+        }
+        else
+        {
+            IPCManager::GetInstance().SendLog("[오류] 접속 실패. 하마치 IP와 방장의 접속 여부를 확인하세요.");
+
+            // [방어 코드 3] 실패 시 로비로 가지 않고, 본 게임 화면에 3초간 붉은색 경고 타이머 출력
+            Renderer::DisplayUITimed(UIPart::CenterLeft, 8, " \033[31m[연결 실패] 올바른 하마치 IP인지 확인해주세요.\033[0m", 3.0f);
+        }
     }
 }

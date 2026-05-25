@@ -31,6 +31,7 @@
     <ClCompile Include="IPCManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Monster.cpp" />
+    <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
   </ItemGroup>
@@ -48,6 +49,8 @@
     <ClInclude Include="IGameState.h" />
     <ClInclude Include="IPCManager.h" />
     <ClInclude Include="Monster.h" />
+    <ClInclude Include="NetworkManager.h" />
+    <ClInclude Include="Packet.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Item.h" />

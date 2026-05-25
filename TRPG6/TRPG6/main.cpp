@@ -5,13 +5,14 @@
 #include <string>
 
 // 우리들만의~ 라이브러리 ====================================
+#include "NetworkManager.h" // 멀티 플레이 관리 반드시 최우선으로 임포트 할 것!!!!!!!!!!!!!!!
 #include "Utils.h" // 윈도우 API 유틸리티
 #include "DATABASE.h" // 전역 참조하는 헤더 데이터 파일
 #include "Renderer.h" // 게임 렌더링
 #include "Controller.h" // 입력 처리
 #include "GameManager.h" // 게임 상태 관리
+#include "IPCManager.h" // 다중 프롬프트 관리
 #include "Player.h"
-#include "IPCManager.h"
 // 게임상태 ================================================
 #include "IGameState.h"
 #include "GameCreateState.h"
@@ -50,10 +51,9 @@ int main(int argc, char* argv[])
     auto art = LoadImageAsASCII("..\\..\\Resources\\mashutan.png");
     Renderer::SetTopASCIIImage(art); // 여기서 이미지를 등록하고 내부 Height를 계산함
     Renderer::Init();
-#pragma endregion
 
-#pragma region multi
     // 멀티 플레이 세팅
+    NetworkManager::GetInstance().Init();
 #pragma endregion
 
 #pragma region MAIN_LOOP
@@ -62,9 +62,14 @@ int main(int argc, char* argv[])
     {
         auto frameStart = std::chrono::steady_clock::now();
 
+        // 1. 네트워크 루프
+        // ...
+
+        // 2. 렌더링 루프
         Renderer::UpdateTimedUI();
         Renderer::Render();
 
+        // 3. 입력처리
         controller.ProcessInput();
 
         int ch = -1;
@@ -80,9 +85,7 @@ int main(int argc, char* argv[])
             }
             else if (Client::CHAT_MODE)
             {
-                IPCManager::GetInstance().SendChat(Client::playerName, lastCommand);
-                Client::CHAT_MODE = false;
-                READ_MODE = false;
+                NetworkManager::GetInstance().SendChatPacket(Client::playerName, lastCommand);
                 isChatCommand = true;
             }
             else
@@ -92,6 +95,7 @@ int main(int argc, char* argv[])
             }
         }
 
+        // 4. 게임 상태 업데이트
         IGameState* currentState = GameManager::GetInstance().GetCurrentState();
         if (currentState != nullptr)
         {
@@ -105,6 +109,7 @@ int main(int argc, char* argv[])
             lastCommand.clear();
         }
 
+        // 5. 프레임 처리
         auto frameEnd = std::chrono::steady_clock::now();
         auto elapsed = frameEnd - frameStart;
         if (elapsed < FRAME_DURATION)

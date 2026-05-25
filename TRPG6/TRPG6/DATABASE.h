@@ -26,7 +26,23 @@ inline void ApplyFrameDurationFromFps(double fps)
     FRAME_DURATION = std::chrono::duration_cast<std::chrono::steady_clock::duration>(Ms(1000.0 / TARGET_FPS));
 }
 
-namespace Host
+// 게임 내 변수 설정 =======================================================================
+enum class EGameState
+{
+    Start,
+
+    Battle,
+    BossBattle,
+
+    Shop,
+    Inventory,
+
+    GameOver,
+    GameClear,
+};
+
+// 네트워크 설정 ===========================================================================
+namespace Server
 {
     inline int connectedPlayersCount = 1;
     // inline std::vector<Player> playerList;

@@ -1,4 +1,5 @@
-﻿#include "GameLobbyState.h"
+﻿#include "NetworkManager.h"
+#include "GameLobbyState.h"
 #include "GameCreateState.h"
 #include "GameStartState.h"
 #include "Renderer.h"
@@ -32,13 +33,17 @@ void GameLobbyState::Update(int ch, std::string& lastCommand)
         if (ch == 1)
         {
             IPCManager::GetInstance().SendChat(Client::playerName, "게임을 시작합니다!");
-            // (추후 여기에 클라이언트들에게 게임 시작 패킷을 쏘는 로직 추가)
             GameManager::GetInstance().SetCurrentState(new GameStartState());
+            NetworkManager::GetInstance().BroadcastChangeState(EGameState::Start);
         }
         else if (ch == 0)
         {
             IPCManager::GetInstance().SendPlayerLeave(Client::playerName);
-            // 1을 넘겨주어 이름 입력(Phase 0)을 생략하고 방 선택(Phase 1)으로 복귀
+
+            // [수정] 방 폭파 (소켓 및 스레드 완전 종료 후 재초기화)
+            NetworkManager::GetInstance().Shutdown();
+            NetworkManager::GetInstance().Init();
+
             GameManager::GetInstance().SetCurrentState(new GameCreateState(1));
         }
     }
@@ -47,10 +52,14 @@ void GameLobbyState::Update(int ch, std::string& lastCommand)
         Renderer::DisplayUI(UIPart::CenterLeft, 6, " 방장이 게임을 시작할 때까지 대기중입니다...");
         Renderer::DisplayUI(UIPart::CenterLeft, 7, " 0. 접속 끊기 (뒤로가기)");
 
-        // 클라이언트는 스스로 시작할 수 없으며 뒤로가기(0)만 가능
         if (ch == 0)
         {
             IPCManager::GetInstance().SendPlayerLeave(Client::playerName);
+
+            // [수정] 서버와 연결 끊기 (소켓 완전 종료 후 재초기화)
+            NetworkManager::GetInstance().Shutdown();
+            NetworkManager::GetInstance().Init();
+
             GameManager::GetInstance().SetCurrentState(new GameCreateState(1));
         }
     }
