@@ -2,7 +2,6 @@
 #include <mutex>
 #include "GameManager.h"
 #include "Renderer.h"
-#include "IPCLogger.h"
 #include "Controller.h"
 #include "DATABASE.h"
 
@@ -15,7 +14,7 @@ std::map<std::pair<UIPart, int>, int> Renderer::timedUIMap;
 // [Static Member Definitions]
 // ==========================================
 
-std::string Renderer::topStatus = "INITIALIZING...";
+std::string Renderer::topStatus = "게임 시작";
 std::vector<std::string> Renderer::leftLines;
 std::vector<std::string> Renderer::rightLines;
 std::vector<std::string> Renderer::screenBuffer;
@@ -126,7 +125,7 @@ void Renderer::ForceDisplayUI(UIPart part, int lineIdx, const std::string& text)
     {
         // Bottom인 경우 입력 버퍼를 업데이트합니다. 
         // (주의: DATABASE.h의 currentQuery와 동기화가 필요합니다)
-        currentQuery = text;
+        Client::currentQuery = text;
     }
     else
     {
@@ -193,7 +192,9 @@ void Renderer::Render()
     frameOutput += std::string(SCREEN_WIDTH, '=') + "\n";
 
     // \033[K : 줄 끝까지 남아있는 잔상 삭제
-    frameOutput += "\033[K [INPUT] : " + inputBuffer + "_\n";
+    std::string promptTag = Client::CHAT_MODE ? "[채팅]" : "[입력]";
+    frameOutput += "\033[K " + promptTag + " : " + inputBuffer + "_\n";
+
     frameOutput += std::string(SCREEN_WIDTH, '=') + "\n";
 
     // 6. 완성된 버퍼를 콘솔에 한 번에 출력 (I/O 호출 1회로 단축)
@@ -226,9 +227,4 @@ void Renderer::UpdateTimedUI()
             ++it;
         }
     }
-}
-
-void Renderer::DisplayLog(const std::string& text)
-{
-    IPCLogger::GetInstance().SendLog(text);
 }
