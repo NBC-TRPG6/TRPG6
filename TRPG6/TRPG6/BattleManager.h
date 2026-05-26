@@ -71,35 +71,35 @@ public:
     /// </summary>
     /// <param name="player">플레이어 캐릭터</param>
     /// <param name="monster">몬스터 캐릭터</param>
-    void Battle(Player& player);
+    void Battle(Player* player);
 
 
     /// <summary>
     /// 플레이어를 넣으면 랜덤몬스터 함수와 배틀 함수를 작동해 전투를 시작하는 함수입니다.
     /// </summary>
     /// <param name="player">플레이어 캐릭터</param>
-    void StartBattle(Player& player);
+    void StartBattle(Player* player);
 
     /// <summary>
     /// 플레이어 의 차례에 작동하는 함수입니다.
     /// </summary>
     /// <param name="player">플레이어 캐릭터</param>
     /// <param name="monster">몬스터 캐릭터</param>
-    void PlayerTurn(Player& player, Monster& monster);
+    void PlayerTurn(Player* player, Monster& monster);
 
     /// <summary>
     /// 몬스터의 차례에 작동하는 함수입니다.
     /// </summary>
     /// <param name="player">플레이어 캐릭터</param>
     /// <param name="monster">몬스터 캐릭터</param>
-    void MonsterTurn(Player& player, Monster& monster);
+    void MonsterTurn(Player* player, Monster& monster);
 
     /// <summary>
     /// 배틀종료 후 결과 처리 함수입니다.
     /// </summary>
     /// <param name="player">보상을 받을 플레이어</param>
     /// <param name="monster">처치한 몬스터(돈/아이템 제공)</param>
-    void BattleEnd(Player& player);
+    void BattleEnd(Player* player);
 
 
     Monster GetCurrentMonster() const { return currentMonster; }
