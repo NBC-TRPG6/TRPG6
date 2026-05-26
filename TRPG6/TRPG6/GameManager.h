@@ -4,6 +4,7 @@
 class IGameState;
 class Player;
 class Shop;
+class BattleManager;
 
 /// <summary>
 /// 그냥 얘는 모든걸 다함 개큼 데이터도 있음 메서드도 있음 매우 대단한 녀석임
@@ -15,6 +16,7 @@ private:
     bool IsGameRunning = true; // 게임 실행중인지 판단
     Player* player = nullptr; // 플레이어 넣을 자리
     Shop* shop = nullptr; // Shop 넣을 자리
+    BattleManager* battleManager = nullptr;
 
 public:
     ~GameManager(); // 싱글턴 구현
@@ -28,6 +30,9 @@ public:
         static GameManager Instance; // static 지역 변수로 인스턴스 생성함
         return Instance;
     }
+
+    BattleManager* GetBattleManager();
+    
 
     /// <summary>
     /// 현재 상태를 설정합니다.
