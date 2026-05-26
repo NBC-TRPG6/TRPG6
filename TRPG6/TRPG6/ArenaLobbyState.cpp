@@ -15,6 +15,7 @@ void ArenaLobbyState::Update(int ch, std::string& lastCommand) {
 
     if (ch == 1 && Client::isServer) {
         GameManager::GetInstance().SetCurrentState(new ArenaBattleState());
+        NetworkManager::GetInstance().BroadcastChangeState(EGameState::ArenaBattle);
     }
 }
 
