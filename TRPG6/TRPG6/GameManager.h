@@ -3,6 +3,8 @@
 #pragma once
 class IGameState;
 class Player;
+class Shop;
+class BattleManager;
 
 /// <summary>
 /// 그냥 얘는 모든걸 다함 개큼 데이터도 있음 메서드도 있음 매우 대단한 녀석임
@@ -13,6 +15,8 @@ private:
     IGameState* CURRENT_STATE = nullptr; // 현재 상태
     bool IsGameRunning = true; // 게임 실행중인지 판단
     Player* player = nullptr; // 플레이어 넣을 자리
+    Shop* shop = nullptr; // Shop 넣을 자리
+    BattleManager* battleManager = nullptr;
 
 public:
     ~GameManager(); // 싱글턴 구현
@@ -27,6 +31,9 @@ public:
         return Instance;
     }
 
+    BattleManager* GetBattleManager();
+    
+
     /// <summary>
     /// 현재 상태를 설정합니다.
     /// 상태 전환 시 반드시 반영해주세요
@@ -36,6 +43,7 @@ public:
 
     void SetPlayer(Player* p); //플레이어 생성 함수
     Player* GetPlayer() const; // 플레이어 가져오는 함수
+    Shop* GetShop() const; // Shop 가져오는 함수
 
 #pragma region gettedr, setter
     /// <summary>
@@ -48,4 +56,11 @@ public:
     /// </summary>
     void SetIsGameRunning(bool isRunning);
 #pragma endregion
+
+    /// <summary>
+    /// 현재 게임의 FPS를 설정하는 함수입니다.
+    /// 큰값은 안됩니다 위험해요.
+    /// </summary>
+    /// <param name="fps">설정할 FPS 값</param>
+    void SetFps(double fps);
 };

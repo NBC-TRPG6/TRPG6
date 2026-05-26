@@ -8,8 +8,9 @@ private:
     Inventory<Item> inventory;
 public:
     Player(const std::string& name)
-        : Character(name), MaxHp(200), Exp(0), MaxExp(100), Level(1) {
+        : Character(name), Exp(0), MaxExp(100), Level(1) {
         Hp = 200;
+        MaxHp = Hp;
         Attack = 30;
     }
     Inventory<Item>& GetInventory() { return inventory; }
@@ -18,14 +19,14 @@ public:
 
     virtual std::string WhoAmI() { return "Player"; }
 
-    int MaxHp;
+
     int Exp;
     int MaxExp;
     int Level;
 
 
     // Getters
-    int GetMaxHp() const { return MaxHp; }
+
     int GetExp() const { return Exp; }
     int GetMaxExp() const { return MaxExp; }
     int GetLevel() const { return Level; }
@@ -43,9 +44,4 @@ public:
     void LevelUp();
 
     void PrintStatus() const;
-
-
-protected:
-    int Hp;
-    int Attack;
 };

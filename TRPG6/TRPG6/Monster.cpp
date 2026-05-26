@@ -1,8 +1,13 @@
 ﻿#include "Monster.h"
+#include "IPCManager.h"
 
-std::string Monster::MonsterNames[10]{
+std::string Monster::MonsterNames[11]{
    "고블린", "오크", "트롤", "스켈레톤", "좀비",
-   "뱀파이어", "늑대인간", "거미", "슬라임", "산적"
+   "뱀파이어", "늑대인간", "거미", "슬라임", "산적", "대래래래래곤~~~"
+};
+std::string Monster::MonsterImageNames[11]{
+   "goblin", "orc", "troll", "skeleton", "zombie",
+    "vampire", "werewolf", "spider", "slime", "bandit", "dragon"
 };
 std::string Monster::MonsterItems[11]{
    "고블린 코", "오크 귀", "트롤 발톱", "스켈레톤 뼈", "좀비 살점",
@@ -50,9 +55,19 @@ Monster* Monster::ResetState(int playerLevel)
     return this;
 }
 
+std::string Monster::GetImageName()
+{
+    for (int i = 0; i < 11; ++i) {
+        if (MonsterNames[i] == Name) {
+            return MonsterImageNames[i];
+        }
+    }
+    return "default_image"; // 일치하는 이름이 없을 경우 기본 이미지 반환
+}
+
 Item* Monster::DropItem(int percent)
 {
-    int num;
+    int num=0;
     if (Name == "대래래래래곤~~~")
     {
         num = 10;
@@ -66,9 +81,13 @@ Item* Monster::DropItem(int percent)
         }
     }
 
+    IPCManager::GetInstance().SendLog("몬스터 이름: " + Name + ", 드롭 아이템: " + std::to_string(num)+", 드롭 확률: " + std::to_string(percent) + "%");
+
     if (rand() % 100 < percent)
     {
-        return new Item(MonsterItems[num], ItemType::MONSTER_PART, 50, 20);
+        Item* droppedItem = new Item(MonsterItems[num], ItemType::MONSTER_PART, 50, 10);
+        IPCManager::GetInstance().SendLog("아이템 드롭 성공: " + droppedItem->GetName());
+        return droppedItem;
     }
 
     return nullptr;

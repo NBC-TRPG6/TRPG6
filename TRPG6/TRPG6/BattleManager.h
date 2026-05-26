@@ -1,10 +1,13 @@
-﻿//기본 라이브러리 헤더
+﻿#pragma once
+//기본 라이브러리 헤더
 #include <random>
-
+#include <string>
+#include <map>
 //커스텀 라이브러리 헤더
 #include "Player.h"
 #include "Monster.h"
 #include "Renderer.h"
+#include "Item.h"
 
 
 /// <summary>
@@ -23,6 +26,16 @@ private:
 
     EBattleState CurrentBattleState = EBattleState::Locked; // 배틀상태 관리용 변수입니다. 배틀이 가능한 상태인지, 진행 중인지 등을 관리합니다.
     std::mt19937 rng{ std::random_device{}() };// random_device는 시드로 사용할 수 있는 난수 생성기입니다. mt19937은 Mersenne Twister 알고리즘을 사용하는 난수 생성기입니다.
+    std::map<std::string, int> KillCount; //Monster.GetName()을 키로 두는 처치회수 map
+    bool isBoss; //보스면 true
+    //플레이어의 원래 공격력을 OriginalPlayerAttack 에 저장합니다.
+    int OriginalPlayerAttack = 0;
+    bool isPlayerTurn = false;
+    bool isNIMO = false;
+    bool NimoDefeated = false;
+    Monster currentMonster; // 현재 전투 중인 몬스터를 저장하는 변수입니다.
+
+
 public:
 
 #pragma region CurrentBattleState &Getters/Setters
@@ -45,6 +58,11 @@ public:
     /// <returns>전투 가능 여부</returns>
     bool GetIsInBattle() const { return CurrentBattleState == EBattleState::InProgress; }
 
+    void GetAllKillCount();
+    int GetKillCount(std::string name);
+
+    bool GetIsBoss() const { return isBoss; }
+
     /// <summary>
     /// 바깥에서 배틀 상태를 설정하는 함수입니다. EBattleState 타입의 값을 넣으면 CurrentBattleState를  변경합니다.
     /// </summary>
@@ -61,36 +79,38 @@ public:
     /// </summary>
     /// <param name="player">플레이어 캐릭터</param>
     /// <param name="monster">몬스터 캐릭터</param>
-    void Battle(Player& player, Monster& monster);
+    void Battle(Player* player);
 
 
     /// <summary>
     /// 플레이어를 넣으면 랜덤몬스터 함수와 배틀 함수를 작동해 전투를 시작하는 함수입니다.
     /// </summary>
     /// <param name="player">플레이어 캐릭터</param>
-    void StartBattle(Player& player);
+    void StartBattle(Player* player);
 
     /// <summary>
     /// 플레이어 의 차례에 작동하는 함수입니다.
     /// </summary>
     /// <param name="player">플레이어 캐릭터</param>
     /// <param name="monster">몬스터 캐릭터</param>
-    void PlayerTurn(Player& player, Monster& monster);
+    void PlayerTurn(Player* player, Monster& monster);
 
     /// <summary>
     /// 몬스터의 차례에 작동하는 함수입니다.
     /// </summary>
     /// <param name="player">플레이어 캐릭터</param>
     /// <param name="monster">몬스터 캐릭터</param>
-    void MonsterTurn(Player& player, Monster& monster);
+    void MonsterTurn(Player* player, Monster& monster);
 
     /// <summary>
     /// 배틀종료 후 결과 처리 함수입니다.
     /// </summary>
     /// <param name="player">보상을 받을 플레이어</param>
     /// <param name="monster">처치한 몬스터(돈/아이템 제공)</param>
-    void BattleEnd(Player& player, const Monster& monster);
+    void BattleEnd(Player* player);
 
+
+    Monster GetCurrentMonster() const { return currentMonster; }
 #pragma endregion
 
 };

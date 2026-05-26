@@ -16,7 +16,8 @@ protected:
     static int RandomAttack(int pLevel, float multi = 1);
     static int RandomMoney(int pLevel, float multi = 1);
 
-    static std::string MonsterNames[10];
+    static std::string MonsterNames[11];
+    static std::string MonsterImageNames[11];
     static std::string MonsterItems[11];
 
 public:
@@ -89,6 +90,14 @@ public:
     /// <param name="playerLevel"></param>
     /// <returns>새로운 상태로 초기화된 Monster 객체의 포인터</returns>
     virtual Monster* ResetState(int playerLevel);
+
+    /// <summary>
+    /// Monster의 이름을 기반으로 해당 몬스터의 이미지 파일 이름을 반환하는 함수입니다.
+    /// 예를 들어, "고블린"이라는 이름을 가진 몬스터는 "goblin"이라는 이미지 파일 이름을 반환합니다.
+    /// </summary>
+    /// <returns>몬스터 이미지 파일 이름</returns>
+    std::string GetImageName();
+
 
     /// <summary>
     /// 일정 확률로 아이템을 드롭하는 메서드입니다. 아이템이 드롭될 경우 해당 아이템의 포인터를 반환하며,

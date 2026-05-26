@@ -7,7 +7,7 @@
 ///  버퍼관리용 전역변수
 /// </summary>
 inline std::string inputBuffer = "";
-inline std::string lastCommand = "-1";
+inline std::string lastCommand = "";
 
 /// <summary>
 /// 플레이어	입력을 처리하는 클래스입니다. 매 프레임마다 ProcessInput()이 호출되어야 합니다.
