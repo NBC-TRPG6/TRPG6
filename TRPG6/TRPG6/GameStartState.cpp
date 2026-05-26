@@ -11,6 +11,7 @@ void GameStartState::Enter()
 {
     Renderer::ClearAllCenterLeftUI();
     IPCManager::GetInstance().SendLog("게임 진입");
+    GameManager::GetInstance().SetFps(30.f);
 }
 
 void GameStartState::Update(int ch, std::string& lastCommand) {
