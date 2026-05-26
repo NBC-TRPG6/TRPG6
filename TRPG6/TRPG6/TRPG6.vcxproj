@@ -30,6 +30,7 @@
   <ItemGroup>
     <ClCompile Include="ArenaBattleManager.cpp" />
     <ClCompile Include="ArenaBattleState.cpp" />
+    <ClCompile Include="ArenaBettingState.cpp" />
     <ClCompile Include="ArenaLobbyState.cpp" />
     <ClCompile Include="ArenaReadyState.cpp" />
     <ClCompile Include="ArenaResultState.cpp" />
@@ -64,6 +65,7 @@
   <ItemGroup>
     <ClInclude Include="ArenaBattleManager.h" />
     <ClInclude Include="ArenaBattleState.h" />
+    <ClInclude Include="ArenaBettingState.h" />
     <ClInclude Include="ArenaLobbyState.h" />
     <ClInclude Include="ArenaReadyState.h" />
     <ClInclude Include="ArenaResultState.h" />
