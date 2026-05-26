@@ -32,6 +32,7 @@
     <ClCompile Include="BattleState.cpp" />
     <ClCompile Include="BossMonster.cpp" />
     <ClCompile Include="Controller.cpp" />
+    <ClCompile Include="DieState.cpp" />
     <ClCompile Include="GameCreateState.cpp" />
     <ClCompile Include="GameLobbyState.cpp" />
     <ClCompile Include="GameManager.cpp" />
@@ -53,6 +54,7 @@
     <ClInclude Include="Character.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="DATABASE.h" />
+    <ClInclude Include="DieState.h" />
     <ClInclude Include="GameCreateState.h" />
     <ClInclude Include="GameLobbyState.h" />
     <ClInclude Include="GameManager.h" />

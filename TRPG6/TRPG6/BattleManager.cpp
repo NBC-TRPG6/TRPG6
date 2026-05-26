@@ -102,6 +102,7 @@ void BattleManager::PlayerTurn(Player* player, Monster& monster)
     if (isNIMO)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 3, "!!!!!귀여운 강아지를 처치하셧습니다!!!!!!");
+        monster.SetHp(0);
         BattleEnd(player);
         return;
     }
@@ -259,19 +260,12 @@ void BattleManager::BattleEnd(Player* player)
 
 
     Item* item = currentMonster.DropItem(); //30%확률로 아이템 드랍
+    if (item != nullptr)
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, 6, item->GetName() + "을(를) 획득했다!");
+        player->GetInventory().AddItem(item);
+    }
 
-    //TODO:: 몬스터가 주는 아이템을 플레이어 인벤토리에 추가(함수 필요, 내함수 X)
-
-
-
-    /*
-    //TODO:: 배틀 후 획득한 것 표시
-    Renderer::DisplayUI(UIPart::CenterLeft, 6, player->GetName() + "의 남은 체력" + std::to_string(player->GetHp()));
-    Renderer::DisplayUI(UIPart::CenterLeft, 6, player->GetName() + "의 남은 체력" + std::to_string(player->GetHp()));
-    Renderer::DisplayUI(UIPart::CenterLeft, 6, player->GetName() + "의 남은 체력" + std::to_string(player->GetHp()));
-    */
-
-    CurrentBattleState = EBattleState::Locked;
 }
 
 #pragma endregion
