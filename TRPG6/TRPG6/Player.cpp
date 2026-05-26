@@ -39,4 +39,5 @@ void Player::PrintStatus() const
     Renderer::DisplayUI(UIPart::CenterRight, 3, "경험치: " + std::to_string(Exp) + "/100");
     Renderer::DisplayUI(UIPart::CenterRight, 4, "HP: " + std::to_string(Hp) + "/" + std::to_string(MaxHp));
     Renderer::DisplayUI(UIPart::CenterRight, 5, "공격력: " + std::to_string(Attack));
+    Renderer::DisplayUI(UIPart::CenterRight, 6, "보유 골드: " + std::to_string(Money));
 }
