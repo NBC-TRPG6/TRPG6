@@ -13,6 +13,8 @@
 #include "GameManager.h" // 게임 상태 관리
 #include "IPCManager.h" // 다중 프롬프트 관리
 #include "Player.h"
+#include "BattleManager.h"
+#include "Shop.h"
 // 게임상태 ================================================
 #include "IGameState.h"
 #include "GameCreateState.h"
@@ -102,6 +104,23 @@ int main(int argc, char* argv[])
             // 채팅 명령어였다면 게임 로직이 반응하지 않도록 빈 문자열 전달
             std::string cmdForState = isChatCommand ? "" : lastCommand;
             currentState->Update(ch, cmdForState);
+        }
+        // 5. 메뉴 출력 + switch
+        Renderer::DisplayUI(UIPart::CenterLeft, 10, "1. 던전 입장");
+        Renderer::DisplayUI(UIPart::CenterLeft, 11, "2. 상점 입장");
+        Renderer::DisplayUI(UIPart::CenterLeft, 12, "3. 인벤토리 확인");
+        switch (ch) {
+        case 1: {
+            Renderer::ClearAllCenterLeftUI();
+            battle.SetBattleState(EBattleState::Ready);
+            battle.StartBattle(*GameManager::GetInstance().GetPlayer());
+            break;
+        }
+        case 2:
+            Renderer::ClearAllCenterLeftUI();
+            shop.ShowStock();
+            Renderer::DisplayUI(UIPart::CenterLeft, 5, "1. 구매  2. 판매  3. 나가기");
+            break;
         }
 
         if (!lastCommand.empty())
