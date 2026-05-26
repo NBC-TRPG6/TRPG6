@@ -1,5 +1,6 @@
 ﻿#include "BattleManager.h"
 #include "GameManager.h"
+#include "IPCManager.h"
 
 
 
@@ -284,7 +285,7 @@ void BattleManager::GetAllKillCount()
 {
     int i = 2;
     for (auto& pair : KillCount) {
-        Renderer::DisplayUI(UIPart::CenterLeft, i, pair.first + " :" + std::to_string(pair.second) + "회");
+        IPCManager::GetInstance().SendLog(pair.first + " :" + std::to_string(pair.second) + "회");
 
     }
 }
