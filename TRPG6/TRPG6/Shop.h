@@ -7,15 +7,18 @@ class Player;
 class Shop
 {
 public:
-    //생성자
     Shop();
-
-    // 소멸자
     virtual ~Shop() {}
 
     void ShowStock() const;
     bool BuyItem(Player* player, const std::string& itemName);
     bool SellItem(Player* player, const std::string& itemName, int amount = 1);
+
+    // 인덱스 기반 함수
+    int GetStockSize() const;
+    std::string GetItemNameByIndex(int index) const;
+    int GetItemPriceByIndex(int index) const;
+    int GetItemStockByIndex(int index) const;
 
 private:
     Inventory<Item> stock; // 상점 재고

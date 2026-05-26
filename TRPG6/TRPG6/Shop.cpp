@@ -12,6 +12,60 @@ Shop::Shop()
 }
 
 /*
+ * @brief 상점의 재고 품목 종류 수를 반환하는 메서드
+ * @return 재고 품목 종류 수
+ */
+int Shop::GetStockSize() const
+{
+    return (int)stock.GetSlots().size();
+}
+
+/*
+ * @brief 인덱스를 통해 아이템 이름을 반환하는 메서드
+ * @param index 가져올 아이템의 인덱스
+ * @return 아이템 이름 (인덱스 범위 밖일 경우 빈 문자열)
+ */
+std::string Shop::GetItemNameByIndex(int index) const
+{
+    const auto& slots = stock.GetSlots();
+    if (index >= 0 && index < (int)slots.size())
+    {
+        return slots[index].item->GetName();
+    }
+    return "";
+}
+
+/*
+ * @brief 인덱스를 통해 아이템 가격을 반환하는 메서드
+ * @param index 가져올 아이템의 인덱스
+ * @return 아이템 가격 (인덱스 범위 밖일 경우 0)
+ */
+int Shop::GetItemPriceByIndex(int index) const
+{
+    const auto& slots = stock.GetSlots();
+    if (index >= 0 && index < (int)slots.size())
+    {
+        return slots[index].item->GetPrice();
+    }
+    return 0;
+}
+
+/*
+ * @brief 인덱스를 통해 아이템 재고 수량을 반환하는 메서드
+ * @param index 가져올 아이템의 인덱스
+ * @return 아이템 재고 수량 (인덱스 범위 밖일 경우 0)
+ */
+int Shop::GetItemStockByIndex(int index) const
+{
+    const auto& slots = stock.GetSlots();
+    if (index >= 0 && index < (int)slots.size())
+    {
+        return slots[index].count;
+    }
+    return 0;
+}
+
+/*
  * @brief 상점 재고 출력 메서드
  */
 void Shop::ShowStock() const
@@ -24,7 +78,7 @@ void Shop::ShowStock() const
                 Renderer::DisplayUI(UIPart::CenterLeft, 1, "상점에 재고가 없습니다.");
                 return;
             }
-            std::string info = "- " + item->GetName() + " | 가격: " + std::to_string(item->GetPrice()) + "G | 재고: " + std::to_string(count) + "개";
+            std::string info = item->GetName() + " | 가격: " + std::to_string(item->GetPrice()) + "G | 재고: " + std::to_string(count) + "개";
             Renderer::DisplayUI(UIPart::CenterLeft, index + 1, info);
         });
 }
@@ -41,28 +95,18 @@ bool Shop::BuyItem(Player* player, const std::string& itemName)
     auto* slot = stock.GetItemSlot(itemName);
 
     // 재고 확인
-    if (!slot || slot->count <= 0)
-    {
-        Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "품절된 아이템입니다.", 2.0f);
-        return false;
-    }
+    if (!slot || slot->count <= 0) return false;
 
     Item* shopItem = slot->item;
     int price = shopItem->GetPrice();
 
     // 플레이어 잔고 확인
-    if (player->GetMoney() < price)
-    {
-        Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "골드가 부족합니다! (필요: " + std::to_string(price) + "G / 보유: "
-            + std::to_string(player->GetMoney()) + "G)", 2.0f);
-        return false;
-    }
+    if (player->GetMoney() < price) return false;
 
     // 구매 진행
     player->SetMoney(player->GetMoney() - price);
     player->GetInventory().AddItem(new Item(*shopItem), 1);
     stock.UseItem(nullptr, itemName, 1);
-    Renderer::DisplayUITimed(UIPart::CenterLeft, 0, itemName + "을(를) 구매했습니다! (-" + std::to_string(price) + "G", 2.0f);
     return true;
 }
 
@@ -78,20 +122,17 @@ bool Shop::SellItem(Player* player, const std::string& itemName, int amount)
     // 플레이어 인벤토리에 해당 아이템이 실제로 있는지 확인
     auto* slot = player->GetInventory().GetItemSlot(itemName);
 
-    if (!slot || slot->count < amount)
-    {
-        Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "판매할 아이템이 없습니다.", 2.0f);
-        return false;
-    }
+    if (!slot || slot->count < amount) return false;
 
     // 판매 금액
+    Item* itemToSell = slot->item;
     int sellPrice = slot->item->GetSellPrice() * amount;
 
-
     // 판매 진행
+    Item* newItemForStock = new Item(*itemToSell);
     player->GetInventory().UseItem(nullptr, itemName, amount);
     player->SetMoney(player->GetMoney() + sellPrice);
-    stock.AddItem(new Item(*(slot->item)), amount);
+    stock.AddItem(newItemForStock, amount);
 
     return true;
 }

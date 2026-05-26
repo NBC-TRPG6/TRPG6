@@ -4,12 +4,16 @@
 class Character {
 public:
     Character(const std::string& name)
-        : Name(name), Hp(0), Attack(0), Money(0) {
+        : Name(name), Hp(0), Attack(0), Money(0)
+    {
+        MaxHp = Hp;
     }
     //Name,Hp,Attack,Defecse,Level
 
     Character(const std::string& name, int hp, int attack, int Money)
-        : Name(name), Hp(hp), Attack(attack), Money(Money) {
+        : Name(name), Hp(hp), Attack(attack), Money(Money)
+    {
+        MaxHp = Hp;
     }
 
     virtual ~Character() {}

@@ -3,6 +3,7 @@
 #pragma once
 class IGameState;
 class Player;
+class Shop;
 class BattleManager;
 
 /// <summary>
@@ -14,6 +15,7 @@ private:
     IGameState* CURRENT_STATE = nullptr; // 현재 상태
     bool IsGameRunning = true; // 게임 실행중인지 판단
     Player* player = nullptr; // 플레이어 넣을 자리
+    Shop* shop = nullptr; // Shop 넣을 자리
     BattleManager* battleManager = nullptr;
 
 public:
@@ -41,6 +43,7 @@ public:
 
     void SetPlayer(Player* p); //플레이어 생성 함수
     Player* GetPlayer() const; // 플레이어 가져오는 함수
+    Shop* GetShop() const; // Shop 가져오는 함수
 
 #pragma region gettedr, setter
     /// <summary>

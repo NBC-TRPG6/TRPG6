@@ -31,7 +31,9 @@
     <ClCompile Include="BattleManager.cpp" />
     <ClCompile Include="BattleState.cpp" />
     <ClCompile Include="BossMonster.cpp" />
+    <ClCompile Include="ClearState.cpp" />
     <ClCompile Include="Controller.cpp" />
+    <ClCompile Include="DieState.cpp" />
     <ClCompile Include="GameCreateState.cpp" />
     <ClCompile Include="GameLobbyState.cpp" />
     <ClCompile Include="GameManager.cpp" />
@@ -45,14 +47,20 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shop.cpp" />
+    <ClCompile Include="ShopBuyState.cpp" />
+    <ClCompile Include="ShopSellState.cpp" />
+    <ClCompile Include="ShopState.cpp" />
+    <ClCompile Include="ShopStockState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BattleManager.h" />
     <ClInclude Include="BattleState.h" />
     <ClInclude Include="BossMonster.h" />
     <ClInclude Include="Character.h" />
+    <ClInclude Include="ClearState.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="DATABASE.h" />
+    <ClInclude Include="DieState.h" />
     <ClInclude Include="GameCreateState.h" />
     <ClInclude Include="GameLobbyState.h" />
     <ClInclude Include="GameManager.h" />
@@ -66,6 +74,11 @@
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Shop.h" />
+    <ClInclude Include="ShopBuyState.h" />
+    <ClInclude Include="ShopSellState.h" />
+    <ClInclude Include="ShopState.h" />
+    <ClInclude Include="ShopStockState.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
