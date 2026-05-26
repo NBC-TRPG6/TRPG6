@@ -2,6 +2,7 @@
 #include "BossMonster.h"
 #include "GameManager.h"
 #include "GameStartState.h"
+#include "ClearState.h"
 #include "DieState.h"
 
 
@@ -11,8 +12,6 @@
 
 void BattleState::Enter()
 {
-    auto art = LoadImageAsASCII("..\\..\\Resources\\dragon.png");
-    Renderer::SetTopASCIIImage(art);
 
     TurnCount = 0;
     isInit = false;
@@ -20,6 +19,10 @@ void BattleState::Enter()
 
     battleManager.SetBattleState(EBattleState::Ready);
     battleManager.StartBattle(GameManager::GetInstance().GetPlayer());
+
+    std::string monsterName = "..\\..\\Resources\\" + battleManager.GetCurrentMonster().GetImageName() + ".png";
+    auto art = LoadImageAsASCII(monsterName.c_str());
+    Renderer::SetTopASCIIImage(art);
 }
 
 void BattleState::Update(int ch, std::string& lastCommand)
@@ -30,7 +33,10 @@ void BattleState::Update(int ch, std::string& lastCommand)
 
     if (BattleEnded && !isBattle)
     {
-        GameManager::GetInstance().SetCurrentState(new GameStartState());
+        if (battleManager.GetIsBoss())
+            GameManager::GetInstance().SetCurrentState(new ClearState());
+        else
+            GameManager::GetInstance().SetCurrentState(new GameStartState());
         return;
     }
 
@@ -75,5 +81,6 @@ void BattleState::Exit()
 {
     isInit = false;
     Renderer::DisplayUI(UIPart::CenterLeft, 1, "배틀에서 나왔습니다.");
+    GameManager::GetInstance().SetFps(30.f);
 }
 
