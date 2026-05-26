@@ -39,6 +39,7 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameStartState.cpp" />
     <ClCompile Include="IGameState.cpp" />
+    <ClCompile Include="InventoryState.cpp" />
     <ClCompile Include="IPCManager.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="main.cpp" />
@@ -67,6 +68,7 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameStartState.h" />
     <ClInclude Include="IGameState.h" />
+    <ClInclude Include="InventoryState.h" />
     <ClInclude Include="IPCManager.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="NetworkManager.h" />
