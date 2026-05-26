@@ -3,10 +3,13 @@
 #include "GameManager.h"
 #include "Renderer.h"
 #include "NetworkManager.h"
+#include "Utils.h"
 
 void ArenaLobbyState::Enter() {
     Renderer::ClearAllCenterLeftUI();
     NetworkManager::GetInstance().SendArenaReadyPacket();
+    auto art = LoadImageAsASCII("..\\..\\Resources\\colosseum2.png");
+    Renderer::SetTopASCIIImage(art);
 }
 
 void ArenaLobbyState::Update(int ch, std::string& lastCommand) {
