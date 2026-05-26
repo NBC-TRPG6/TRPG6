@@ -1,7 +1,7 @@
 ﻿#include "BattleState.h"
 #include "BossMonster.h"
 #include "GameManager.h"
-#include "GameStartState.h"
+#include "ShopBranchState.h"
 #include "ClearState.h"
 #include "DieState.h"
 
@@ -36,7 +36,7 @@ void BattleState::Update(int ch, std::string& lastCommand)
         if (battleManager.GetIsBoss())
             GameManager::GetInstance().SetCurrentState(new ClearState());
         else
-            GameManager::GetInstance().SetCurrentState(new GameStartState());
+            GameManager::GetInstance().SetCurrentState(new ShopBranchState());
         return;
     }
 
