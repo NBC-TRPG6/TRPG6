@@ -228,7 +228,7 @@ void BattleManager::MonsterTurn(Player* player, Monster& monster)
 void BattleManager::BattleEnd(Player* player)
 {
 
-    KillCount[monster.GetName()]++;
+    KillCount[currentMonster.GetName()]++;
 
     //연속전투 막기
     CurrentBattleState = EBattleState::Locked;
@@ -284,7 +284,6 @@ void BattleManager::BattleEnd(Player* player)
 /// </summary>
 void BattleManager::GetAllKillCount()
 {
-    int i = 2;
     for (auto& pair : KillCount) {
         IPCManager::GetInstance().SendLog(pair.first + " :" + std::to_string(pair.second) + "회");
 
