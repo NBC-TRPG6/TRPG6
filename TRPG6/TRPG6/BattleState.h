@@ -9,7 +9,6 @@ class BattleState : public IGameState
 public:
     virtual ~BattleState() override
     {
-        delete bossMonster;
     }
 
     void Enter() override;
@@ -20,8 +19,7 @@ public:
 
 private:
     bool isInit = false;
-    BattleManager battleManager;
-    Monster* bossMonster;
+    BattleManager* battleManager;
     Player* player;
     int TurnCount =0;
     bool isBattle = false;

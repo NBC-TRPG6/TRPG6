@@ -15,11 +15,11 @@ void BattleState::Enter()
     TurnCount = 0;
     isInit = false;
     isBattle = false;
+    battleManager = GameManager::GetInstance().GetBattleManager();
+    battleManager->SetBattleState(EBattleState::Ready);
+    battleManager->StartBattle(GameManager::GetInstance().GetPlayer());
 
-    battleManager.SetBattleState(EBattleState::Ready);
-    battleManager.StartBattle(GameManager::GetInstance().GetPlayer());
-
-    std::string monsterName = "..\\..\\Resources\\" + battleManager.GetCurrentMonster().GetImageName() + ".png";
+    std::string monsterName = "..\\..\\Resources\\" + battleManager->GetCurrentMonster().GetImageName() + ".png";
     auto art = LoadImageAsASCII(monsterName.c_str());
     Renderer::SetTopASCIIImage(art);
 }
@@ -49,7 +49,7 @@ void BattleState::Update(int ch, std::string& lastCommand)
 
         if (BattleEnded && !isBattle)
         {
-            if (battleManager.GetIsBoss())
+            if (battleManager->GetIsBoss())
                 ChangeState(new ClearState());
             else
                 ChangeState(new ShopBranchState());
@@ -62,9 +62,9 @@ void BattleState::Update(int ch, std::string& lastCommand)
             isInit = true;
         }
 
-        if (battleManager.GetCurrentMonster().IsDead())
+        if (battleManager->GetCurrentMonster().IsDead())
         {
-            battleManager.BattleEnd(player);
+            battleManager->BattleEnd(player);
             player->PrintStatus();
             isBattle = false;
             BattleEnded = true;
@@ -84,7 +84,7 @@ void BattleState::Update(int ch, std::string& lastCommand)
 
         TurnCount++;
         Renderer::DisplayUI(UIPart::CenterLeft, 2, std::to_string(TurnCount) + "턴");
-        battleManager.Battle(player);
+        battleManager->Battle(player);
         player->PrintStatus();
     }
 
