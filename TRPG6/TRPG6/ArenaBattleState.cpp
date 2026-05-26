@@ -16,6 +16,7 @@ void ArenaBattleState::Enter()
 
 void ArenaBattleState::Update(int ch, std::string& lastCommand)
 {
+    Renderer::ClearAllCenterLeftUI();
     (void)lastCommand;
 
     DrawPlayerList();
@@ -43,8 +44,22 @@ void ArenaBattleState::Update(int ch, std::string& lastCommand)
     case BattleUIStep::MainMenu:
     {
         DrawMainMenu();
-        if (ch == 1) CurrentStep = BattleUIStep::SelectTarget;
-        else if (ch == 2) CurrentStep = BattleUIStep::SelectItem;
+        if (ch == 1)
+        {
+            CurrentStep = BattleUIStep::SelectTarget;
+        }
+        else if (ch == 2)
+        {
+            if (HasUsableArenaItems())
+            {
+                CurrentStep = BattleUIStep::SelectItem;
+            }
+            else
+            {
+                Renderer::DisplayUITimed(UIPart::CenterLeft, 11,
+                    "사용 가능한 아이템이 없습니다.", 2.0f);
+            }
+        }
         break;
     }
 
@@ -153,6 +168,15 @@ void ArenaBattleState::OnPlayerDie(const std::string& playerName)
             return;
         }
     }
+}
+
+bool ArenaBattleState::HasUsableArenaItems() const
+{
+    for (const auto& slot : ItemSnapshot)
+    {
+        if (slot.count > 0) return true;
+    }
+    return false;
 }
 
 void ArenaBattleState::DrawPlayerList()

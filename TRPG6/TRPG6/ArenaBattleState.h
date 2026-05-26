@@ -30,7 +30,7 @@ private:
     void DrawMainMenu();
     void DrawTargetList();
     void DrawItemList();
-
+    bool HasUsableArenaItems() const;
 
     /// <summary>
     /// 플레이어 기본: 대기(턴X)

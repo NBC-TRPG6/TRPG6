@@ -98,6 +98,8 @@ private:
 
     // 호스트: 플레이어별 C2S 스냅샷 원본(가변 패킷 바이트)
     std::map<std::string, std::vector<char>> arenaPlayerSnapshots;
+    // 호스트: 전투 시작 시점 스냅샷(종료 후 인벤 차감 동기화용)
+    std::map<std::string, std::vector<char>> arenaInitialPlayerSnapshots;
     // 호스트: 전원 스냅샷 수집 후 전투 시작 1회만 수행
     bool arenaBattleStarted = false;
     // 호스트: 방장 전투 시작 후 스냅샷 수집 중
@@ -114,6 +116,13 @@ private:
     bool IsActorsArenaTurn(const std::string& actorName) const;
     void BuildArenaTurnOrder();
     bool BuildArenaItemListPacket(const std::string& ownerName, Pkt_ArenaItemList& out) const;
+    void BuildArenaPlayerListPacket(Pkt_ArenaPlayerList& out) const;
+    void BroadcastArenaPlayerListFromSnapshots();
+    void SaveArenaInitialSnapshots();
+    void SendArenaSessionApplyToAllPlayers(const Pkt_ArenaRankList& rankPkt);
+    bool BuildArenaSessionApplyPacket(const std::string& playerName, const Pkt_ArenaRankList& rankPkt,
+        std::vector<char>& outBuffer) const;
+    static int GetArenaRankForPlayer(const Pkt_ArenaRankList& rankPkt, const std::string& playerName);
     void BroadcastArenaTurnAndItems(const std::string& playerName);
     void StartFirstArenaTurn();
     void AdvanceArenaTurnAfterAction();
