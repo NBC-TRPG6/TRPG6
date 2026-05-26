@@ -65,11 +65,30 @@ void Renderer::DisplayASCIIAnimation()
 
 static std::string CenterText(const std::string& text, int width)
 {
-    int len = (int)text.length();
-    if (len >= width) return text.substr(0, width);
+    // --- [수정 구간 시작] ANSI 코드를 제외한 실제 출력 글자 수 계산 ---
+    int visibleLen = 0;
+    for (size_t i = 0; i < text.length(); ++i)
+    {
+        if (text[i] == '\033' && i + 1 < text.length() && text[i + 1] == '[')
+        {
+            // '\033['를 만나면 'm'이 나올 때까지 인덱스를 건너뜁니다.
+            i += 2;
+            while (i < text.length() && text[i] != 'm')
+            {
+                i++;
+            }
+        }
+        else
+        {
+            visibleLen++;
+        }
+    }
+    // --- [수정 구간 끝] ---
 
-    int leftPad = (width - len) / 2;
-    int rightPad = width - len - leftPad;
+    if (visibleLen >= width) return text.substr(0, width);
+
+    int leftPad = (width - visibleLen) / 2;
+    int rightPad = width - visibleLen - leftPad;
     return std::string(leftPad, ' ') + text + std::string(rightPad, ' ');
 }
 
