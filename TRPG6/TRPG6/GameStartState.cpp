@@ -13,6 +13,8 @@
 #include "Utils.h" //아스키 아트를 위한 include
 #include "InventoryState.h" // 인벤토리
 
+#include "ArenaReadyState.h"
+
 void GameStartState::Enter()
 {
     Renderer::ClearAllCenterLeftUI();
@@ -34,10 +36,11 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
     // 5. 메뉴 출력 + switch
 
     Renderer::DisplayUI(UIPart::Top, 0, "메인 화면");
-    Renderer::DisplayUI(UIPart::CenterLeft, 9, "1. 던전 입장");
-    Renderer::DisplayUI(UIPart::CenterLeft, 10, "2. 상점 입장");
-    Renderer::DisplayUI(UIPart::CenterLeft, 11, "3. 인벤토리 확인");
-    Renderer::DisplayUI(UIPart::CenterLeft, 12, "4. 킬로그 확인");
+    Renderer::DisplayUI(UIPart::CenterLeft, 8, "1. 던전 입장");
+    Renderer::DisplayUI(UIPart::CenterLeft, 9, "2. 상점 입장");
+    Renderer::DisplayUI(UIPart::CenterLeft, 10, "3. 인벤토리 확인");
+    Renderer::DisplayUI(UIPart::CenterLeft, 11, "4. 킬로그 확인");
+    Renderer::DisplayUI(UIPart::CenterLeft, 12, "5. 아레나 입장");
     switch (ch) {
     case 1: {
         GameManager::GetInstance().SetCurrentState(new BattleState());
@@ -58,6 +61,11 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
 
     case 4:
         GameManager::GetInstance().GetBattleManager()->GetAllKillCount();
+        break;
+
+    case 5:
+        GameManager::GetInstance().SetCurrentState(new ArenaReadyState());
+        Renderer::ClearAllCenterLeftUI();
         break;
     }
 }
