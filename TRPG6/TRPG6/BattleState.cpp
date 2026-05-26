@@ -4,9 +4,8 @@
 #include "ShopBranchState.h"
 #include "ClearState.h"
 #include "DieState.h"
-
-
 #include "Utils.h"
+#include <chrono>
 
 
 
@@ -27,54 +26,69 @@ void BattleState::Enter()
 
 void BattleState::Update(int ch, std::string& lastCommand)
 {
-
-    Renderer::ClearAllCenterLeftUI();
-    // 예시: 상태 진입 후 처음 한 번만 실행되도록 플래그 처리
-
-    if (BattleEnded && !isBattle)
+    if (waiting)
     {
-        if (battleManager.GetIsBoss())
-            GameManager::GetInstance().SetCurrentState(new ClearState());
+        auto now = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - lastActionTime).count();
+
+        if (duration >= 2)
+        {
+            waiting = false; 
+        }
         else
-            GameManager::GetInstance().SetCurrentState(new ShopBranchState());
-        return;
+        {
+            return; 
+        }
     }
 
-    if (isInit && !isBattle)
+    if (!waiting)
     {
-        isBattle = true;
-        GameManager::GetInstance().SetFps(0.333333f);
-    }
-    if (!isInit || player == nullptr)
-    {
-        player = GameManager::GetInstance().GetPlayer();
-        isInit = true;
-    }
-
-    if (battleManager.GetCurrentMonster().IsDead())
-    {
-        battleManager.BattleEnd(player);
-        player->PrintStatus();
-        isBattle = false;
-        BattleEnded = true;
-        return;
-    }
-    else if(player->IsDead())
-    {
+        waiting = true;
+        lastActionTime = std::chrono::steady_clock::now();
         Renderer::ClearAllCenterLeftUI();
-        
-        player->PrintStatus();
-        isBattle = false;
-        BattleEnded = true;
 
-        GameManager::GetInstance().SetCurrentState(new DieState());
-        return;
+        if (BattleEnded && !isBattle)
+        {
+            if (battleManager.GetIsBoss())
+                ChangeState(new ClearState());
+            else
+                ChangeState(new ShopBranchState());
+            return;
+        }
+
+        if (!isInit || player == nullptr)
+        {
+            player = GameManager::GetInstance().GetPlayer();
+            isInit = true;
+        }
+
+        if (battleManager.GetCurrentMonster().IsDead())
+        {
+            battleManager.BattleEnd(player);
+            player->PrintStatus();
+            isBattle = false;
+            BattleEnded = true;
+            return;
+        }
+        else if (player->IsDead())
+        {
+            Renderer::ClearAllCenterLeftUI();
+
+            player->PrintStatus();
+            isBattle = false;
+            BattleEnded = true;
+
+            ChangeState(new DieState());
+            return;
+        }
+
+        TurnCount++;
+        Renderer::DisplayUI(UIPart::CenterLeft, 2, std::to_string(TurnCount) + "턴");
+        battleManager.Battle(player);
+        player->PrintStatus();
     }
 
-    TurnCount++;
-    Renderer::DisplayUI(UIPart::CenterLeft, 2, std::to_string(TurnCount) + "턴");
-    battleManager.Battle(player);
-    player->PrintStatus();
+
 }
 
 void BattleState::Exit()
@@ -82,5 +96,18 @@ void BattleState::Exit()
     isInit = false;
     Renderer::DisplayUI(UIPart::CenterLeft, 1, "배틀에서 나왔습니다.");
     GameManager::GetInstance().SetFps(30.f);
+}
+
+void BattleState::ChangeState(IGameState* newState)
+{
+    GameManager::GetInstance().SetCurrentState(newState);
+    //static auto lastActionTime = std::chrono::steady_clock::now();
+    //auto now = std::chrono::steady_clock::now();
+    //auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - lastActionTime).count();
+    //
+    //if (duration >= 2)
+    //{
+    //    GameManager::GetInstance().SetCurrentState(newState);
+    //}
 }
 
