@@ -28,6 +28,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ArenaBattleState.cpp" />
+    <ClCompile Include="ArenaLobbyState.cpp" />
+    <ClCompile Include="ArenaReadyState.cpp" />
+    <ClCompile Include="ArenaResultState.cpp" />
+    <ClCompile Include="ArenaWaitState.cpp" />
     <ClCompile Include="BattleManager.cpp" />
     <ClCompile Include="BattleState.cpp" />
     <ClCompile Include="BossMonster.cpp" />
@@ -39,6 +44,7 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameStartState.cpp" />
     <ClCompile Include="IGameState.cpp" />
+    <ClCompile Include="InventoryState.cpp" />
     <ClCompile Include="IPCManager.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="main.cpp" />
@@ -54,6 +60,11 @@
     <ClCompile Include="ShopStockState.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ArenaBattleState.h" />
+    <ClInclude Include="ArenaLobbyState.h" />
+    <ClInclude Include="ArenaReadyState.h" />
+    <ClInclude Include="ArenaResultState.h" />
+    <ClInclude Include="ArenaWaitState.h" />
     <ClInclude Include="BattleManager.h" />
     <ClInclude Include="BattleState.h" />
     <ClInclude Include="BossMonster.h" />
@@ -67,6 +78,7 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameStartState.h" />
     <ClInclude Include="IGameState.h" />
+    <ClInclude Include="InventoryState.h" />
     <ClInclude Include="IPCManager.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="NetworkManager.h" />

@@ -5,11 +5,16 @@
 #include "DATABASE.h"
 
 enum class PacketType : uint16_t {
+    // 접속용 패킷
     PKT_C2S_JOIN = 1,   // 클라이언트 -> 서버 (나 접속했어 + 이름 보냄)
     PKT_S2C_JOIN_ACK,   // 서버 -> 클라이언트 (접속 허가 + 서버 이름 보냄)
     PKT_S2C_LEAVE,      // 서버 -> 클라이언트 (누군가 나갔음)
-    PKT_S2C_CHANGE_STATE,      // 서버 -> 클라이언트 (게임 상태 변경)
+
+    // 채팅용 패킷
     PKT_CHAT,
+
+    // 브로드 캐스팅용 패킷
+    PKT_S2C_CHANGE_STATE,      // 서버 -> 클라이언트 (게임 상태 변경)
 };
 
 #pragma pack(push, 1)
@@ -20,6 +25,7 @@ struct PacketHeader {
 };
 #pragma pack(pop)
 
+#pragma region Core Packet
 // 가입 요청 및 승인 공용 구조체 추가
 #pragma pack(push, 1)
 struct Pkt_Join {
@@ -65,3 +71,4 @@ struct Pkt_ChangeState {
     }
 };
 #pragma pack(pop)
+#pragma endregion

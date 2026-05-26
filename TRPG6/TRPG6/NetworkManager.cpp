@@ -5,6 +5,134 @@
 #include "DATABASE.h"
 #include <algorithm>
 
+// 패킷 처리 함수=======================================================================================
+// 여기서 패킷 종류별로 게임 로직 구현하시면 됩니다.
+#pragma region Packet Processing
+void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
+{
+    switch (header->type)
+    {
+        case PacketType::PKT_C2S_JOIN: {
+            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
+
+            // [추가] 방장이 클라이언트의 이름을 맵에 기억해둠
+            {
+                std::lock_guard<std::mutex> lock(clientsMutex);
+                clientNames[sock] = pkt->name;
+            }
+
+            IPCManager::GetInstance().SendPlayerJoin(false, pkt->name);
+
+            Pkt_Join ackPkt(PacketType::PKT_S2C_JOIN_ACK);
+            strcpy_s(ackPkt.name, sizeof(ackPkt.name), Client::playerName.c_str());
+            send(sock, reinterpret_cast<char*>(&ackPkt), ackPkt.header.size, 0);
+            break;
+        }
+
+        case PacketType::PKT_S2C_JOIN_ACK: {
+            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
+            IPCManager::GetInstance().SendPlayerJoin(true, pkt->name);
+            break;
+        }
+
+                                         // [추가] 방장으로부터 누군가 나갔다는 퇴장 패킷을 받았을 때의 처리
+        case PacketType::PKT_S2C_LEAVE: {
+            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
+            IPCManager::GetInstance().SendPlayerLeave(pkt->name); // 로컬 창 갱신
+            break;
+        }
+
+        case PacketType::PKT_CHAT: {
+            Pkt_Chat* pkt = reinterpret_cast<Pkt_Chat*>(header);
+            IPCManager::GetInstance().SendChat(pkt->sender, pkt->message);
+
+            if (Client::isServer)
+            {
+                std::lock_guard<std::mutex> lock(clientsMutex);
+                for (SOCKET clientSock : connectedClients)
+                {
+                    if (clientSock != sock)
+                    {
+                        send(clientSock, reinterpret_cast<char*>(pkt), pkt->header.size, 0);
+                    }
+                }
+            }
+            break;
+        }
+
+        case PacketType::PKT_S2C_CHANGE_STATE: {
+            Pkt_ChangeState* pkt = reinterpret_cast<Pkt_ChangeState*>(header);
+
+            if (!Client::isServer) // 방지책: 방장 본인은 이중 전환 방지
+            {
+                if (pkt->targetState == EGameState::Start)
+                {
+                    IPCManager::GetInstance().SendLog("[네트워크] 방장이 게임을 시작했습니다. 인게임으로 진입합니다.");
+                    GameManager::GetInstance().SetCurrentState(new GameStartState());
+                }
+            }
+            break;
+        }
+    }
+}
+#pragma endregion
+
+// 패킷 전송 함수=======================================================================================
+#pragma region Packet Sending Functions
+void NetworkManager::SendChatPacket(const std::string& sender, const std::string& message)
+{
+    Pkt_Chat pkt;
+    // 고정 배열 버퍼 오버플로우 방지 복사
+    std::string safeSender = sender.substr(0, 31);
+    std::string safeMsg = message.substr(0, 127);
+    std::strcpy(pkt.sender, safeSender.c_str());
+    std::strcpy(pkt.message, safeMsg.c_str());
+
+    // 1. 내 로컬 멀티창에는 즉시 반영
+    IPCManager::GetInstance().SendChat(sender, message);
+
+    // 2. 권한별 네트워크 발송
+    if (Client::isServer)
+    {
+        // 내가 호스트라면 접속 중인 모든 클라이언트에게 뿌림
+        std::lock_guard<std::mutex> lock(clientsMutex);
+        for (SOCKET clientSock : connectedClients)
+        {
+            send(clientSock, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
+        }
+    }
+    else
+    {
+        // 내가 게스트라면 서버에게만 상신
+        if (clientSocket != INVALID_SOCKET)
+        {
+            send(clientSocket, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
+        }
+    }
+}
+#pragma endregion
+
+// 브로드 캐스팅용 함수=======================================================================================
+#pragma region Broadcast Functions
+// 플레이어들의 게임 상태 일괄 전환
+void NetworkManager::BroadcastChangeState(EGameState stateType)
+{
+    // 방장이 아니라면 전파 권한 없음
+    if (!Client::isServer) return;
+
+    Pkt_ChangeState pkt;
+    pkt.targetState = stateType;
+
+    std::lock_guard<std::mutex> lock(clientsMutex);
+    for (SOCKET clientSock : connectedClients)
+    {
+        send(clientSock, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
+    }
+}
+#pragma endregion
+
+// 기존 구현들=======================================================================================
+#pragma region NetworkManager Implementation
 void NetworkManager::Init()
 {
     WSADATA wsaData;
@@ -59,31 +187,6 @@ bool NetworkManager::StartHost(int port)
     return true;
 }
 
-void NetworkManager::AcceptLoop()
-{
-    while (isNetworkRunning)
-    {
-        sockaddr_in clientAddr;
-        int clientAddrLen = sizeof(clientAddr);
-        SOCKET newClient = accept(listenSocket, (SOCKADDR*)&clientAddr, &clientAddrLen);
-
-        if (newClient != INVALID_SOCKET)
-        {
-            char ipBuf[INET_ADDRSTRLEN];
-            inet_ntop(AF_INET, &clientAddr.sin_addr, ipBuf, INET_ADDRSTRLEN);
-
-            {
-                std::lock_guard<std::mutex> lock(clientsMutex);
-                connectedClients.push_back(newClient);
-            }
-            IPCManager::GetInstance().SendLog("[네트워크] 클라이언트 접속 성공! IP: " + std::string(ipBuf));
-
-            // [수정] 접속한 클라이언트 전용 수신 백그라운드 스레드 가동
-            std::thread(&NetworkManager::ReceiveLoop, this, newClient).detach();
-        }
-    }
-}
-
 bool NetworkManager::ConnectToServer(const std::string& ip, int port)
 {
     clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -113,6 +216,31 @@ bool NetworkManager::ConnectToServer(const std::string& ip, int port)
     isNetworkRunning = true;
     std::thread(&NetworkManager::ReceiveLoop, this, clientSocket).detach();
     return true;
+}
+
+void NetworkManager::AcceptLoop()
+{
+    while (isNetworkRunning)
+    {
+        sockaddr_in clientAddr;
+        int clientAddrLen = sizeof(clientAddr);
+        SOCKET newClient = accept(listenSocket, (SOCKADDR*)&clientAddr, &clientAddrLen);
+
+        if (newClient != INVALID_SOCKET)
+        {
+            char ipBuf[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &clientAddr.sin_addr, ipBuf, INET_ADDRSTRLEN);
+
+            {
+                std::lock_guard<std::mutex> lock(clientsMutex);
+                connectedClients.push_back(newClient);
+            }
+            IPCManager::GetInstance().SendLog("[네트워크] 클라이언트 접속 성공! IP: " + std::string(ipBuf));
+
+            // [수정] 접속한 클라이언트 전용 수신 백그라운드 스레드 가동
+            std::thread(&NetworkManager::ReceiveLoop, this, newClient).detach();
+        }
+    }
 }
 
 void NetworkManager::ReceiveLoop(SOCKET sock)
@@ -188,119 +316,4 @@ void NetworkManager::ReceiveLoop(SOCKET sock)
         }
     }
 }
-
-void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
-{
-    switch (header->type)
-    {
-        case PacketType::PKT_C2S_JOIN: {
-            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
-
-            // [추가] 방장이 클라이언트의 이름을 맵에 기억해둠
-            {
-                std::lock_guard<std::mutex> lock(clientsMutex);
-                clientNames[sock] = pkt->name;
-            }
-
-            IPCManager::GetInstance().SendPlayerJoin(false, pkt->name);
-
-            Pkt_Join ackPkt(PacketType::PKT_S2C_JOIN_ACK);
-            strcpy_s(ackPkt.name, sizeof(ackPkt.name), Client::playerName.c_str());
-            send(sock, reinterpret_cast<char*>(&ackPkt), ackPkt.header.size, 0);
-            break;
-        }
-
-        case PacketType::PKT_S2C_JOIN_ACK: {
-            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
-            IPCManager::GetInstance().SendPlayerJoin(true, pkt->name);
-            break;
-        }
-
-                                         // [추가] 방장으로부터 누군가 나갔다는 퇴장 패킷을 받았을 때의 처리
-        case PacketType::PKT_S2C_LEAVE: {
-            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
-            IPCManager::GetInstance().SendPlayerLeave(pkt->name); // 로컬 창 갱신
-            break;
-        }
-
-        case PacketType::PKT_CHAT: {
-            Pkt_Chat* pkt = reinterpret_cast<Pkt_Chat*>(header);
-            IPCManager::GetInstance().SendChat(pkt->sender, pkt->message);
-
-            if (Client::isServer)
-            {
-                std::lock_guard<std::mutex> lock(clientsMutex);
-                for (SOCKET clientSock : connectedClients)
-                {
-                    if (clientSock != sock)
-                    {
-                        send(clientSock, reinterpret_cast<char*>(pkt), pkt->header.size, 0);
-                    }
-                }
-            }
-            break;
-        }
-
-        case PacketType::PKT_S2C_CHANGE_STATE: {
-            Pkt_ChangeState* pkt = reinterpret_cast<Pkt_ChangeState*>(header);
-
-            if (!Client::isServer) // 방지책: 방장 본인은 이중 전환 방지
-            {
-                if (pkt->targetState == EGameState::Start)
-                {
-                    IPCManager::GetInstance().SendLog("[네트워크] 방장이 게임을 시작했습니다. 인게임으로 진입합니다.");
-                    GameManager::GetInstance().SetCurrentState(new GameStartState());
-                }
-            }
-            break;
-        }
-    }
-}
-
-// [추가] 대화 메시지 네트워크 발송 인터페이스
-void NetworkManager::SendChatPacket(const std::string& sender, const std::string& message)
-{
-    Pkt_Chat pkt;
-    // 고정 배열 버퍼 오버플로우 방지 복사
-    std::string safeSender = sender.substr(0, 31);
-    std::string safeMsg = message.substr(0, 127);
-    std::strcpy(pkt.sender, safeSender.c_str());
-    std::strcpy(pkt.message, safeMsg.c_str());
-
-    // 1. 내 로컬 멀티창에는 즉시 반영
-    IPCManager::GetInstance().SendChat(sender, message);
-
-    // 2. 권한별 네트워크 발송
-    if (Client::isServer)
-    {
-        // 내가 호스트라면 접속 중인 모든 클라이언트에게 뿌림
-        std::lock_guard<std::mutex> lock(clientsMutex);
-        for (SOCKET clientSock : connectedClients)
-        {
-            send(clientSock, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
-        }
-    }
-    else
-    {
-        // 내가 게스트라면 서버에게만 상신
-        if (clientSocket != INVALID_SOCKET)
-        {
-            send(clientSocket, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
-        }
-    }
-}
-
-void NetworkManager::BroadcastChangeState(EGameState stateType)
-{
-    // 방장이 아니라면 전파 권한 없음
-    if (!Client::isServer) return;
-
-    Pkt_ChangeState pkt;
-    pkt.targetState = stateType;
-
-    std::lock_guard<std::mutex> lock(clientsMutex);
-    for (SOCKET clientSock : connectedClients)
-    {
-        send(clientSock, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
-    }
-}
+#pragma endregion

@@ -39,6 +39,12 @@ enum class EGameState
 
     GameOver,
     GameClear,
+
+    ArenaReady,
+    ArenaLobby,
+    ArenaBattle,
+    ArenaWait,
+    ArenaResult,
 };
 
 // 네트워크 설정 ===========================================================================

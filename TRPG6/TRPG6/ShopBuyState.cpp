@@ -23,7 +23,6 @@ void ShopBuyState::Update(int ch, std::string& lastCommand)
     }
 
     Renderer::DisplayUI(UIPart::CenterLeft, 0, "==== [ 아이템 구매 ] ====");
-    Renderer::DisplayUI(UIPart::CenterLeft, 1, "현재 보유 골드: " + std::to_string(player->GetMoney()) + "G");
 
     Shop* shop = GameManager::GetInstance().GetShop();
     int size = shop->GetStockSize();
@@ -34,10 +33,10 @@ void ShopBuyState::Update(int ch, std::string& lastCommand)
         int price = shop->GetItemPriceByIndex(i);
         int stock = shop->GetItemStockByIndex(i);
         std::string info = std::to_string(i + 1) + ". " + name + " | 가격: " + std::to_string(price) + "G | 재고: " + std::to_string(stock);
-        Renderer::DisplayUI(UIPart::CenterLeft, i + 3, info);
+        Renderer::DisplayUI(UIPart::CenterLeft, i + 2, info);
     }
 
-    int msgLine = size + 4;
+    int msgLine = size + 3;
     Renderer::DisplayUI(UIPart::CenterLeft, msgLine, "0. 이전으로 돌아가기");
 
     if (size > 0)

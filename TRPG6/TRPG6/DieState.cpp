@@ -14,9 +14,9 @@ void DieState::Enter()
 void DieState::Update(int ch, std::string& lastCommand)
 {
     Renderer::ClearAllCenterLeftUI();
-    Renderer::DisplayUI(UIPart::CenterLeft, 2, "\033[31m==========\033[0m");
+    //Renderer::DisplayUI(UIPart::CenterLeft, 2, "\033[31m==========\033[0m");
     Renderer::DisplayUI(UIPart::CenterLeft, 3, "\033[31mYOU DIED...\033[0m");
-    Renderer::DisplayUI(UIPart::CenterLeft, 4, "\033[31m==========\033[0m");
+    //Renderer::DisplayUI(UIPart::CenterLeft, 4, "\033[31m==========\033[0m");
 
 
     GameManager::GetInstance().GetPlayer()->PrintStatus();
