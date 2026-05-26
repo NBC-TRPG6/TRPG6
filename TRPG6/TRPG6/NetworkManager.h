@@ -73,7 +73,6 @@ public:
 
 #pragma endregion
 
-    void SendArenaReady(); 
 // 브로드 캐스팅 함수=======================================================================================
 public:
     void BroadcastChangeState(EGameState stateType);
