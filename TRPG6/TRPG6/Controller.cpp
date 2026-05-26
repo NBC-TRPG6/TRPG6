@@ -10,7 +10,7 @@ void Controller::ProcessInput() {
         char ch = _getch();
         if (ch == '\r') { // Enter 키
             lastCommand = inputBuffer;		
-			// Renderer::DisplayUI(UIPart::CenterLeft, 12, std::string("Last Command: " + lastCommand)); // 디버깅용
+			// Renderer::DisplayLog(std::string("Last Command: " + lastCommand)); // 디버깅용
             if (lastCommand == "exit") GameManager::GetInstance().SetIsGameRunning(false);
             inputBuffer.clear();
         }

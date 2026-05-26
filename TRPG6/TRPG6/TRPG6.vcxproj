@@ -23,11 +23,15 @@
     <ClCompile Include="BossBattleState.cpp" />
     <ClCompile Include="BossMonster.cpp" />
     <ClCompile Include="Controller.cpp" />
+    <ClCompile Include="GameCreateState.cpp" />
+    <ClCompile Include="GameLobbyState.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameStartState.cpp" />
     <ClCompile Include="IGameState.cpp" />
+    <ClCompile Include="IPCManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Monster.cpp" />
+    <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
   </ItemGroup>
@@ -38,10 +42,15 @@
     <ClInclude Include="Character.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="DATABASE.h" />
+    <ClInclude Include="GameCreateState.h" />
+    <ClInclude Include="GameLobbyState.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameStartState.h" />
     <ClInclude Include="IGameState.h" />
+    <ClInclude Include="IPCManager.h" />
     <ClInclude Include="Monster.h" />
+    <ClInclude Include="NetworkManager.h" />
+    <ClInclude Include="Packet.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Item.h" />
