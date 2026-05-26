@@ -1,5 +1,6 @@
 ﻿#include "GameManager.h"
 #include "GameStartState.h"
+#include "NetworkManager.h"
 #include "Renderer.h"
 #include "Player.h"
 #include "BattleManager.h"
@@ -19,28 +20,25 @@ void GameStartState::Enter()
 {
     Renderer::ClearAllCenterLeftUI();
     IPCManager::GetInstance().SendLog("게임 진입");
-    
     GameManager::GetInstance().SetFps(30.f);
+
+    auto art = LoadImageAsASCII("..\\..\\Resources\\DungeonDoor.png");
+    Renderer::SetTopASCIIImage(art);
 
 }
 
 void GameStartState::Update(int ch, std::string& lastCommand) {
     BattleManager battle;
-    Shop shop;
-    auto art = LoadImageAsASCII("..\\..\\Resources\\DungeonDoor.png");
-    Renderer::SetTopASCIIImage(art);
-
+    Shop shop;  
 
     GameManager::GetInstance().GetPlayer()->PrintStatus();
-
-    // 5. 메뉴 출력 + switch
 
     Renderer::DisplayUI(UIPart::Top, 0, "메인 화면");
     Renderer::DisplayUI(UIPart::CenterLeft, 8, "1. 던전 입장");
     Renderer::DisplayUI(UIPart::CenterLeft, 9, "2. 상점 입장");
     Renderer::DisplayUI(UIPart::CenterLeft, 10, "3. 인벤토리 확인");
     Renderer::DisplayUI(UIPart::CenterLeft, 11, "4. 킬로그 확인");
-    Renderer::DisplayUI(UIPart::CenterLeft, 12, "5. 아레나 입장");
+    Renderer::DisplayUI(UIPart::CenterLeft, 12, "5. 아레나 개최");
     switch (ch) {
     case 1: {
         GameManager::GetInstance().SetCurrentState(new BattleState());
@@ -64,8 +62,14 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
         break;
 
     case 5:
+        if (!Client::isServer)
+        {
+            Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "\033[1;31m아레나는 방장만 개최할 수 있습니다!\033[0m", 2.0f);   
+            break;
+        }
         GameManager::GetInstance().SetCurrentState(new ArenaReadyState());
-        Renderer::ClearAllCenterLeftUI();
+        NetworkManager::GetInstance().BroadcastChangeState(EGameState::ArenaReady);
+        IPCManager::GetInstance().SendLog("\033[1;34m방장이 아레나를 개최했습니다.\033[0m");
         break;
     }
 }
