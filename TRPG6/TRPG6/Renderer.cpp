@@ -14,9 +14,10 @@ std::map<std::pair<UIPart, int>, int> Renderer::timedUIMap;
 // [Static Member Definitions]
 // ==========================================
 
-std::string Renderer::topStatus = "INITIALIZING...";
+std::string Renderer::topStatus = "게임 시작";
 std::vector<std::string> Renderer::leftLines;
 std::vector<std::string> Renderer::rightLines;
+std::vector<std::string> Renderer::screenBuffer;
 
 // 상단 아스키 관련 변수 정의
 std::vector<std::string> Renderer::topAsciiLines;
@@ -84,6 +85,9 @@ void Renderer::Init()
 
     leftLines.assign(middleHeight, "");
     rightLines.assign(middleHeight, "");
+
+    // 화면 전체 크기만큼 스크린 버퍼 할당
+    screenBuffer.assign(SCREEN_HEIGHT, "");
 }
 
 void Renderer::SetTopASCIIImage(const std::vector<std::string>& asciiArt)
@@ -116,42 +120,21 @@ void Renderer::DisplayUI(UIPart part, int lineIdx, const std::string& text)
 
 void Renderer::ForceDisplayUI(UIPart part, int lineIdx, const std::string& text)
 {
-    int targetY = 0, targetX = 0, targetWidth = 0;
-    int infoWidth = 20;
-    int mainWidth = SCREEN_WIDTH - infoWidth - 7;
-
-    // 아스키 이미지(reservedAsciiHeight)와 상태창(3줄)을 합친 뒤 본문이 시작됨
-    int baseMiddleY = 4 + reservedAsciiHeight;
-
-    switch (part)
+    // 1. 기존 DisplayUI처럼 내부 데이터(배열)를 먼저 업데이트합니다.
+    if (part == UIPart::Bottom)
     {
-    case UIPart::Top:
-        // 상태 표시줄이 아스키 이미지 아래로 내려왔으므로 Y좌표 수정
-        targetY = reservedAsciiHeight + 2;
-        targetX = 3; targetWidth = SCREEN_WIDTH - 4;
-        break;
-    case UIPart::CenterLeft:
-        targetY = baseMiddleY + lineIdx;
-        targetX = 3;
-        targetWidth = mainWidth;
-        break;
-    case UIPart::CenterRight:
-        targetY = baseMiddleY + lineIdx;
-        targetX = mainWidth + 6;
-        targetWidth = infoWidth;
-        break;
-    case UIPart::Bottom:
-        targetY = SCREEN_HEIGHT - 1;
-        targetX = 12;
-        targetWidth = SCREEN_WIDTH - 13;
-        break;
+        // Bottom인 경우 입력 버퍼를 업데이트합니다. 
+        // (주의: DATABASE.h의 currentQuery와 동기화가 필요합니다)
+        Client::currentQuery = text;
+    }
+    else
+    {
+        // 나머지 영역은 기존 DisplayUI 로직을 재사용하여 배열에 데이터를 담습니다.
+        DisplayUI(part, lineIdx, text);
     }
 
-    printf("\033[%d;%dH%s", targetY, targetX, CenterText(text, targetWidth).c_str());
-
-    // inputBuffer 원래대로 복구 (DATABASE.h 또는 extern 전역 변수로 존재한다고 가정)
-    printf("\033[%d;%dH", SCREEN_HEIGHT - 1, 12 + (int)inputBuffer.length());
-    fflush(stdout);
+    // 2. 데이터가 갱신되었으므로 전체 화면 버퍼를 다시 그려서 즉시 출력합니다.
+    Render();
 }
 
 void Renderer::ClearAllCenterLeftUI()
@@ -163,24 +146,31 @@ void Renderer::ClearAllCenterLeftUI()
 
 void Renderer::Render()
 {
-    printf("\033[1;1H");
+    // 1. 프레임 버퍼 조합을 위한 단일 문자열 선언 (동적 할당 최소화를 위해 reserve 사용)
+    std::string frameOutput;
+    frameOutput.reserve(SCREEN_WIDTH * SCREEN_HEIGHT * 2);
 
-    // 1. 상단 고정 아스키 이미지 영역 (가장 먼저 출력)
+    // 커서를 맨 위로 초기화
+    frameOutput += "\033[1;1H";
+
+    // 2. 상단 고정 아스키 이미지 영역
     for (int i = 0; i < reservedAsciiHeight; ++i)
     {
         std::string asciiLine = (i < (int)topAsciiLines.size()) ? topAsciiLines[i] : "";
-        printf("%s\n", CenterText(asciiLine, SCREEN_WIDTH).c_str());
+        frameOutput += CenterText(asciiLine, SCREEN_WIDTH) + "\n";
     }
 
-    // 2. 상태 표시줄 섹션 (아스키 이미지 아래에 출력, 3줄)
-    for (int x = 0; x < SCREEN_WIDTH; ++x) printf("="); printf("\n");
-    char topBuffer[256];
-    snprintf(topBuffer, sizeof(topBuffer), "현재 상태: %s | 시간: %.1fs",
-        topStatus.c_str(), FRAMECOUNT / TARGET_FPS);
-    printf("| %s |\n", CenterText(topBuffer, SCREEN_WIDTH - 4).c_str());
-    for (int x = 0; x < SCREEN_WIDTH; ++x) printf("="); printf("\n");
+    // 3. 상태 표시줄 섹션 (3줄)
+    frameOutput += std::string(SCREEN_WIDTH, '=') + "\n";
 
-    // 3. 본문 섹션
+    char topBuffer[256];
+    snprintf(topBuffer, sizeof(topBuffer), "%s | 시간: %.1fs",
+        topStatus.c_str(), FRAMECOUNT / TARGET_FPS);
+
+    frameOutput += "| " + CenterText(topBuffer, SCREEN_WIDTH - 4) + " |\n";
+    frameOutput += std::string(SCREEN_WIDTH, '=') + "\n";
+
+    // 4. 본문 섹션
     int infoWidth = 20;
     int mainWidth = SCREEN_WIDTH - infoWidth - 7;
     int middleHeight = SCREEN_HEIGHT - 7 - reservedAsciiHeight;
@@ -190,23 +180,29 @@ void Renderer::Render()
         std::string lStr = (i < (int)leftLines.size()) ? leftLines[i] : "";
         std::string rStr = (i < (int)rightLines.size()) ? rightLines[i] : "";
 
-        printf("| %s | %s |\n",
+        char lineBuffer[256];
+        snprintf(lineBuffer, sizeof(lineBuffer), "| %s | %s |\n",
             CenterText(lStr, mainWidth).c_str(),
             CenterText(rStr, infoWidth).c_str());
+
+        frameOutput += lineBuffer;
     }
 
-    // 4. 하단 섹션 (3줄)
-    for (int x = 0; x < SCREEN_WIDTH; ++x) printf("="); printf("\n");
+    // 5. 하단 섹션 (3줄)
+    frameOutput += std::string(SCREEN_WIDTH, '=') + "\n";
 
-    printf("\033[K");
-    // inputBuffer 원래대로 복구
-    printf(" [INPUT] : %s_\n", inputBuffer.c_str());
+    // \033[K : 줄 끝까지 남아있는 잔상 삭제
+    std::string promptTag = Client::CHAT_MODE ? "[채팅]" : "[입력]";
+    frameOutput += "\033[K " + promptTag + " : " + inputBuffer + "_\n";
 
-    for (int x = 0; x < SCREEN_WIDTH; ++x) printf("="); printf("\n");
+    frameOutput += std::string(SCREEN_WIDTH, '=') + "\n";
 
-    // 누락되었던 프레임 카운트 증가 복구
-    FRAMECOUNT++;
+    // 6. 완성된 버퍼를 콘솔에 한 번에 출력 (I/O 호출 1회로 단축)
+    printf("%s", frameOutput.c_str());
     fflush(stdout);
+
+    // 프레임 카운트 증가
+    FRAMECOUNT++;
 }
 
 void Renderer::DisplayUITimed(UIPart part, int lineIdx, const std::string& text, float durationSeconds)
