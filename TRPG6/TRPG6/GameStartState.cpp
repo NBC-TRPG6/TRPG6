@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "Player.h"
 #include "BattleManager.h"
+#include "BattleState.h"
 #include "Shop.h"
 #include "IPCManager.h"
 
@@ -26,10 +27,9 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
     Renderer::DisplayUI(UIPart::CenterLeft, 12, "3. 인벤토리 확인");
     switch (ch) {
     case 1: {
-        //GameManager::GetInstance().SetCurrentState(new BattleState());
+        GameManager::GetInstance().SetCurrentState(new BattleState());
         Renderer::ClearAllCenterLeftUI();
-        //battle.SetBattleState(EBattleState::Ready);
-        //battle.StartBattle(*GameManager::GetInstance().GetPlayer());
+
         break;
     }
     case 2:
