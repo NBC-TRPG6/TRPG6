@@ -6,16 +6,20 @@
 #include "DATABASE.h"
 #include "IPCManager.h"
 #include "Player.h"
+#include "Utils.h"
 #include <iostream>
 
 void GameCreateState::Enter()
 {
     Renderer::ClearAllCenterLeftUI();
+
+    auto art = LoadImageAsASCII("..\\..\\Resources\\Create.png");
+    Renderer::SetTopASCIIImage(art);
 }
 
 void GameCreateState::ShowTitle()
 {
-    Renderer::DisplayUI(UIPart::Top, 0, "\033[32m[ TEXTRPG 6 : THE MULTIVERSE ]\033[0m");
+    Renderer::DisplayUI(UIPart::Top, 0, "\033[32m[ Game Create ]\033[0m");
 }
 
 void GameCreateState::ShowMenu()

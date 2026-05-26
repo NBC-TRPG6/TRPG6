@@ -23,7 +23,12 @@ template <typename T>
 class Inventory
 {
 public:
-    Inventory() {}
+    Inventory()
+    {
+        AddItem(new Item("HP 포션", ItemType::HP_POTION, 50, 15), 3);
+        AddItem(new Item("공격력 포션", ItemType::ATTACK_BUFF, 10, 30), 3);
+    }
+
     ~Inventory()
     {
         for (auto& slot : slots)
