@@ -7,4 +7,5 @@
 class GameStartState : public IGameState {
 public:
     void Update(int ch, std::string& lastCommand) override;
+    void Enter() override;
 };
