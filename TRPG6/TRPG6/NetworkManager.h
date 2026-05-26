@@ -12,6 +12,7 @@
 #include <thread>
 #include <vector>
 #include <map>
+#include <set>
 #include <atomic>
 #include <mutex>
 #include "Packet.h"
@@ -42,8 +43,13 @@ public:
 #pragma region Arena
     // C2S: 보상(베팅) 아이템 등록 — ArenaReady / ArenaBetting 단계
     void SendArenaItemRegisterPacket(const std::string& itemName, int count);
-    // C2S: 준비 완료 → 호스트가 해당 플레이어만 ArenaLobby로 전환
-    void SendArenaReadyPacket();
+    // C2S: 로비 도착 신고(로컬은 이미 ArenaLobbyState, 서버에만 알림)
+    void SendArenaLobbyArrivedPacket();
+    // 호스트: 전원(방장+접속자)이 로비 도착 신고를 냈는지
+    bool HasAllPlayersInArenaLobby() const;
+    // 로비 도착 신고한 인원 / 참가 예정 인원(UI 표시용)
+    int GetArenaLobbyArrivedCount() const;
+    int GetExpectedArenaPlayerCount() const;
     // C2S: 전투 입장 스냅샷(스탯+인벤 최대 14슬롯, 가변 길이) 전송
     void SendArenaPlayerSnapshotPacket(Player* player);
     // C2S: 공격 요청(대상 이름만, 공격자는 소켓/호스트 이름으로 판별)
@@ -81,7 +87,10 @@ public:
 private:
     // 소켓 ID로 플레이어 이름을 찾기 위한 컨테이너
     std::map<SOCKET, std::string> clientNames;
-    int readyCount = 0;
+    // 호스트: 로비 도착 신고(PKT_C2S_ARENA_READY)를 보낸 플레이어 이름
+    std::set<std::string> arenaLobbyArrived;
+    // 호스트: 전원 로비 도착 확인 후 1회만 처리했는지
+    bool arenaAllLobbyConfirmed = false;
 
     // 호스트: 플레이어별 C2S 스냅샷 원본(가변 패킷 바이트)
     std::map<std::string, std::vector<char>> arenaPlayerSnapshots;
@@ -99,8 +108,14 @@ private:
 
     // 호스트: PKT_C2S_ARENA_ITEM_REGISTER 처리 → ArenaBattleManager 베팅 등록
     void OnHostArenaItemRegister(SOCKET sock, const Pkt_ArenaItemRegister& pkt);
-    // 호스트: PKT_C2S_ARENA_READY 처리 → SendStateChangeToPlayer(ArenaLobby)
-    void OnHostArenaReady(SOCKET sock);
+    // 호스트: PKT_C2S_ARENA_READY = 로비 도착 신고 기록
+    void OnHostArenaLobbyArrived(SOCKET sock);
+    // 호스트: 전원 로비 도착 시 로그 등 후속 처리
+    void TryConfirmAllPlayersInArenaLobby();
+    // 호스트: 로비 도착 추적 초기화(아레나 Ready 진입·세션 정리 시)
+    void ResetArenaLobbyArrivalTracking();
+    // 호스트+접속자 이름 집합(로비 전원 판정용)
+    std::set<std::string> CollectExpectedArenaPlayerNames() const;
     // 호스트: PKT_C2S_ARENA_PLAYER_SNAPSHOT 저장 후 전원 수집 시 전투 시작
     void OnHostArenaPlayerSnapshot(SOCKET sock, const char* packetData, size_t packetSize);
     // 호스트: PKT_C2S_ARENA_ATTACK 처리 → 데미지·AttackResult·HpSync·Die
@@ -114,6 +129,8 @@ private:
     void ClearArenaSessionData();
     // 호스트: 호스트+접속자 전원 스냅샷 수신 여부
     bool HasAllArenaSnapshots();
+    // 호스트: 생존 1명 이하 시 RankList 브로드캐스트 후 ArenaResult 동기화
+    void TryEndArenaBattleIfNeeded();
 
 
 // 네트워크 매니저의 핵심 기능=======================================================================================
@@ -135,7 +152,7 @@ private:
     SOCKET listenSocket = INVALID_SOCKET;
     SOCKET clientSocket = INVALID_SOCKET; // 내가 클라이언트일 때 사용하는 소켓
     std::vector<SOCKET> connectedClients; // 내가 서버일 때 접속한 클라이언트들
-    std::mutex clientsMutex;
+    mutable std::mutex clientsMutex;
     std::thread acceptThread;
     std::atomic<bool> isNetworkRunning{ false };
 

@@ -23,7 +23,7 @@ enum class PacketType : uint16_t {
 
     // 아레나 C2S (클라이언트 -> 서버)
     PKT_C2S_ARENA_ITEM_REGISTER,   // 보상 아이템 등록 (ArenaReadyState)
-    PKT_C2S_ARENA_READY,           // 아레나 준비 완료 -> 로비 합류 요청
+    PKT_C2S_ARENA_READY,           // 로비 도착 신고(ArenaLobby 진입 후 서버에 알림)
     PKT_C2S_ARENA_PLAYER_SNAPSHOT, // 전투 입장 스냅샷 (스탯 + 인벤, 가변 길이)
     PKT_C2S_ARENA_ATTACK,          // 공격 (targetName만, 공격자는 소켓 기준)
     PKT_C2S_ARENA_ITEM_USE,        // 아이템 사용
