@@ -20,15 +20,7 @@ void ArenaBattleState::Enter()
 
     // 스냅샷 빌드 + 전송 + 로컬 복사
     Player* player = GameManager::GetInstance().GetPlayer();
-    auto buffer = BuildArenaPlayerSnapshotPacket(player);
-    if (!buffer.empty())
-    {
-        // TODO:: 스냅샷 받아오기 NetworkManager::GetInstance().SendArenaSnapshotPacket(buffer);
-
-        auto* hdr = reinterpret_cast<Pkt_ArenaPlayerSnapshotHeader*>(buffer.data());
-        const ArenaItemSlot* items = GetArenaSnapshotItems(hdr);
-        ItemSnapshot.assign(items, items + hdr->itemSlotCount);
-    }
+    NetworkManager::GetInstance().SendArenaPlayerSnapshotPacket(player);
 }
 
 void ArenaBattleState::Update(int ch, std::string& lastCommand)

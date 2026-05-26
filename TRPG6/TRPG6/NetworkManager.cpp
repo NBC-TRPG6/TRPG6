@@ -17,6 +17,7 @@
 
 #pragma region Arena Helpers
 
+// PKT_S2C_CHANGE_STATE 수신 시 EGameState에 맞는 IGameState 인스턴스 생성
 static IGameState* CreateStateFromEGameState(EGameState state)
 {
     switch (state)
@@ -133,7 +134,7 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
 
         case PacketType::PKT_C2S_ARENA_READY: {
             if (!Client::isServer) break;
-            OnHostArenaReady(sock);
+            OnHostArenaLobbyArrived(sock);
             break;
         }
 
@@ -155,10 +156,11 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
             break;
         }
 
-        // ---------- 아레나 S2C (게스트만 처리) ----------
+        // ---------- 아레나 S2C (게스트: ArenaBattleManager 관전 캐시 갱신) ----------
         case PacketType::PKT_S2C_ARENA_PLAYER_LIST: {
             if (Client::isServer) break;
             auto* pkt = reinterpret_cast<Pkt_ArenaPlayerList*>(header);
+            ArenaBattleManager::GetInstance().OnSpectatorPlayerList(*pkt);
             IPCManager::GetInstance().SendLog(
                 "[아레나] 플레이어 목록 수신 (" + std::to_string(pkt->playerCount) + "명)");
             break;
@@ -167,6 +169,7 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         case PacketType::PKT_S2C_ARENA_TURN_START: {
             if (Client::isServer) break;
             auto* pkt = reinterpret_cast<Pkt_ArenaTurnStart*>(header);
+            ArenaBattleManager::GetInstance().OnSpectatorTurnStart(pkt->turnPlayerName);
             IPCManager::GetInstance().SendLog(
                 "[아레나] 턴 시작: " + std::string(pkt->turnPlayerName));
             break;
@@ -175,6 +178,7 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         case PacketType::PKT_S2C_ARENA_ATTACK_RESULT: {
             if (Client::isServer) break;
             auto* pkt = reinterpret_cast<Pkt_ArenaAttackResult*>(header);
+            ArenaBattleManager::GetInstance().OnSpectatorAttackResult(*pkt);
             IPCManager::GetInstance().SendLog(
                 "[아레나] " + std::string(pkt->attackerName) + " -> " +
                 std::string(pkt->targetName) + " 데미지 " + std::to_string(pkt->damage));
@@ -184,6 +188,7 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         case PacketType::PKT_S2C_ARENA_HP_SYNC: {
             if (Client::isServer) break;
             auto* pkt = reinterpret_cast<Pkt_ArenaHpSync*>(header);
+            ArenaBattleManager::GetInstance().OnSpectatorHpSync(*pkt);
             IPCManager::GetInstance().SendLog(
                 "[아레나] HP: " + std::string(pkt->playerName) +
                 " " + std::to_string(pkt->currentHp) + "/" + std::to_string(pkt->maxHp));
@@ -202,6 +207,7 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         case PacketType::PKT_S2C_ARENA_DIE: {
             if (Client::isServer) break;
             auto* pkt = reinterpret_cast<Pkt_ArenaDie*>(header);
+            ArenaBattleManager::GetInstance().OnSpectatorDie(pkt->playerName);
             IPCManager::GetInstance().SendLog("[아레나] 사망: " + std::string(pkt->playerName));
             break;
         }
@@ -209,6 +215,7 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         case PacketType::PKT_S2C_ARENA_RANK_LIST: {
             if (Client::isServer) break;
             auto* pkt = reinterpret_cast<Pkt_ArenaRankList*>(header);
+            ArenaBattleManager::GetInstance().OnSpectatorRankList(*pkt);
             IPCManager::GetInstance().SendLog(
                 "[아레나] 순위 수신 (" + std::to_string(pkt->entryCount) + "명)");
             break;
@@ -221,6 +228,10 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
 #pragma endregion
 
 #pragma region Arena Implementation
+
+// ---------------------------------------------------------------------------
+// 전송·소켓 헬퍼
+// ---------------------------------------------------------------------------
 
 std::string NetworkManager::GetPlayerNameForSocket(SOCKET sock)
 {
@@ -275,8 +286,54 @@ void NetworkManager::ClearArenaSessionData()
 {
     arenaPlayerSnapshots.clear();
     arenaBattleStarted = false;
+    ResetArenaLobbyArrivalTracking();
 }
 
+void NetworkManager::ResetArenaLobbyArrivalTracking()
+{
+    arenaLobbyArrived.clear();
+    arenaAllLobbyConfirmed = false;
+}
+
+std::set<std::string> NetworkManager::CollectExpectedArenaPlayerNames() const
+{
+    std::set<std::string> expected;
+    expected.insert(Client::playerName);
+
+    std::lock_guard<std::mutex> lock(clientsMutex);
+    for (const auto& pair : clientNames)
+    {
+        expected.insert(pair.second);
+    }
+    return expected;
+}
+
+int NetworkManager::GetExpectedArenaPlayerCount() const
+{
+    return static_cast<int>(CollectExpectedArenaPlayerNames().size());
+}
+
+int NetworkManager::GetArenaLobbyArrivedCount() const
+{
+    return static_cast<int>(arenaLobbyArrived.size());
+}
+
+bool NetworkManager::HasAllPlayersInArenaLobby() const
+{
+    const std::set<std::string> expected = CollectExpectedArenaPlayerNames();
+    if (expected.empty()) return false;
+
+    for (const std::string& name : expected)
+    {
+        if (arenaLobbyArrived.find(name) == arenaLobbyArrived.end())
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+// 호스트 이름 + clientNames 전원이 arenaPlayerSnapshots에 있는지 확인
 bool NetworkManager::HasAllArenaSnapshots()
 {
     std::set<std::string> expected;
@@ -299,6 +356,10 @@ bool NetworkManager::HasAllArenaSnapshots()
     return true;
 }
 
+// ---------------------------------------------------------------------------
+// 호스트 C2S 처리
+// ---------------------------------------------------------------------------
+
 void NetworkManager::OnHostArenaItemRegister(SOCKET sock, const Pkt_ArenaItemRegister& pkt)
 {
     std::string playerName = GetPlayerNameForSocket(sock);
@@ -308,11 +369,34 @@ void NetworkManager::OnHostArenaItemRegister(SOCKET sock, const Pkt_ArenaItemReg
         std::string(pkt.itemName) + " (x" + std::to_string(pkt.amount) + ")");
 }
 
-void NetworkManager::OnHostArenaReady(SOCKET sock)
+void NetworkManager::OnHostArenaLobbyArrived(SOCKET sock)
 {
-    std::string playerName = GetPlayerNameForSocket(sock);
-    SendStateChangeToPlayer(playerName, EGameState::ArenaLobby);
-    IPCManager::GetInstance().SendLog("[아레나] " + playerName + " 로비 입장");
+    if (!Client::isServer) return;
+
+    const std::string playerName = GetPlayerNameForSocket(sock);
+    if (arenaLobbyArrived.find(playerName) != arenaLobbyArrived.end())
+    {
+        return;
+    }
+
+    arenaLobbyArrived.insert(playerName);
+
+    const int arrived = GetArenaLobbyArrivedCount();
+    const int expected = GetExpectedArenaPlayerCount();
+    IPCManager::GetInstance().SendLog(
+        "[아레나] " + playerName + " 로비 도착 (" +
+        std::to_string(arrived) + "/" + std::to_string(expected) + ")");
+
+    TryConfirmAllPlayersInArenaLobby();
+}
+
+void NetworkManager::TryConfirmAllPlayersInArenaLobby()
+{
+    if (!Client::isServer || arenaAllLobbyConfirmed) return;
+    if (!HasAllPlayersInArenaLobby()) return;
+
+    arenaAllLobbyConfirmed = true;
+    IPCManager::GetInstance().SendLog("[아레나] 전원 로비 도착 완료. 방장이 전투를 시작할 수 있습니다.");
 }
 
 void NetworkManager::OnHostArenaPlayerSnapshot(SOCKET sock, const char* packetData, size_t packetSize)
@@ -342,6 +426,7 @@ void NetworkManager::OnHostArenaPlayerSnapshot(SOCKET sock, const char* packetDa
     TryStartArenaBattleAfterSnapshots();
 }
 
+// 스냅샷 기준 데미지 계산 -> AttackResult/HpSync/Die 브로드캐스트, 탈락자는 ArenaWait
 void NetworkManager::OnHostArenaAttack(SOCKET sock, const Pkt_ArenaAttack& pkt)
 {
     std::string attackerName = GetPlayerNameForSocket(sock);
@@ -381,8 +466,39 @@ void NetworkManager::OnHostArenaAttack(SOCKET sock, const Pkt_ArenaAttack& pkt)
         SendStateChangeToPlayer(targetName, EGameState::ArenaWait);
     }
 
+    // 생존 1명 이하이면 순위 브로드캐스트 후 전원 ArenaResult
+    TryEndArenaBattleIfNeeded();
+
     IPCManager::GetInstance().SendLog(
         "[아레나] 공격: " + attackerName + " -> " + targetName + " (-" + std::to_string(damage) + ")");
+}
+
+// 참가 2명 이상·생존 1명 이하일 때 RankList 전송 + ApplySyncedStateChange(ArenaResult)
+void NetworkManager::TryEndArenaBattleIfNeeded()
+{
+    if (!Client::isServer || !arenaBattleStarted) return;
+
+    ArenaBattleManager& arena = ArenaBattleManager::GetInstance();
+    if (arena.IsBattleEnded()) return;
+
+    const size_t totalPlayers = arena.GetSpectatorPlayers().size();
+    if (totalPlayers < 2) return;
+
+    const int aliveCount = arena.GetAliveCount();
+    if (aliveCount > 1) return;
+
+    Pkt_ArenaRankList rankPkt;
+    if (!arena.TryBuildRankList(rankPkt))
+    {
+        IPCManager::GetInstance().SendLog("[아레나] 순위 생성 실패");
+        return;
+    }
+
+    BroadcastArenaRankList(rankPkt);
+    arenaBattleStarted = false;
+
+    IPCManager::GetInstance().SendLog("[아레나] 전투 종료 - 결과 화면으로 전환합니다.");
+    ApplySyncedStateChange(EGameState::ArenaResult);
 }
 
 void NetworkManager::OnHostArenaItemUse(SOCKET sock, const Pkt_ArenaItemUse& pkt)
@@ -427,6 +543,7 @@ void NetworkManager::OnHostArenaItemUse(SOCKET sock, const Pkt_ArenaItemUse& pkt
         "[아레나] 아이템 사용: " + userName + " / " + std::string(pkt.itemName));
 }
 
+// 전원 스냅샷 수집 완료 시 PlayerList/TurnStart/ItemList 후 ArenaBattle 시작
 void NetworkManager::TryStartArenaBattleAfterSnapshots()
 {
     if (arenaBattleStarted || !HasAllArenaSnapshots()) return;
@@ -474,12 +591,19 @@ void NetworkManager::TryStartArenaBattleAfterSnapshots()
     }
 
     arenaBattleStarted = true;
+    ResetArenaLobbyArrivalTracking();
     ApplySyncedStateChange(EGameState::ArenaBattle);
 }
 
+// 호스트 로컬 상태 전환 + 모든 게스트에 PKT_S2C_CHANGE_STATE
 void NetworkManager::ApplySyncedStateChange(EGameState stateType)
 {
     if (!Client::isServer) return;
+
+    if (stateType == EGameState::ArenaReady)
+    {
+        ResetArenaLobbyArrivalTracking();
+    }
 
     IGameState* nextState = CreateStateFromEGameState(stateType);
     if (nextState != nullptr)
@@ -490,6 +614,7 @@ void NetworkManager::ApplySyncedStateChange(EGameState stateType)
     BroadcastChangeState(stateType);
 }
 
+// 한 명만 상태 변경(탈락 ArenaWait 등). 호스트 본인은 SetCurrentState, 게스트는 CHANGE_STATE 전송
 void NetworkManager::SendStateChangeToPlayer(const std::string& playerName, EGameState stateType)
 {
     if (!Client::isServer) return;
@@ -511,11 +636,12 @@ void NetworkManager::SendStateChangeToPlayer(const std::string& playerName, EGam
     }
 }
 
-void NetworkManager::SendArenaReadyPacket()
+// C2S: 로컬은 이미 ArenaLobby, 서버에 도착만 알림(상태 전환 없음)
+void NetworkManager::SendArenaLobbyArrivedPacket()
 {
     if (Client::isServer)
     {
-        OnHostArenaReady(INVALID_SOCKET);
+        OnHostArenaLobbyArrived(INVALID_SOCKET);
     }
     else
     {
@@ -524,6 +650,7 @@ void NetworkManager::SendArenaReadyPacket()
     }
 }
 
+// C2S 가변 스냅샷: BuildArenaPlayerSnapshotPacket 후 호스트/게스트 분기
 void NetworkManager::SendArenaPlayerSnapshotPacket(Player* player)
 {
     std::vector<char> buffer = BuildArenaPlayerSnapshotPacket(player);
@@ -570,9 +697,14 @@ void NetworkManager::SendArenaItemUsePacket(const std::string& itemName, const s
     }
 }
 
+// 게스트에 전송 + 호스트 로컬 관전 캐시 갱신(방장은 S2C를 직접 받지 않음)
 void NetworkManager::BroadcastArenaPlayerList(const Pkt_ArenaPlayerList& pkt)
 {
     BroadcastToClients(&pkt, pkt.header.size);
+    if (Client::isServer)
+    {
+        ArenaBattleManager::GetInstance().OnSpectatorPlayerList(pkt);
+    }
 }
 
 void NetworkManager::BroadcastArenaTurnStart(const std::string& turnPlayerName)
@@ -582,23 +714,35 @@ void NetworkManager::BroadcastArenaTurnStart(const std::string& turnPlayerName)
     Pkt_ArenaTurnStart pkt;
     CopyStringToPacketField(pkt.turnPlayerName, sizeof(pkt.turnPlayerName), turnPlayerName);
     BroadcastToClients(&pkt, pkt.header.size);
+    ArenaBattleManager::GetInstance().OnSpectatorTurnStart(turnPlayerName);
 }
 
+// 공격 결과 브로드캐스트 + 호스트 관전 로그 갱신
 void NetworkManager::BroadcastArenaAttackResult(const Pkt_ArenaAttackResult& pkt)
 {
     BroadcastToClients(&pkt, pkt.header.size);
+    if (Client::isServer)
+    {
+        ArenaBattleManager::GetInstance().OnSpectatorAttackResult(pkt);
+    }
 }
 
 void NetworkManager::BroadcastArenaHpSync(const Pkt_ArenaHpSync& pkt)
 {
     BroadcastToClients(&pkt, pkt.header.size);
+    if (Client::isServer)
+    {
+        ArenaBattleManager::GetInstance().OnSpectatorHpSync(pkt);
+    }
 }
 
+// 턴 보유자 인벤 목록(관전 UI에는 미사용, 전투 측 연동용)
 void NetworkManager::BroadcastArenaItemList(const Pkt_ArenaItemList& pkt)
 {
     BroadcastToClients(&pkt, pkt.header.size);
 }
 
+// 사망 통지 + 탈락 순서·관전 캐시 갱신
 void NetworkManager::BroadcastArenaDie(const std::string& playerName)
 {
     if (!Client::isServer) return;
@@ -606,11 +750,17 @@ void NetworkManager::BroadcastArenaDie(const std::string& playerName)
     Pkt_ArenaDie pkt;
     CopyStringToPacketField(pkt.playerName, sizeof(pkt.playerName), playerName);
     BroadcastToClients(&pkt, pkt.header.size);
+    ArenaBattleManager::GetInstance().OnSpectatorDie(playerName);
 }
 
+// 전투 종료 순위. 호스트·게스트 모두 battleEnded 및 rankEntries 갱신
 void NetworkManager::BroadcastArenaRankList(const Pkt_ArenaRankList& pkt)
 {
     BroadcastToClients(&pkt, pkt.header.size);
+    if (Client::isServer)
+    {
+        ArenaBattleManager::GetInstance().OnSpectatorRankList(pkt);
+    }
 }
 
 #pragma endregion
