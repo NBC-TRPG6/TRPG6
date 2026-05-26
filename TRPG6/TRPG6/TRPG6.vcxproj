@@ -47,6 +47,10 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shop.cpp" />
+    <ClCompile Include="ShopBuyState.cpp" />
+    <ClCompile Include="ShopSellState.cpp" />
+    <ClCompile Include="ShopState.cpp" />
+    <ClCompile Include="ShopStockState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BattleManager.h" />
@@ -70,6 +74,11 @@
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Shop.h" />
+    <ClInclude Include="ShopBuyState.h" />
+    <ClInclude Include="ShopSellState.h" />
+    <ClInclude Include="ShopState.h" />
+    <ClInclude Include="ShopStockState.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
