@@ -7,7 +7,7 @@ std::string Monster::MonsterNames[11]{
 };
 std::string Monster::MonsterImageNames[11]{
    "goblin", "orc", "troll", "skeleton", "zombie",
-    "vampire", "werewolf", "spider", "slime", "bandit", "dearagon"
+    "vampire", "werewolf", "spider", "slime", "bandit", "dragon"
 };
 std::string Monster::MonsterItems[11]{
    "고블린 코", "오크 귀", "트롤 발톱", "스켈레톤 뼈", "좀비 살점",
