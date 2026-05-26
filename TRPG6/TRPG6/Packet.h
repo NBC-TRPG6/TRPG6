@@ -36,6 +36,11 @@ enum class PacketType : uint16_t {
     PKT_S2C_ARENA_ITEM_LIST,       // 턴 보유자 아이템 목록 (최대 MAX_ARENA_ITEM_SLOTS)
     PKT_S2C_ARENA_DIE,             // 사망 통지
     PKT_S2C_ARENA_RANK_LIST,       // 아레나 종료 순위
+
+    // 아이템 거래
+    PKT_C2S_TRADE_REQUEST,    // 거래 신청 (클라 -> 서버)
+    PKT_C2S_TRADE_RESPONSE,        // 거래 수락/거절 (클라 -> 서버)
+    PKT_S2C_TRADE_SYNC,            // 거래 목록 동기화 (서버 -> 클라)
 };
 
 #pragma pack(push, 1)
@@ -293,6 +298,80 @@ struct Pkt_ArenaRankList {
     }
 };
 
+#pragma endregion
+#pragma pack(pop)
+
+#pragma region Item
+#pragma pack(push, 1)
+// 거래 하나에 대한 모든 정보를 담는 구조체
+struct TradeInfo
+{
+    uint32_t tradeId;      // 방장(서버)이 부여하는 거래 고유 번호
+    char sender[32];       // 거래를 신청한 사람 이름
+    char receiver[32];     // 거래를 받을 사람 이름
+
+    // [주는 아이템 정보]
+    char itemGiveName[32];
+    int itemGiveType;      // 0: HP_POTION, 1: ATTACK_BUFF, 2: MONSTER_PART
+    int itemGiveValue;
+    int itemGivePrice;
+    int itemGiveCount;     // 몇 개 줄 것인지
+
+    // [받고 싶은 아이템 정보]
+    char itemReceiveName[32];
+    int itemReceiveType;   // 0: HP_POTION, 1: ATTACK_BUFF, 2: MONSTER_PART
+    int itemReceiveValue;
+    int itemReceivePrice;
+    int itemReceiveCount;  // 몇 개 받을 것인지
+
+    // 거래 상태 (0: 대기 중, 1: 수락됨, 2: 거절됨, 3: 취소됨)
+    uint8_t status;
+};
+
+// 거래 신청 패킷 (클라이언트가 서버로 보냄)
+struct Pkt_TradeRequest
+{
+    PacketHeader header;
+    TradeInfo info;
+
+    Pkt_TradeRequest()
+    {
+        header.size = sizeof(Pkt_TradeRequest);
+        header.type = PacketType::PKT_C2S_TRADE_REQUEST;
+        std::memset(&info, 0, sizeof(info));
+        info.status = 0; // 0: 대기 중 (Pending)
+    }
+};
+
+// 거래 응답 패킷 (클라이언트가 서버로 보냄)
+struct Pkt_TradeResponse
+{
+    PacketHeader header;
+    uint32_t tradeId;      // 어떤 거래에 대한 응답인지
+    uint8_t response;      // 1: 수락(Accepted), 2: 거절(Declined)
+
+    Pkt_TradeResponse()
+    {
+        header.size = sizeof(Pkt_TradeResponse);
+        header.type = PacketType::PKT_C2S_TRADE_RESPONSE;
+        tradeId = 0;
+        response = 2; // 기본값 거절
+    }
+};
+
+// 거래 목록 동기화 패킷 (서버가 모든 클라이언트에게 보냄)
+struct Pkt_TradeSync
+{
+    PacketHeader header;
+    TradeInfo info; // 업데이트된 거래 정보
+
+    Pkt_TradeSync()
+    {
+        header.size = sizeof(Pkt_TradeSync);
+        header.type = PacketType::PKT_S2C_TRADE_SYNC;
+        std::memset(&info, 0, sizeof(info));
+    }
+};
 #pragma endregion
 
 #pragma pack(pop)

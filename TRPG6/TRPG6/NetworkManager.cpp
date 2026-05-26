@@ -12,6 +12,7 @@
 #include "IGameState.h"
 #include "DATABASE.h"
 #include "ArenaBattleState.h"
+#include "TradeManager.h"
 #include <algorithm>
 #include <set>
 
@@ -218,6 +219,37 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
             ArenaBattleManager::GetInstance().OnSpectatorRankList(*pkt);
             IPCManager::GetInstance().SendLog(
                 "[아레나] 순위 수신 (" + std::to_string(pkt->entryCount) + "명)");
+            break;
+        }
+
+        case PacketType::PKT_C2S_TRADE_REQUEST:
+        {
+            Pkt_TradeRequest * pkt = reinterpret_cast<Pkt_TradeRequest*>(header);
+            // 방장만 이 패킷을 처리해서 ID를 부여함
+            if (Client::isServer)
+            {
+                TradeManager::GetInstance().Server_HandleRequest(pkt->info);
+            }
+            break;
+        }
+
+        case PacketType::PKT_C2S_TRADE_RESPONSE:
+        {
+            Pkt_TradeResponse * pkt = reinterpret_cast<Pkt_TradeResponse*>(header);
+            // 방장만 이 패킷을 받아서 최종 수락/거절 판정을 내림
+            if (Client::isServer)
+            {
+                TradeManager::GetInstance().Server_HandleResponse(pkt->tradeId, pkt->response);
+            }
+            break;
+        }
+
+        case PacketType::PKT_S2C_TRADE_SYNC:
+        {
+            Pkt_TradeSync * pkt = reinterpret_cast<Pkt_TradeSync*>(header);
+            // 서버가 갱신된 리스트를 보내주면 모두가 내 로컬 리스트를 동기화함
+            // (이 과정에서 상태가 1(성공)로 변했다면 아이템 교환 로직도 같이 실행됨)
+            TradeManager::GetInstance().SyncTrade(pkt->info);
             break;
         }
 
@@ -763,6 +795,49 @@ void NetworkManager::BroadcastArenaRankList(const Pkt_ArenaRankList& pkt)
     }
 }
 
+#pragma endregion
+
+#pragma region Item Implementation
+void NetworkManager::SendTradeRequest(const Pkt_TradeRequest & pkt)
+{
+    if (Client::isServer)
+    {
+        // 내가 방장인데 내가 신청하는 경우: 스스로에게 바로 처리
+        TradeManager::GetInstance().Server_HandleRequest(pkt.info);
+    }
+    else if (clientSocket != INVALID_SOCKET)
+    {
+        // 게스트인 경우: 서버로 전송
+        send(clientSocket, reinterpret_cast<const char*>(&pkt), pkt.header.size, 0);
+    }
+}
+
+void NetworkManager::SendTradeResponse(const Pkt_TradeResponse & pkt)
+{
+    if (Client::isServer)
+    {
+        TradeManager::GetInstance().Server_HandleResponse(pkt.tradeId, pkt.response);
+    }
+    else if (clientSocket != INVALID_SOCKET)
+    {
+        send(clientSocket, reinterpret_cast<const char*>(&pkt), pkt.header.size, 0);
+    }
+}
+
+void NetworkManager::BroadcastTradeSync(const Pkt_TradeSync & pkt)
+{
+    if (!Client::isServer) return; // 방장만 브로드캐스트 가능
+
+    // 모든 클라이언트에게 쏘기
+    std::lock_guard<std::mutex> lock(clientsMutex);
+    for (SOCKET clientSock : connectedClients)
+    {
+        send(clientSock, reinterpret_cast<const char*>(&pkt), pkt.header.size, 0);
+    }
+
+    // 방장 본인의 화면도 즉시 동기화
+    TradeManager::GetInstance().SyncTrade(pkt.info);
+}
 #pragma endregion
 
 #pragma region Packet Sending Functions
