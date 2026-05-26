@@ -7,45 +7,69 @@
 #include "Utils.h"
 
 
+
 void BattleState::Enter()
 {
     auto art = LoadImageAsASCII("..\\..\\Resources\\dragon.png");
     Renderer::SetTopASCIIImage(art);
-    Renderer::DisplayUI(UIPart::CenterLeft, 1, "보스 배틀에 돌입합니다!");
+
     TurnCount = 0;
-    GameManager::GetInstance().SetFps(0.333333f);
-    GameManager::GetInstance().SetPlayer(new Player(Client::playerName));
-    battleManager.StartBattle(*GameManager::GetInstance().GetPlayer());
+    isInit = false;
+    isBattle = false;
+
+    battleManager.SetBattleState(EBattleState::Ready);
+    battleManager.StartBattle(GameManager::GetInstance().GetPlayer());
 }
 
 void BattleState::Update(int ch, std::string& lastCommand)
 {
-    // 예시: 상태 진입 후 처음 한 번만 실행되도록 플래그 처리
-    static bool isInit = false;
 
-    if (!isInit)
+    Renderer::ClearAllCenterLeftUI();
+    // 예시: 상태 진입 후 처음 한 번만 실행되도록 플래그 처리
+
+    if (BattleEnded && !isBattle)
+    {
+        GameManager::GetInstance().SetCurrentState(new GameStartState());
+        return;
+    }
+
+    if (isInit && !isBattle)
+    {
+        isBattle = true;
+        GameManager::GetInstance().SetFps(0.333333f);
+    }
+    if (!isInit || player == nullptr)
     {
         player = GameManager::GetInstance().GetPlayer();
         isInit = true;
     }
 
-    if (player->IsDead() || battleManager.GetCurrentMonster().IsDead())
+    if (battleManager.GetCurrentMonster().IsDead())
     {
-        battleManager.BattleEnd(*player);
-        GameManager::GetInstance().SetCurrentState(new GameStartState());
+        battleManager.BattleEnd(player);
+        player->PrintStatus();
+        isBattle = false;
+        BattleEnded = true;
+        return;
+    }
+    else if(player->IsDead())
+    {
+        player->PrintStatus();
+        isBattle = false;
+        BattleEnded = true;
         return;
     }
 
     TurnCount++;
     Renderer::DisplayUI(UIPart::CenterLeft, 2, std::to_string(TurnCount) + "턴");
-    battleManager.Battle(*player);
-
-
+    battleManager.Battle(player);
+    player->PrintStatus();
 }
 
 void BattleState::Exit()
 {
-        Renderer::DisplayUI(UIPart::CenterLeft, 1, "배틀에서 나왔습니다.");
-        GameManager::GetInstance().SetFps(8.f);
+    isInit = false;
+    Renderer::DisplayUI(UIPart::CenterLeft, 1, "배틀에서 나왔습니다.");
+    GameManager::GetInstance().SetFps(8.f);
 }
 

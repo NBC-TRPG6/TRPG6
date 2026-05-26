@@ -1,5 +1,6 @@
 ﻿#include "BattleManager.h"
 #include "GameManager.h"
+#include "IPCManager.h"
 
 
 
@@ -9,7 +10,7 @@
 /// 플레이어를 넣으면 랜덤몬스터를 불러와 전투를 시작하는 함수입니다.
 /// </summary>
 /// <param name="player">플레이어 캐릭터</param>
-void BattleManager::StartBattle(Player& player)
+void BattleManager::StartBattle(Player* player)
 {
     //dist(0,99)는 분포로, dist(rng)가 된다면 rng의 난수 값을 0~99로 제한합니다.
     std::uniform_int_distribution<int> dist(0, 99);
@@ -25,12 +26,12 @@ void BattleManager::StartBattle(Player& player)
     }
     //전투 상태 전환
     CurrentBattleState = EBattleState::InProgress;
-    OriginalPlayerAttack = player.GetAttack(); //플레이어의 원래 공격력을 저장합니다.
+    OriginalPlayerAttack = player->GetAttack(); //플레이어의 원래 공격력을 저장합니다.
 
-    if (player.GetLevel() > 9)
+    if (player->GetLevel() > 9)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 2, "이제 일반 몬스터는 상대도 안 된다!");
-        Monster DEARAGON(player.GetLevel(), "대래래래래곤~~~", 1.5f); // 레벨과 이름을 기반으로 보스 몬스터 생성
+        Monster DEARAGON(player->GetLevel(), "대래래래래곤~~~", 1.5f); // 레벨과 이름을 기반으로 보스 몬스터 생성
         isBoss = true;
         isPlayerTurn = false; // 보스몬스터의 선공으로 시작
         currentMonster = DEARAGON; // 현재 몬스터로 보스몬스터 설정
@@ -39,7 +40,7 @@ void BattleManager::StartBattle(Player& player)
     else if (nimochance <= 10 && !NimoDefeated)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 2, "!!!!!!!야생의 니모가 나타났다!!!!!!!!");
-        Monster NIMO(player.GetLevel(), "니모", 0.5f); // 체공이 일반몹보다 낮다.
+        Monster NIMO(player->GetLevel(), "니모", 0.5f); // 체공이 일반몹보다 낮다.
         currentMonster = NIMO; // 현재 몬스터로 니모 설정
         isPlayerTurn = false;
         isNIMO = true;
@@ -49,8 +50,8 @@ void BattleManager::StartBattle(Player& player)
     {
 
         //몬스터 생성
-        Monster monster(player.GetLevel(), 1.f);
-        monster.ResetState(player.GetLevel()); //몬스터 상태 초기화
+        Monster monster(player->GetLevel(), 1.f);
+        monster.ResetState(player->GetLevel()); //몬스터 상태 초기화
         currentMonster = monster; //현재 몬스터로 설정
 
 
@@ -67,7 +68,7 @@ void BattleManager::StartBattle(Player& player)
 /// </summary>
 /// <param name="player">플레이어 캐릭터</param>
 /// <param name="monster">몬스터 캐릭터</param>
-void BattleManager::Battle(Player& player)
+void BattleManager::Battle(Player* player)
 {
     if (isBoss)
     {
@@ -93,9 +94,9 @@ void BattleManager::Battle(Player& player)
 /// </summary>
 /// <param name="player">플레이어 캐릭터</param>
 /// <param name="monster">몬스터 캐릭터</param>
-void BattleManager::PlayerTurn(Player& player, Monster& monster)
+void BattleManager::PlayerTurn(Player* player, Monster& monster)
 {
-    Renderer::DisplayUI(UIPart::CenterLeft, 3, player.GetName() + "의 턴!");
+    Renderer::DisplayUI(UIPart::CenterLeft, 3, player->GetName() + "의 턴!");
     std::uniform_int_distribution<int> dist(0, 99); //0~ 99의 균등 분포 생성
 
     if (isNIMO)
@@ -107,43 +108,43 @@ void BattleManager::PlayerTurn(Player& player, Monster& monster)
 
     bool isplayerUseItem = dist(rng) < 20; // 20% 확률로 아이템 사용
 
-    if (player.GetHp() < player.GetMaxHp() / 2 && !isplayerUseItem) // 체력이 절반 이하일 때 아이템 사용 확률 증가
+    if (player->GetHp() < player->GetMaxHp() / 2 && !isplayerUseItem) // 체력이 절반 이하일 때 아이템 사용 확률 증가
     {
         isplayerUseItem = dist(rng) < 50; // 50% 확률로 아이템 사용, 더블체크로 체력이 낮을 때 아이템 사용 확률 증가
     }
 
     if (isplayerUseItem)
     {
-        if (player.GetHp() == player.GetMaxHp()) // 최대 체력이면
+        if (player->GetHp() == player->GetMaxHp()) // 최대 체력이면
         {
-            //player.useItem(AttackPotion) //TODO:: 최대 체력이면 무조건 공격력 포션
+            //player->useItem(AttackPotion) //TODO:: 최대 체력이면 무조건 공격력 포션
         }
-        else if (player.GetHp() < player.GetMaxHp() / 2) // 반피 이하면
+        else if (player->GetHp() < player->GetMaxHp() / 2) // 반피 이하면
         {
-            //player.useItem(HealPotion) //TODO:: 반피 이하면 무조건 회복 포션
+            //player->useItem(HealPotion) //TODO:: 반피 이하면 무조건 회복 포션
         }
         else // 그 사이 (반피 ~ 최대 미만)
         {
             int UseItemType = dist(rng) < 50 ? 0 : 1; // 50% 확률로 공격력 또는 회복 포션
             if (UseItemType == 0)
             {
-                //player.useItem(AttackPotion) //TODO
+                //player->useItem(AttackPotion) //TODO
             }
             else
             {
-                //player.useItem(HealPotion) //TODO
+                //player->useItem(HealPotion) //TODO
             }
         }
 
-        Renderer::DisplayUI(UIPart::CenterLeft, 4, player.GetName() + "이 아이템을 사용했습니다!");
-        // Renderer::DisplayUI(UIPart::CenterLeft, 5, player.GetName() + "이 아이템을 사용했습니다!"); TODO::사용한 아이템 출력
+        Renderer::DisplayUI(UIPart::CenterLeft, 4, player->GetName() + "이 아이템을 사용했습니다!");
+        // Renderer::DisplayUI(UIPart::CenterLeft, 5, player->GetName() + "이 아이템을 사용했습니다!"); TODO::사용한 아이템 출력
 
         return; // 아이템 사용 후 공격하지 않고 턴 종료
     }
 
 
 
-    int PAttackDamage = player.GetAttack(); //플레이어 공격력 저장
+    int PAttackDamage = player->GetAttack(); //플레이어 공격력 저장
     if (dist(rng) < 10) // 10% 확률로 크리티컬 히트
     {
         PAttackDamage *= 2;
@@ -173,7 +174,7 @@ void BattleManager::PlayerTurn(Player& player, Monster& monster)
 /// </summary>
 /// <param name="player">플레이어 캐릭터</param>
 /// <param name="monster">몬스터 캐릭터</param>
-void BattleManager::MonsterTurn(Player& player, Monster& monster)
+void BattleManager::MonsterTurn(Player* player, Monster& monster)
 {
 
     if (isNIMO)
@@ -197,18 +198,18 @@ void BattleManager::MonsterTurn(Player& player, Monster& monster)
     }
 
     //플레이어 체력 변경
-    player.SetHp(player.GetHp() - MAttackDamage);
-    Renderer::DisplayUI(UIPart::CenterLeft, 5, player.GetName() + "의 체력이" + std::to_string(MAttackDamage) + "만큼 달았습니다!");
+    player->SetHp(player->GetHp() - MAttackDamage);
+    Renderer::DisplayUI(UIPart::CenterLeft, 5, player->GetName() + "의 체력이" + std::to_string(MAttackDamage) + "만큼 달았습니다!");
 
     //플레이어 사망 여부 확인
-    if (player.GetHp() <= 0)
+    if (player->GetHp() <= 0)
     {
-        player.SetHp(0);
-        Renderer::DisplayUI(UIPart::CenterLeft, 6, player.GetName() + "가 쓰러졌습니다!");
+        player->SetHp(0);
+        Renderer::DisplayUI(UIPart::CenterLeft, 6, player->GetName() + "가 쓰러졌습니다!");
     }
     else //안죽었다면
     {
-        Renderer::DisplayUI(UIPart::CenterLeft, 6, player.GetName() + "의 남은 체력" + std::to_string(player.GetHp()));
+        Renderer::DisplayUI(UIPart::CenterLeft, 6, player->GetName() + "의 남은 체력" + std::to_string(player->GetHp()));
     }
 
 }
@@ -224,9 +225,10 @@ void BattleManager::MonsterTurn(Player& player, Monster& monster)
 /// </summary>
 /// <param name="player">보상을 받을 플레이어</param>
 /// <param name="monster">처치한 몬스터(돈/아이템 제공)</param>
-void BattleManager::BattleEnd(Player& player)
+void BattleManager::BattleEnd(Player* player)
 {
 
+    KillCount[currentMonster.GetName()]++;
 
     //연속전투 막기
     CurrentBattleState = EBattleState::Locked;
@@ -241,12 +243,12 @@ void BattleManager::BattleEnd(Player& player)
         return;
     }
 
-    player.SetAttack(OriginalPlayerAttack); //플레이어 공격력을 원래대로 돌려놓습니다.
+    player->SetAttack(OriginalPlayerAttack); //플레이어 공격력을 원래대로 돌려놓습니다.
     //몬스터의 소지금 강탈
-    player.SetMoney(player.GetMoney() + currentMonster.GetMoney());
+    player->SetMoney(player->GetMoney() + currentMonster.GetMoney());
 
 
-    player.GainExp(50); // 경험치 50 획득
+    player->GainExp(50); // 경험치 50 획득
 
     if (isNIMO)
     {
@@ -264,12 +266,39 @@ void BattleManager::BattleEnd(Player& player)
 
     /*
     //TODO:: 배틀 후 획득한 것 표시
-    Renderer::DisplayUI(UIPart::CenterLeft, 6, player.GetName() + "의 남은 체력" + std::to_string(player.GetHp()));
-    Renderer::DisplayUI(UIPart::CenterLeft, 6, player.GetName() + "의 남은 체력" + std::to_string(player.GetHp()));
-    Renderer::DisplayUI(UIPart::CenterLeft, 6, player.GetName() + "의 남은 체력" + std::to_string(player.GetHp()));
+    Renderer::DisplayUI(UIPart::CenterLeft, 6, player->GetName() + "의 남은 체력" + std::to_string(player->GetHp()));
+    Renderer::DisplayUI(UIPart::CenterLeft, 6, player->GetName() + "의 남은 체력" + std::to_string(player->GetHp()));
+    Renderer::DisplayUI(UIPart::CenterLeft, 6, player->GetName() + "의 남은 체력" + std::to_string(player->GetHp()));
     */
 
+    CurrentBattleState = EBattleState::Locked;
+}
 
+#pragma endregion
+
+
+#pragma region GETTER
+
+/// <summary>
+/// 한번 이상 처치한 모든 몬스터의 처치횟수를 반환하는 함수
+/// </summary>
+void BattleManager::GetAllKillCount()
+{
+    for (auto& pair : KillCount) {
+        IPCManager::GetInstance().SendLog(pair.first + " :" + std::to_string(pair.second) + "회");
+
+    }
+}
+
+/// <summary>
+/// 몬스터name을 집어넣으면 KillCount 횟수를 반환하는 함수
+/// </summary>
+/// <param name="name">몬스터이름</param>
+/// <returns>처치한횟수</returns>
+int BattleManager::GetKillCount(std::string name)
+{
+    int count = KillCount[name];
+    return count;
 }
 
 #pragma endregion
