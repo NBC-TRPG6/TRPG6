@@ -3,20 +3,22 @@
 #include "IGameState.h"
 #include "BattleManager.h"
 
-class BossBattleState : public IGameState
+class BattleState : public IGameState
 {
 public:
-    virtual ~BossBattleState() override
+    virtual ~BattleState() override
     {
         delete bossMonster;
     }
 
     void Enter() override;
     void Update(int ch, std::string& lastCommand) override;
+    void Exit() override {}
 
 private:
     BattleManager battleManager;
     Monster* bossMonster;
     Player* player;
+    int TurnCount =0;
 };
 
