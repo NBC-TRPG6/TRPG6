@@ -1,4 +1,5 @@
 ﻿#include "Monster.h"
+#include "IPCManager.h"
 
 std::string Monster::MonsterNames[10]{
    "고블린", "오크", "트롤", "스켈레톤", "좀비",
@@ -52,7 +53,7 @@ Monster* Monster::ResetState(int playerLevel)
 
 Item* Monster::DropItem(int percent)
 {
-    int num;
+    int num=0;
     if (Name == "대래래래래곤~~~")
     {
         num = 10;
@@ -66,9 +67,13 @@ Item* Monster::DropItem(int percent)
         }
     }
 
+    IPCManager::GetInstance().SendLog("몬스터 이름: " + Name + ", 드롭 아이템: " + std::to_string(num)+", 드롭 확률: " + std::to_string(percent) + "%");
+
     if (rand() % 100 < percent)
     {
-        return new Item(MonsterItems[num], ItemType::MONSTER_PART, 50, 10);
+        Item* droppedItem = new Item(MonsterItems[num], ItemType::MONSTER_PART, 50, 10);
+        IPCManager::GetInstance().SendLog("아이템 드롭 성공: " + droppedItem->GetName());
+        return droppedItem;
     }
 
     return nullptr;
