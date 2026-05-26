@@ -4,7 +4,7 @@
 void Player::GainExp(int amount)
 {
     Exp += amount;
-    while (Exp > MaxExp && Level < 10) {
+    while (Exp >= MaxExp && Level < 10) {
         Exp -= MaxExp;
         LevelUp();
     }
