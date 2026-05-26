@@ -33,6 +33,7 @@ private:
     bool isPlayerTurn = false;
     bool isNIMO = false;
     bool NimoDefeated = false;
+    Monster currentMonster; // 현재 전투 중인 몬스터
 
 
 public:
@@ -104,7 +105,7 @@ public:
     /// </summary>
     /// <param name="player">보상을 받을 플레이어</param>
     /// <param name="monster">처치한 몬스터(돈/아이템 제공)</param>
-    void BattleEnd(Player& player, Monster& monster);
+    void BattleEnd(Player& player);
 
 #pragma endregion
 
