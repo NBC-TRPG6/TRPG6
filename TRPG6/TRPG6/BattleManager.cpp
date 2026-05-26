@@ -1,7 +1,7 @@
 ﻿#include "BattleManager.h"
 #include "GameManager.h"
 #include "IPCManager.h"
-
+#include "Item.h"
 
 
 #pragma region BeginBattle
@@ -117,6 +117,7 @@ void BattleManager::PlayerTurn(Player* player, Monster& monster)
         else if (player->GetHp() < player->GetMaxHp() / 2) // 반피 이하면
         {
             //player->useItem(HealPotion) //TODO:: 반피 이하면 무조건 회복 포션
+            
         }
         else // 그 사이 (반피 ~ 최대 미만)
         {
@@ -124,6 +125,7 @@ void BattleManager::PlayerTurn(Player* player, Monster& monster)
             if (UseItemType == 0)
             {
                 //player->useItem(AttackPotion) //TODO
+               
             }
             else
             {
