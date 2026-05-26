@@ -43,7 +43,7 @@ void BattleState::Update(int ch, std::string& lastCommand)
     if (isInit && !isBattle)
     {
         isBattle = true;
-        GameManager::GetInstance().SetFps(8.f);
+        GameManager::GetInstance().SetFps(0.333333f);
     }
     if (!isInit || player == nullptr)
     {
