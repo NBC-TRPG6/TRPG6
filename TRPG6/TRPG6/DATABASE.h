@@ -1,4 +1,4 @@
-﻿// 게임 내에서 전역적으로 참조되는 데이터를 넣으세요
+// 게임 내에서 전역적으로 참조되는 데이터를 넣으세요
 // 너무 과도하게 사용하면 객체지향을 위반하니 주의할 것
 
 #pragma once
@@ -47,18 +47,20 @@ enum class EGameState
     ArenaResult,
 };
 
+// 아레나 네트워크 상수 ======================================================================
+inline constexpr int MAX_ARENA_ITEM_SLOTS = 14;
+inline constexpr int MAX_ARENA_PLAYERS = 8;
+
 // 네트워크 설정 ===========================================================================
 namespace Server
 {
     inline int connectedPlayersCount = 1;
-    // inline std::vector<Player> playerList;
-    // inline int currentTurnIndex = 0;
 }
 
 namespace Client
 {
-    inline bool isServer = false; // 현재 내가 방장(Host)인지 여부
-    inline bool CHAT_MODE = false; // 채팅 모드 활성화 여부
+    inline bool isServer = false;
+    inline bool CHAT_MODE = false;
     inline std::string playerName = "Unknown";
-    inline std::string currentQuery = ""; // 외부 사용 시 메인 루프에서 컨트롤러가 정상적으로 작동안할 수 있습니다.
+    inline std::string currentQuery = "";
 }
