@@ -30,7 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BattleManager.cpp" />
-    <ClCompile Include="BossBattleState.cpp" />
+    <ClCompile Include="BattleState.cpp" />
     <ClCompile Include="BossMonster.cpp" />
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="GameCreateState.cpp" />
@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BattleManager.h" />
-    <ClInclude Include="BossBattleState.h" />
+    <ClInclude Include="BattleState.h" />
     <ClInclude Include="BossMonster.h" />
     <ClInclude Include="Character.h" />
     <ClInclude Include="Controller.h" />

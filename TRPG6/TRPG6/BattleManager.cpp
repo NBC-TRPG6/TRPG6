@@ -31,15 +31,16 @@ void BattleManager::StartBattle(Player& player)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 2, "이제 일반 몬스터는 상대도 안 된다!");
         Monster DEARAGON(player.GetLevel(), "대래래래래곤~~~", 1.5f); // 레벨과 이름을 기반으로 보스 몬스터 생성
-        Battle(player, DEARAGON); // 보스 몬스터와 전투 시작
         isBoss = true;
         isPlayerTurn = false; // 보스몬스터의 선공으로 시작
+        currentMonster = DEARAGON; // 현재 몬스터로 보스몬스터 설정
     }
 
     else if (nimochance <= 10 && !NimoDefeated)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 2, "!!!!!!!야생의 니모가 나타났다!!!!!!!!");
         Monster NIMO(player.GetLevel(), "니모", 0.5f); // 체공이 일반몹보다 낮다.
+        currentMonster = NIMO; // 현재 몬스터로 니모 설정
         isPlayerTurn = false;
         isNIMO = true;
 
@@ -50,7 +51,7 @@ void BattleManager::StartBattle(Player& player)
         //몬스터 생성
         Monster monster(player.GetLevel(), 1.f);
         monster.ResetState(player.GetLevel()); //몬스터 상태 초기화
-
+        currentMonster = monster; //현재 몬스터로 설정
 
 
         if (!isPlayerTurn)
@@ -66,7 +67,7 @@ void BattleManager::StartBattle(Player& player)
 /// </summary>
 /// <param name="player">플레이어 캐릭터</param>
 /// <param name="monster">몬스터 캐릭터</param>
-void BattleManager::Battle(Player& player, Monster& monster)
+void BattleManager::Battle(Player& player)
 {
     if (isBoss)
     {
@@ -74,9 +75,9 @@ void BattleManager::Battle(Player& player, Monster& monster)
     }
 
     if (isPlayerTurn)
-        PlayerTurn(player, monster);
+        PlayerTurn(player, currentMonster);
     else
-        MonsterTurn(player, monster);
+        MonsterTurn(player, currentMonster);
     isPlayerTurn = !isPlayerTurn;
 
 }
@@ -100,7 +101,7 @@ void BattleManager::PlayerTurn(Player& player, Monster& monster)
     if (isNIMO)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 3, "!!!!!귀여운 강아지를 처치하셧습니다!!!!!!");
-        BattleEnd(player, monster);
+        BattleEnd(player);
         return;
     }
 
@@ -223,7 +224,7 @@ void BattleManager::MonsterTurn(Player& player, Monster& monster)
 /// </summary>
 /// <param name="player">보상을 받을 플레이어</param>
 /// <param name="monster">처치한 몬스터(돈/아이템 제공)</param>
-void BattleManager::BattleEnd(Player& player, Monster& monster)
+void BattleManager::BattleEnd(Player& player)
 {
 
 
@@ -242,7 +243,7 @@ void BattleManager::BattleEnd(Player& player, Monster& monster)
 
     player.SetAttack(OriginalPlayerAttack); //플레이어 공격력을 원래대로 돌려놓습니다.
     //몬스터의 소지금 강탈
-    player.SetMoney(player.GetMoney() + monster.GetMoney());
+    player.SetMoney(player.GetMoney() + currentMonster.GetMoney());
 
 
     player.GainExp(50); // 경험치 50 획득
@@ -255,7 +256,7 @@ void BattleManager::BattleEnd(Player& player, Monster& monster)
     }
 
 
-    Item* item = monster.DropItem(); //30%확률로 아이템 드랍
+    Item* item = currentMonster.DropItem(); //30%확률로 아이템 드랍
 
     //TODO:: 몬스터가 주는 아이템을 플레이어 인벤토리에 추가(함수 필요, 내함수 X)
 

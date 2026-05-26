@@ -31,6 +31,7 @@ private:
     bool isPlayerTurn = false;
     bool isNIMO = false;
     bool NimoDefeated = false;
+    Monster currentMonster; // 현재 전투 중인 몬스터를 저장하는 변수입니다.
 
 public:
 
@@ -70,7 +71,7 @@ public:
     /// </summary>
     /// <param name="player">플레이어 캐릭터</param>
     /// <param name="monster">몬스터 캐릭터</param>
-    void Battle(Player& player, Monster& monster);
+    void Battle(Player& player);
 
 
     /// <summary>
@@ -98,8 +99,10 @@ public:
     /// </summary>
     /// <param name="player">보상을 받을 플레이어</param>
     /// <param name="monster">처치한 몬스터(돈/아이템 제공)</param>
-    void BattleEnd(Player& player, Monster& monster);
+    void BattleEnd(Player& player);
 
+
+    Monster GetCurrentMonster() const { return currentMonster; }
 #pragma endregion
 
 };
