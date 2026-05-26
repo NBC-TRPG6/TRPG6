@@ -36,6 +36,7 @@ public:
 // 패킷 전송 함수=======================================================================================
 public:
     void SendChatPacket(const std::string& sender, const std::string& message);
+    void SendArenaItemRegisterPacket(const std::string& itemName, int count);
 
 // 브로드 캐스팅 함수=======================================================================================
 public:
