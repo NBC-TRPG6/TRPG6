@@ -14,6 +14,7 @@ void ShopStockState::Enter()
 
 void ShopStockState::Update(int ch, std::string& lastCommand)
 {
+    Renderer::ClearAllCenterLeftUI();
     player = GameManager::GetInstance().GetPlayer();
 
     if (player != nullptr)
@@ -22,10 +23,10 @@ void ShopStockState::Update(int ch, std::string& lastCommand)
     }
 
     Renderer::DisplayUI(UIPart::CenterLeft, 0, "==== [ 상점 재고 목록 ] ====");
-    
-    Shop::GetInstance().ShowStock();
 
-    int stockSize = Shop::GetInstance().GetStockSize();
+    GameManager::GetInstance().GetShop()->ShowStock();
+
+    int stockSize = GameManager::GetInstance().GetShop()->GetStockSize();
     Renderer::DisplayUI(UIPart::CenterLeft, stockSize + 2, "0. 이전으로 돌아가기");
 
     if (ch == 0)

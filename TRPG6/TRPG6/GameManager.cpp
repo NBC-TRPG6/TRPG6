@@ -1,17 +1,25 @@
 ﻿#include "GameManager.h"
 #include "IGameState.h"
 #include "Player.h"
+#include "Shop.h" 
 #include "DATABASE.h"
 
 GameManager::GameManager() {
     // 생성자
     // 게임에서 제일 빨리 실행되는 부분입니다.(UIManager 제외)
+
+    // Shop 할당
+    shop = new Shop();
 }
 
 GameManager::~GameManager() {
     // 파괴자
     delete CURRENT_STATE;
     CURRENT_STATE = nullptr;
+
+    // Shop 해제
+    delete shop;
+    shop = nullptr;
 }
 
 /// <summary>
@@ -68,4 +76,9 @@ void GameManager::SetIsGameRunning(bool isRunning)
 void GameManager::SetFps(double fps)
 {
     ApplyFrameDurationFromFps(fps);
+}
+
+Shop* GameManager::GetShop() const
+{
+    return shop;
 }

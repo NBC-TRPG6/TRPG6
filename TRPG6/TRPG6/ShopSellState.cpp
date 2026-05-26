@@ -67,7 +67,7 @@ void ShopSellState::Update(int ch, std::string& lastCommand)
     {
         std::string targetName = slots[ch - 1].item->GetName();
         int price = slots[ch - 1].item->GetSellPrice();
-        if (Shop::GetInstance().SellItem(player, targetName, 1))
+        if (GameManager::GetInstance().GetShop()->SellItem(player, targetName, 1))
         {
             sellFeedback = "[판매 완료] " + targetName + ": " + std::to_string(price) + "G";
         }

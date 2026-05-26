@@ -25,14 +25,14 @@ void ShopBuyState::Update(int ch, std::string& lastCommand)
     Renderer::DisplayUI(UIPart::CenterLeft, 0, "==== [ 아이템 구매 ] ====");
     Renderer::DisplayUI(UIPart::CenterLeft, 1, "현재 보유 골드: " + std::to_string(player->GetMoney()) + "G");
 
-    Shop& shop = Shop::GetInstance();
-    int size = shop.GetStockSize();
+    Shop* shop = GameManager::GetInstance().GetShop();
+    int size = shop->GetStockSize();
     
     for (int i = 0; i < size; ++i)
     {
-        std::string name = shop.GetItemNameByIndex(i);
-        int price = shop.GetItemPriceByIndex(i);
-        int stock = shop.GetItemStockByIndex(i);
+        std::string name = shop->GetItemNameByIndex(i);
+        int price = shop->GetItemPriceByIndex(i);
+        int stock = shop->GetItemStockByIndex(i);
         std::string info = std::to_string(i + 1) + ". " + name + " | 가격: " + std::to_string(price) + "G | 재고: " + std::to_string(stock);
         Renderer::DisplayUI(UIPart::CenterLeft, i + 3, info);
     }
@@ -56,8 +56,8 @@ void ShopBuyState::Update(int ch, std::string& lastCommand)
     }
     else if (ch >= 1 && ch <= size)
     {
-        std::string targetName = shop.GetItemNameByIndex(ch - 1);
-        if (shop.BuyItem(player, targetName))
+        std::string targetName = shop->GetItemNameByIndex(ch - 1);
+        if (shop->BuyItem(player, targetName))
         {
             buyFeedback = "[구매 완료]";
         }

@@ -15,6 +15,7 @@ void ShopState::Enter()
 
 void ShopState::Update(int ch, std::string& lastCommand)
 {
+    Renderer::ClearAllCenterLeftUI();
     player = GameManager::GetInstance().GetPlayer();
 
     if (player != nullptr)
