@@ -37,7 +37,7 @@ public:
 public:
     void SendChatPacket(const std::string& sender, const std::string& message);
     void SendArenaItemRegisterPacket(const std::string& itemName, int count);
-
+    void SendArenaReady(); 
 // 브로드 캐스팅 함수=======================================================================================
 public:
     void BroadcastChangeState(EGameState stateType);
@@ -46,6 +46,7 @@ public:
 private:
     // 소켓 ID로 플레이어 이름을 찾기 위한 컨테이너
     std::map<SOCKET, std::string> clientNames;
+    int readyCount = 0;
 
 // 네트워크 매니저의 핵심 기능=======================================================================================
 #pragma region Core

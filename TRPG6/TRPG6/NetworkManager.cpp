@@ -4,6 +4,7 @@
 #include "GameStartState.h"
 #include "DATABASE.h"
 #include "ArenaBattleManager.h"
+#include "ArenaBattleState.h"
 #include <algorithm>
 
 // 패킷 처리 함수=======================================================================================
@@ -71,6 +72,27 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
                     IPCManager::GetInstance().SendLog("[네트워크] 방장이 게임을 시작했습니다. 인게임으로 진입합니다.");
                     GameManager::GetInstance().SetCurrentState(new GameStartState());
                 }
+                else if (pkt->targetState == EGameState::ArenaBattle){
+                    GameManager::GetInstance().SetCurrentState(new ArenaBattleState());
+                }
+                    
+            }
+            break;
+        }
+        
+        case PacketType::PKT_C2S_ARENA_READY:{
+            if (!Client::isServer)break; // 호스트만 처리
+            {
+                std::lock_guard<std::mutex> lock(clientsMutex);
+                readyCount++;
+            }
+            IPCManager::GetInstance().SendLog("아레나 준비 완료: " + std::to_string(readyCount)
+                + "/" + std::to_string(Server::connectedPlayersCount));
+
+            // 전원 레디 상태면 ArenaBattle로 상태전환
+            if (readyCount >= Server::connectedPlayersCount) {
+                readyCount = 0;// 초기화
+                BroadcastChangeState(EGameState::ArenaBattle);
             }
             break;
         }
@@ -142,6 +164,26 @@ void NetworkManager::SendArenaItemRegisterPacket(const std::string& itemName, in
             send(clientSocket, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
         }
     }
+}
+
+void NetworkManager::SendArenaReady() {
+    if (Client::isServer) {
+        {
+            std::lock_guard<std::mutex> lock(clientsMutex);
+            readyCount++;
+        }
+        if (readyCount >= Server::connectedPlayersCount) {
+            readyCount = 0;
+            BroadcastChangeState(EGameState::ArenaBattle);
+        }
+    }
+    else {
+        Pkt_ArenaReady pkt;
+        if (clientSocket != INVALID_SOCKET) {
+            send(clientSocket, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
+        }
+    }
+    
 }
 #pragma endregion
 
