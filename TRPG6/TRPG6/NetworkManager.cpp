@@ -3,6 +3,7 @@
 #include "GameManager.h"
 #include "GameStartState.h"
 #include "DATABASE.h"
+#include "ArenaBattleManager.h"
 #include <algorithm>
 
 // 패킷 처리 함수=======================================================================================
@@ -73,6 +74,16 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
             }
             break;
         }
+
+        case PacketType::PKT_C2S_ARENA_ITEM_REGISTER: {
+            Pkt_ArenaItemRegister* pkt = reinterpret_cast<Pkt_ArenaItemRegister*>(header);
+            if (Client::isServer)
+            {
+                ArenaBattleManager::GetInstance().AddBettedItem(pkt->itemName, pkt->amount);
+                IPCManager::GetInstance().SendLog("[아레나] 아이템 등록됨: " + std::string(pkt->itemName) + " (x" + std::to_string(pkt->amount) + ")");
+            }
+            break;
+        }
     }
 }
 #pragma endregion
@@ -104,6 +115,28 @@ void NetworkManager::SendChatPacket(const std::string& sender, const std::string
     else
     {
         // 내가 게스트라면 서버에게만 상신
+        if (clientSocket != INVALID_SOCKET)
+        {
+            send(clientSocket, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
+        }
+    }
+}
+
+void NetworkManager::SendArenaItemRegisterPacket(const std::string& itemName, int count)
+{
+    Pkt_ArenaItemRegister pkt;
+    CopyStringToPacketField(pkt.itemName, sizeof(pkt.itemName), itemName);
+    pkt.amount = count;
+
+    if (Client::isServer)
+    {
+        // 서버(방장)인 경우 바로 ArenaBattleManager에 추가
+        ArenaBattleManager::GetInstance().AddBettedItem(itemName, count);
+        IPCManager::GetInstance().SendLog("[아레나] 호스트 아이템 등록됨: " + itemName + " (x" + std::to_string(count) + ")");
+    }
+    else
+    {
+        // 클라이언트인 경우 서버로 전송
         if (clientSocket != INVALID_SOCKET)
         {
             send(clientSocket, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
