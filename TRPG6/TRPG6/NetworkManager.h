@@ -57,6 +57,10 @@ public:
     // C2S: 아이템 사용(targetName 비우면 자기 자신)
     void SendArenaItemUsePacket(const std::string& itemName, const std::string& targetName);
 
+    // 호스트 전용: 방장 ch==1 — 호스트 스냅샷 + 게스트 스냅샷 요청 브로드캐스트
+    bool RequestAllArenaPlayerSnapshots(Player* hostPlayer);
+    bool IsArenaSnapshotCollecting() const { return arenaSnapshotCollecting; }
+
     // 호스트 전용: 로컬 상태 전환 + 접속 클라이언트 전원에게 PKT_S2C_CHANGE_STATE
     void ApplySyncedStateChange(EGameState stateType);
     // 호스트 전용: 지정 플레이어 1명만 EGameState 전환(탈락 ArenaWait 등)
@@ -96,6 +100,23 @@ private:
     std::map<std::string, std::vector<char>> arenaPlayerSnapshots;
     // 호스트: 전원 스냅샷 수집 후 전투 시작 1회만 수행
     bool arenaBattleStarted = false;
+    // 호스트: 방장 전투 시작 후 스냅샷 수집 중
+    bool arenaSnapshotCollecting = false;
+    // 호스트: 턴 순서(방장 먼저, 이후 접속자 이름 오름차순)
+    std::vector<std::string> arenaTurnOrder;
+    size_t arenaTurnIndex = 0;
+    std::string arenaCurrentTurnPlayer;
+
+    // S2C: 게스트에게 스냅샷 전송 요청
+    void BroadcastArenaSnapshotRequest();
+
+    bool IsArenaPlayerAlive(const std::string& playerName) const;
+    bool IsActorsArenaTurn(const std::string& actorName) const;
+    void BuildArenaTurnOrder();
+    bool BuildArenaItemListPacket(const std::string& ownerName, Pkt_ArenaItemList& out) const;
+    void BroadcastArenaTurnAndItems(const std::string& playerName);
+    void StartFirstArenaTurn();
+    void AdvanceArenaTurnAfterAction();
 
     // 소켓 → 플레이어 이름(INVALID_SOCKET이면 호스트 본인)
     std::string GetPlayerNameForSocket(SOCKET sock);

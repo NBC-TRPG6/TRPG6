@@ -36,6 +36,7 @@ enum class PacketType : uint16_t {
     PKT_S2C_ARENA_ITEM_LIST,       // 턴 보유자 아이템 목록 (최대 MAX_ARENA_ITEM_SLOTS)
     PKT_S2C_ARENA_DIE,             // 사망 통지
     PKT_S2C_ARENA_RANK_LIST,       // 아레나 종료 순위
+    PKT_S2C_ARENA_SNAPSHOT_REQUEST,  // 방장 전투 시작 시 게스트에게 스냅샷 전송 요청
 };
 
 #pragma pack(push, 1)
@@ -184,9 +185,18 @@ struct Pkt_ArenaItemUse {
     }
 };
 
-#pragma endregion
-
 #pragma region Arena S2C
+
+// 방장 전투 시작 시 게스트에게 C2S 스냅샷 전송 요청
+struct Pkt_ArenaSnapshotRequest {
+    PacketHeader header;
+
+    Pkt_ArenaSnapshotRequest()
+    {
+        header.size = sizeof(Pkt_ArenaSnapshotRequest);
+        header.type = PacketType::PKT_S2C_ARENA_SNAPSHOT_REQUEST;
+    }
+};
 
 struct Pkt_ArenaPlayerList {
     PacketHeader header;

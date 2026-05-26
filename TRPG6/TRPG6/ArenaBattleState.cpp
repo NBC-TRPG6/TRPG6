@@ -83,7 +83,6 @@ void ArenaBattleState::Update(int ch, std::string& lastCommand)
             if (slot.count > 0)
             {
                 NetworkManager::GetInstance().SendArenaItemUsePacket(slot.itemName, Client::playerName);
-                slot.count--;
                 CurrentStep = BattleUIStep::WaitingTurn;
             }
             else
@@ -105,6 +104,8 @@ void ArenaBattleState::Exit()
     LastAttackLog = "";
     CurrentStep = BattleUIStep::WaitingTurn;
 }
+
+// S2C 콜백 ================================================
 
 void ArenaBattleState::OnPlayerList(const std::vector<ArenaPlayerListEntry>& playerStats)
 {

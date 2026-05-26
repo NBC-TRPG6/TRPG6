@@ -22,6 +22,11 @@ static ArenaBattleState* GetArenaBattleState()
     return dynamic_cast<ArenaBattleState*>(GameManager::GetInstance().GetCurrentState());
 }
 
+static ArenaLobbyState* GetArenaLobbyState()
+{
+    return dynamic_cast<ArenaLobbyState*>(GameManager::GetInstance().GetCurrentState());
+}
+
 // PKT_S2C_CHANGE_STATE 수신 시 EGameState에 맞는 IGameState 인스턴스 생성
 static IGameState* CreateStateFromEGameState(EGameState state)
 {
@@ -232,6 +237,25 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
             break;
         }
 
+        case PacketType::PKT_S2C_ARENA_SNAPSHOT_REQUEST: {
+            if (Client::isServer) break;
+
+            if (GetArenaLobbyState() == nullptr)
+            {
+                IPCManager::GetInstance().SendLog(
+                    "[아레나] 로비가 아닌 상태에서 스냅샷 요청 무시");
+                break;
+            }
+
+            Player* player = GameManager::GetInstance().GetPlayer();
+            if (player != nullptr)
+            {
+                SendArenaPlayerSnapshotPacket(player);
+                IPCManager::GetInstance().SendLog("[아레나] 방장 요청으로 스냅샷 전송");
+            }
+            break;
+        }
+
         default:
             break;
     }
@@ -297,7 +321,114 @@ void NetworkManager::ClearArenaSessionData()
 {
     arenaPlayerSnapshots.clear();
     arenaBattleStarted = false;
+    arenaSnapshotCollecting = false;
+    arenaTurnOrder.clear();
+    arenaTurnIndex = 0;
+    arenaCurrentTurnPlayer.clear();
     ResetArenaLobbyArrivalTracking();
+}
+
+bool NetworkManager::IsArenaPlayerAlive(const std::string& playerName) const
+{
+    auto it = arenaPlayerSnapshots.find(playerName);
+    if (it == arenaPlayerSnapshots.end()) return false;
+
+    const auto* hdr = reinterpret_cast<const Pkt_ArenaPlayerSnapshotHeader*>(it->second.data());
+    return hdr->hp > 0;
+}
+
+bool NetworkManager::IsActorsArenaTurn(const std::string& actorName) const
+{
+    return arenaBattleStarted
+        && !arenaCurrentTurnPlayer.empty()
+        && actorName == arenaCurrentTurnPlayer
+        && IsArenaPlayerAlive(actorName);
+}
+
+void NetworkManager::BuildArenaTurnOrder()
+{
+    arenaTurnOrder.clear();
+    arenaTurnOrder.push_back(Client::playerName);
+
+    std::vector<std::string> others;
+    for (const auto& pair : arenaPlayerSnapshots)
+    {
+        if (pair.first != Client::playerName)
+        {
+            others.push_back(pair.first);
+        }
+    }
+    std::sort(others.begin(), others.end());
+    arenaTurnOrder.insert(arenaTurnOrder.end(), others.begin(), others.end());
+}
+
+bool NetworkManager::BuildArenaItemListPacket(const std::string& ownerName, Pkt_ArenaItemList& out) const
+{
+    auto it = arenaPlayerSnapshots.find(ownerName);
+    if (it == arenaPlayerSnapshots.end()) return false;
+
+    const auto* hdr = reinterpret_cast<const Pkt_ArenaPlayerSnapshotHeader*>(it->second.data());
+    const ArenaItemSlot* slots = GetArenaSnapshotItems(hdr);
+
+    out = Pkt_ArenaItemList();
+    CopyStringToPacketField(out.ownerName, sizeof(out.ownerName), ownerName);
+    out.slotCount = hdr->itemSlotCount;
+    if (out.slotCount > MAX_ARENA_ITEM_SLOTS) out.slotCount = MAX_ARENA_ITEM_SLOTS;
+
+    for (uint8_t i = 0; i < out.slotCount; ++i)
+    {
+        out.slots[i] = slots[i];
+    }
+    out.header.size = static_cast<uint16_t>(
+        offsetof(Pkt_ArenaItemList, slots) + out.slotCount * sizeof(ArenaItemSlot));
+    return true;
+}
+
+void NetworkManager::BroadcastArenaTurnAndItems(const std::string& playerName)
+{
+    if (!Client::isServer) return;
+
+    arenaCurrentTurnPlayer = playerName;
+    BroadcastArenaTurnStart(playerName);
+
+    Pkt_ArenaItemList itemPkt;
+    if (BuildArenaItemListPacket(playerName, itemPkt))
+    {
+        BroadcastArenaItemList(itemPkt);
+    }
+}
+
+void NetworkManager::StartFirstArenaTurn()
+{
+    if (!Client::isServer || arenaTurnOrder.empty()) return;
+
+    for (size_t i = 0; i < arenaTurnOrder.size(); ++i)
+    {
+        if (IsArenaPlayerAlive(arenaTurnOrder[i]))
+        {
+            arenaTurnIndex = i;
+            BroadcastArenaTurnAndItems(arenaTurnOrder[i]);
+            return;
+        }
+    }
+}
+
+void NetworkManager::AdvanceArenaTurnAfterAction()
+{
+    if (!Client::isServer || arenaTurnOrder.empty()) return;
+
+    const size_t playerCount = arenaTurnOrder.size();
+    for (size_t step = 1; step <= playerCount; ++step)
+    {
+        const size_t nextIdx = (arenaTurnIndex + step) % playerCount;
+        const std::string& candidate = arenaTurnOrder[nextIdx];
+        if (IsArenaPlayerAlive(candidate))
+        {
+            arenaTurnIndex = nextIdx;
+            BroadcastArenaTurnAndItems(candidate);
+            return;
+        }
+    }
 }
 
 void NetworkManager::ResetArenaLobbyArrivalTracking()
@@ -414,6 +545,13 @@ void NetworkManager::OnHostArenaPlayerSnapshot(SOCKET sock, const char* packetDa
 {
     if (packetData == nullptr || packetSize < sizeof(PacketHeader)) return;
 
+    if (sock != INVALID_SOCKET && !arenaSnapshotCollecting)
+    {
+        IPCManager::GetInstance().SendLog(
+            "[아레나] 스냅샷 수집 중이 아니어서 게스트 스냅샷 무시");
+        return;
+    }
+
     const auto* snapHdr = reinterpret_cast<const Pkt_ArenaPlayerSnapshotHeader*>(packetData);
     if (!IsValidArenaSnapshotSize(snapHdr->header.size, snapHdr->itemSlotCount)) return;
     if (snapHdr->header.size > packetSize) return;
@@ -434,7 +572,13 @@ void NetworkManager::OnHostArenaPlayerSnapshot(SOCKET sock, const char* packetDa
         " HP:" + std::to_string(snapHdr->hp) +
         " 슬롯:" + std::to_string(snapHdr->itemSlotCount));
 
+    const bool wasCollecting = arenaSnapshotCollecting;
     TryStartArenaBattleAfterSnapshots();
+
+    if (wasCollecting && arenaBattleStarted)
+    {
+        arenaSnapshotCollecting = false;
+    }
 }
 
 // 스냅샷 기준 데미지 계산 -> AttackResult/HpSync/Die 브로드캐스트, 탈락자는 ArenaWait
@@ -442,6 +586,24 @@ void NetworkManager::OnHostArenaAttack(SOCKET sock, const Pkt_ArenaAttack& pkt)
 {
     std::string attackerName = GetPlayerNameForSocket(sock);
     std::string targetName = pkt.targetName;
+
+    if (!IsActorsArenaTurn(attackerName))
+    {
+        IPCManager::GetInstance().SendLog("[아레나] 공격 실패: 현재 턴이 아닙니다.");
+        return;
+    }
+
+    if (attackerName == targetName)
+    {
+        IPCManager::GetInstance().SendLog("[아레나] 공격 실패: 자신을 공격할 수 없습니다.");
+        return;
+    }
+
+    if (!IsArenaPlayerAlive(targetName))
+    {
+        IPCManager::GetInstance().SendLog("[아레나] 공격 실패: 대상이 이미 탈락했습니다.");
+        return;
+    }
 
     auto attackerIt = arenaPlayerSnapshots.find(attackerName);
     auto targetIt = arenaPlayerSnapshots.find(targetName);
@@ -477,11 +639,13 @@ void NetworkManager::OnHostArenaAttack(SOCKET sock, const Pkt_ArenaAttack& pkt)
         SendStateChangeToPlayer(targetName, EGameState::ArenaWait);
     }
 
-    // 생존 1명 이하이면 순위 브로드캐스트 후 전원 ArenaResult
-    TryEndArenaBattleIfNeeded();
-
     IPCManager::GetInstance().SendLog(
         "[아레나] 공격: " + attackerName + " -> " + targetName + " (-" + std::to_string(damage) + ")");
+
+    TryEndArenaBattleIfNeeded();
+    if (!arenaBattleStarted) return;
+
+    AdvanceArenaTurnAfterAction();
 }
 
 // 참가 2명 이상·생존 1명 이하일 때 RankList 전송 + ApplySyncedStateChange(ArenaResult)
@@ -507,6 +671,9 @@ void NetworkManager::TryEndArenaBattleIfNeeded()
 
     BroadcastArenaRankList(rankPkt);
     arenaBattleStarted = false;
+    arenaCurrentTurnPlayer.clear();
+    arenaTurnOrder.clear();
+    arenaTurnIndex = 0;
 
     IPCManager::GetInstance().SendLog("[아레나] 전투 종료 - 결과 화면으로 전환합니다.");
     ApplySyncedStateChange(EGameState::ArenaResult);
@@ -517,6 +684,12 @@ void NetworkManager::OnHostArenaItemUse(SOCKET sock, const Pkt_ArenaItemUse& pkt
     std::string userName = GetPlayerNameForSocket(sock);
     std::string targetName = pkt.targetName[0] != '\0' ? std::string(pkt.targetName) : userName;
 
+    if (!IsActorsArenaTurn(userName))
+    {
+        IPCManager::GetInstance().SendLog("[아레나] 아이템 사용 실패: 현재 턴이 아닙니다.");
+        return;
+    }
+
     auto userIt = arenaPlayerSnapshots.find(userName);
     if (userIt == arenaPlayerSnapshots.end())
     {
@@ -525,16 +698,32 @@ void NetworkManager::OnHostArenaItemUse(SOCKET sock, const Pkt_ArenaItemUse& pkt
     }
 
     auto* userHdr = reinterpret_cast<Pkt_ArenaPlayerSnapshotHeader*>(userIt->second.data());
-    const ArenaItemSlot* slots = GetArenaSnapshotItems(userHdr);
-    int32_t healAmount = 0;
+    ArenaItemSlot* slots = reinterpret_cast<ArenaItemSlot*>(
+        const_cast<char*>(userIt->second.data()) + ArenaSnapshotHeaderSize());
 
-    for (uint8_t i = 0; i < userHdr->itemSlotCount; ++i)
+    int32_t healAmount = 0;
+    bool foundSlot = false;
+
+    for (uint8_t i = 0; i < userHdr->itemSlotCount && i < MAX_ARENA_ITEM_SLOTS; ++i)
     {
-        if (std::string(slots[i].itemName) == pkt.itemName)
+        if (std::string(slots[i].itemName) != pkt.itemName) continue;
+
+        if (slots[i].count <= 0)
         {
-            healAmount = slots[i].value;
-            break;
+            IPCManager::GetInstance().SendLog("[아레나] 아이템 사용 실패: 개수 없음");
+            return;
         }
+
+        healAmount = slots[i].value;
+        --slots[i].count;
+        foundSlot = true;
+        break;
+    }
+
+    if (!foundSlot)
+    {
+        IPCManager::GetInstance().SendLog("[아레나] 아이템 사용 실패: 보유하지 않음");
+        return;
     }
 
     auto targetIt = arenaPlayerSnapshots.find(targetName);
@@ -550,8 +739,19 @@ void NetworkManager::OnHostArenaItemUse(SOCKET sock, const Pkt_ArenaItemUse& pkt
     hpPkt.maxHp = targetHdr->maxHp;
     BroadcastArenaHpSync(hpPkt);
 
+    Pkt_ArenaItemList itemPkt;
+    if (BuildArenaItemListPacket(userName, itemPkt))
+    {
+        BroadcastArenaItemList(itemPkt);
+    }
+
     IPCManager::GetInstance().SendLog(
         "[아레나] 아이템 사용: " + userName + " / " + std::string(pkt.itemName));
+
+    TryEndArenaBattleIfNeeded();
+    if (!arenaBattleStarted) return;
+
+    AdvanceArenaTurnAfterAction();
 }
 
 // 전원 스냅샷 수집 완료 시 PlayerList/TurnStart/ItemList 후 ArenaBattle 시작
@@ -577,54 +777,20 @@ void NetworkManager::TryStartArenaBattleAfterSnapshots()
     }
     listPkt.playerCount = idx;
 
-    BroadcastArenaPlayerList(listPkt);
-
-    if (!arenaPlayerSnapshots.empty())
-    {
-        const auto& firstPair = arenaPlayerSnapshots.begin();
-        BroadcastArenaTurnStart(firstPair->first);
-
-        const auto* firstHdr = reinterpret_cast<const Pkt_ArenaPlayerSnapshotHeader*>(firstPair->second.data());
-        const ArenaItemSlot* slots = GetArenaSnapshotItems(firstHdr);
-
-        Pkt_ArenaItemList itemPkt;
-        CopyStringToPacketField(itemPkt.ownerName, sizeof(itemPkt.ownerName), firstPair->first);
-        itemPkt.slotCount = firstHdr->itemSlotCount;
-        if (itemPkt.slotCount > MAX_ARENA_ITEM_SLOTS) itemPkt.slotCount = MAX_ARENA_ITEM_SLOTS;
-
-        for (uint8_t i = 0; i < itemPkt.slotCount; ++i)
-        {
-            itemPkt.slots[i] = slots[i];
-        }
-        itemPkt.header.size = static_cast<uint16_t>(
-            offsetof(Pkt_ArenaItemList, slots) + itemPkt.slotCount * sizeof(ArenaItemSlot));
-        BroadcastArenaItemList(itemPkt);
-    }
-
     arenaBattleStarted = true;
+    arenaSnapshotCollecting = false;
     ResetArenaLobbyArrivalTracking();
+
+    // 게스트는 ArenaBattleState일 때만 NotifyArenaBattle*가 동작하므로
+    // CHANGE_STATE를 먼저 보낸 뒤 PlayerList/TurnStart/ItemList를 브로드캐스트한다.
+    BuildArenaTurnOrder();
+
     ApplySyncedStateChange(EGameState::ArenaBattle);
 
+    BroadcastArenaPlayerList(listPkt);
     NotifyArenaBattlePlayerList(listPkt);
-    if (!arenaPlayerSnapshots.empty())
-    {
-        NotifyArenaBattleTurnStart(arenaPlayerSnapshots.begin()->first);
 
-        Pkt_ArenaItemList itemPktNotify;
-        const auto& firstPair = arenaPlayerSnapshots.begin();
-        const auto* firstHdr = reinterpret_cast<const Pkt_ArenaPlayerSnapshotHeader*>(firstPair->second.data());
-        const ArenaItemSlot* slots = GetArenaSnapshotItems(firstHdr);
-        CopyStringToPacketField(itemPktNotify.ownerName, sizeof(itemPktNotify.ownerName), firstPair->first);
-        itemPktNotify.slotCount = firstHdr->itemSlotCount;
-        if (itemPktNotify.slotCount > MAX_ARENA_ITEM_SLOTS) itemPktNotify.slotCount = MAX_ARENA_ITEM_SLOTS;
-        for (uint8_t i = 0; i < itemPktNotify.slotCount; ++i)
-        {
-            itemPktNotify.slots[i] = slots[i];
-        }
-        itemPktNotify.header.size = static_cast<uint16_t>(
-            offsetof(Pkt_ArenaItemList, slots) + itemPktNotify.slotCount * sizeof(ArenaItemSlot));
-        NotifyArenaBattleItemList(itemPktNotify);
-    }
+    StartFirstArenaTurn();
 }
 
 // 호스트 로컬 상태 전환 + 모든 게스트에 PKT_S2C_CHANGE_STATE
@@ -666,6 +832,47 @@ void NetworkManager::SendStateChangeToPlayer(const std::string& playerName, EGam
     {
         SendToPlayerByName(playerName, &changePkt, changePkt.header.size);
     }
+}
+
+bool NetworkManager::RequestAllArenaPlayerSnapshots(Player* hostPlayer)
+{
+    if (!Client::isServer) return false;
+
+    if (arenaSnapshotCollecting)
+    {
+        IPCManager::GetInstance().SendLog("[아레나] 이미 스냅샷 수집 중입니다.");
+        return false;
+    }
+
+    if (!HasAllPlayersInArenaLobby())
+    {
+        IPCManager::GetInstance().SendLog("[아레나] 전원 로비 도착 전입니다.");
+        return false;
+    }
+
+    if (hostPlayer == nullptr)
+    {
+        IPCManager::GetInstance().SendLog("[아레나] 호스트 플레이어 없음");
+        return false;
+    }
+
+    arenaSnapshotCollecting = true;
+    arenaPlayerSnapshots.clear();
+
+    SendArenaPlayerSnapshotPacket(hostPlayer);
+    BroadcastArenaSnapshotRequest();
+
+    IPCManager::GetInstance().SendLog(
+        "[아레나] 스냅샷 수집 시작 (호스트 전송 + 게스트 요청)");
+    return true;
+}
+
+void NetworkManager::BroadcastArenaSnapshotRequest()
+{
+    if (!Client::isServer) return;
+
+    Pkt_ArenaSnapshotRequest pkt;
+    BroadcastToClients(&pkt, pkt.header.size);
 }
 
 // C2S: 로컬은 이미 ArenaLobby, 서버에 도착만 알림(상태 전환 없음)
