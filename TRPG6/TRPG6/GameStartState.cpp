@@ -24,7 +24,7 @@ void GameStartState::Enter()
 void GameStartState::Update(int ch, std::string& lastCommand) {
     BattleManager battle;
     Shop shop;
-    auto art = LoadImageAsASCII("..\\..\\Resources\\Dungeon5.png");
+    auto art = LoadImageAsASCII("..\\..\\Resources\\DungeonDoor.png");
     Renderer::SetTopASCIIImage(art);
 
 
