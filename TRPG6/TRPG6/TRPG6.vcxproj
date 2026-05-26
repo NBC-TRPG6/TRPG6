@@ -26,10 +26,12 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameStartState.cpp" />
     <ClCompile Include="IGameState.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Shop.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BattleManager.h" />

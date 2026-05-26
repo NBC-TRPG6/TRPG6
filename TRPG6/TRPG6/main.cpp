@@ -11,6 +11,8 @@
 #include "Controller.h" // 입력 처리
 #include "GameManager.h" // 게임 상태 관리
 #include "Player.h"
+#include "BattleManager.h"
+#include "Shop.h"
 // 게임상태 ================================================
 #include "IGameState.h"
 #include "GameStartState.h"
@@ -33,7 +35,9 @@ int main() {
     std::cout << "이름을 입력하세요: ";
     std::cin >> name;
 
-    GameManager::GetInstance().SetPlayer(new Player(name));    
+    GameManager::GetInstance().SetPlayer(new Player(name));
+    BattleManager battle;
+    Shop shop;
 #pragma endregion
 
 #pragma region MAIN_LOOP
@@ -63,11 +67,30 @@ int main() {
             }
         }
 
+        
+
         // 5. 상태 변화
 		// 이곳에서 여러분들의 코드가 실제로 진행됩니다.
         IGameState* currentState = GameManager::GetInstance().GetCurrentState();
         if (currentState != nullptr) {
             currentState->Update(ch, lastCommand);
+        }
+        // 5. 메뉴 출력 + switch
+        Renderer::DisplayUI(UIPart::CenterLeft, 10, "1. 던전 입장");
+        Renderer::DisplayUI(UIPart::CenterLeft, 11, "2. 상점 입장");
+        Renderer::DisplayUI(UIPart::CenterLeft, 12, "3. 인벤토리 확인");
+        switch (ch) {
+        case 1: {
+            Renderer::ClearAllCenterLeftUI();
+            battle.SetBattleState(EBattleState::Ready);
+            battle.StartBattle(*GameManager::GetInstance().GetPlayer());
+            break;
+        }
+        case 2:
+            Renderer::ClearAllCenterLeftUI();
+            shop.ShowStock();
+            Renderer::DisplayUI(UIPart::CenterLeft, 5, "1. 구매  2. 판매  3. 나가기");
+            break;
         }
 
         // 6. 명령어 클리어
