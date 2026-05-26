@@ -10,7 +10,6 @@
 void ArenaLobbyState::Enter()
 {
     Renderer::ClearAllCenterLeftUI();
-    NetworkManager::GetInstance().SendArenaReadyPacket();
     auto art = LoadImageAsASCII("..\\..\\Resources\\colosseum2.png");
     Renderer::SetTopASCIIImage(art);
     NetworkManager::GetInstance().SendArenaLobbyArrivedPacket();
