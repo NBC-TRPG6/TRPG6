@@ -20,16 +20,17 @@ void GameStartState::Enter()
 {
     Renderer::ClearAllCenterLeftUI();
     IPCManager::GetInstance().SendLog("게임 진입");
-    GameManager::GetInstance().SetFps(30.f);
-
     auto art = LoadImageAsASCII("..\\..\\Resources\\DungeonDoor.png");
     Renderer::SetTopASCIIImage(art);
+    
+    GameManager::GetInstance().SetFps(30.f);
 
 }
 
 void GameStartState::Update(int ch, std::string& lastCommand) {
     BattleManager battle;
-    Shop shop;  
+    Shop shop;
+
 
     GameManager::GetInstance().GetPlayer()->PrintStatus();
 
