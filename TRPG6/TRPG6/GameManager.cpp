@@ -2,17 +2,35 @@
 #include "IGameState.h"
 #include "Player.h"
 #include "DATABASE.h"
+#include "BattleManager.h"
 
 GameManager::GameManager() {
     // 생성자
     // 게임에서 제일 빨리 실행되는 부분입니다.(UIManager 제외)
+
+
+    battleManager = new BattleManager();
 }
 
 GameManager::~GameManager() {
     // 파괴자
     delete CURRENT_STATE;
     CURRENT_STATE = nullptr;
+    delete battleManager;
+    battleManager = nullptr;
+
 }
+
+
+/// <summary>
+/// 배틀매니저를 반환하는 함수
+/// </summary>
+/// <returns>배틀 매니저를 보낸다.</returns>
+BattleManager* GameManager::GetBattleManager()
+{
+    return battleManager;
+}
+
 
 /// <summary>
 /// 현재 게임 상태 설정

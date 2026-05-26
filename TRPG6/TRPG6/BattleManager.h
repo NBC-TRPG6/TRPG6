@@ -1,7 +1,8 @@
 ﻿#pragma once
 //기본 라이브러리 헤더
 #include <random>
-
+#include <string>
+#include <map>
 //커스텀 라이브러리 헤더
 #include "Player.h"
 #include "Monster.h"
@@ -25,12 +26,14 @@ private:
 
     EBattleState CurrentBattleState = EBattleState::Locked; // 배틀상태 관리용 변수입니다. 배틀이 가능한 상태인지, 진행 중인지 등을 관리합니다.
     std::mt19937 rng{ std::random_device{}() };// random_device는 시드로 사용할 수 있는 난수 생성기입니다. mt19937은 Mersenne Twister 알고리즘을 사용하는 난수 생성기입니다.
+    std::map<std::string, int> KillCount;
     bool isBoss; //보스면 true
     //플레이어의 원래 공격력을 OriginalPlayerAttack 에 저장합니다.
     int OriginalPlayerAttack = 0;
     bool isPlayerTurn = false;
     bool isNIMO = false;
     bool NimoDefeated = false;
+
 
 public:
 
@@ -53,6 +56,9 @@ public:
     /// </summary>
     /// <returns>전투 가능 여부</returns>
     bool GetIsInBattle() const { return CurrentBattleState == EBattleState::InProgress; }
+
+    void GetAllKillCount();
+    int GetKillCount(std::string name);
 
     /// <summary>
     /// 바깥에서 배틀 상태를 설정하는 함수입니다. EBattleState 타입의 값을 넣으면 CurrentBattleState를  변경합니다.

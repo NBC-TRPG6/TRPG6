@@ -226,6 +226,7 @@ void BattleManager::MonsterTurn(Player& player, Monster& monster)
 void BattleManager::BattleEnd(Player& player, Monster& monster)
 {
 
+    KillCount[monster.GetName()]++;
 
     //연속전투 막기
     CurrentBattleState = EBattleState::Locked;
@@ -269,6 +270,34 @@ void BattleManager::BattleEnd(Player& player, Monster& monster)
     */
 
 
+}
+
+#pragma endregion
+
+
+#pragma region GETTER
+
+/// <summary>
+/// 한번 이상 처치한 모든 몬스터의 처치횟수를 반환하는 함수
+/// </summary>
+void BattleManager::GetAllKillCount()
+{
+    int i = 2;
+    for (auto& pair : KillCount) {
+        Renderer::DisplayUI(UIPart::CenterLeft, i, pair.first + " :" + std::to_string(pair.second) + "회");
+
+    }
+}
+
+/// <summary>
+/// 몬스터name을 집어넣으면 KillCount 횟수를 반환하는 함수
+/// </summary>
+/// <param name="name">몬스터이름</param>
+/// <returns>처치한횟수</returns>
+int BattleManager::GetKillCount(std::string name)
+{
+    int count = KillCount[name];
+    return count;
 }
 
 #pragma endregion
