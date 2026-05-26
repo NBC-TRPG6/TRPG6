@@ -70,17 +70,11 @@ void BattleManager::StartBattle(Player* player)
 /// <param name="monster">몬스터 캐릭터</param>
 void BattleManager::Battle(Player* player)
 {
-    if (isBoss)
-    {
-        isPlayerTurn = false;
-    }
-
     if (isPlayerTurn)
         PlayerTurn(player, currentMonster);
     else
         MonsterTurn(player, currentMonster);
     isPlayerTurn = !isPlayerTurn;
-
 }
 
 
@@ -237,10 +231,9 @@ void BattleManager::BattleEnd(Player* player)
     //대래곤 처치시 엔딩
     if (isBoss)
     {
-        Renderer::DisplayUI(UIPart::CenterLeft, 2, "대래래래래래래래래래래래곤을 쓰러뜨렸다!!!!!!!!!!!!!!!!!!!!!!!!!");
-        Renderer::DisplayUI(UIPart::CenterLeft, 3, "십억을 받았습니다.");
-        Renderer::DisplayUI(UIPart::CenterLeft, 4, "-끝-");
-        GameManager::GetInstance().SetIsGameRunning(false); //게임 승리 상태로 전환
+        Renderer::DisplayUI(UIPart::CenterLeft, 2, "대래래래래래래래래래래래곤을 쓰러뜨렸다!!!!!!!!!!!!!!!");
+        Renderer::DisplayUI(UIPart::CenterLeft, 3, "쓰러뜨렸다!!!!!!!!!!!!!");
+        Renderer::DisplayUI(UIPart::CenterLeft, 4, "십억을 받았습니다.");
         return;
     }
 

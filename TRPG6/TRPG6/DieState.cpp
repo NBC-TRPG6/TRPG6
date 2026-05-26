@@ -3,9 +3,12 @@
 #include "GameManager.h"
 #include "Player.h"
 #include <chrono>
+#include "Utils.h"
 
 void DieState::Enter()
 {
+    auto art = LoadImageAsASCII("..\\..\\Resources\\Die.png");
+    Renderer::SetTopASCIIImage(art);
 }
 
 void DieState::Update(int ch, std::string& lastCommand)

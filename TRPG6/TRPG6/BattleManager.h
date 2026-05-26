@@ -61,6 +61,8 @@ public:
     void GetAllKillCount();
     int GetKillCount(std::string name);
 
+    bool GetIsBoss() const { return isBoss; }
+
     /// <summary>
     /// 바깥에서 배틀 상태를 설정하는 함수입니다. EBattleState 타입의 값을 넣으면 CurrentBattleState를  변경합니다.
     /// </summary>

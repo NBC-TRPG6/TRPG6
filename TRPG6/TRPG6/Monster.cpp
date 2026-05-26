@@ -1,9 +1,13 @@
 ﻿#include "Monster.h"
 #include "IPCManager.h"
 
-std::string Monster::MonsterNames[10]{
+std::string Monster::MonsterNames[11]{
    "고블린", "오크", "트롤", "스켈레톤", "좀비",
-   "뱀파이어", "늑대인간", "거미", "슬라임", "산적"
+   "뱀파이어", "늑대인간", "거미", "슬라임", "산적", "대래래래래곤~~~"
+};
+std::string Monster::MonsterImageNames[11]{
+   "goblin", "orc", "troll", "skeleton", "zombie",
+    "vampire", "werewolf", "spider", "slime", "bandit", "dearagon"
 };
 std::string Monster::MonsterItems[11]{
    "고블린 코", "오크 귀", "트롤 발톱", "스켈레톤 뼈", "좀비 살점",
@@ -49,6 +53,16 @@ Monster* Monster::ResetState(int playerLevel)
     Attack = RandomAttack(playerLevel);
     Money = RandomMoney(playerLevel);
     return this;
+}
+
+std::string Monster::GetImageName()
+{
+    for (int i = 0; i < 11; ++i) {
+        if (MonsterNames[i] == Name) {
+            return MonsterImageNames[i];
+        }
+    }
+    return "default_image"; // 일치하는 이름이 없을 경우 기본 이미지 반환
 }
 
 Item* Monster::DropItem(int percent)
