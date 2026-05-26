@@ -132,6 +132,14 @@ private:
     // 호스트: 생존 1명 이하 시 RankList 브로드캐스트 후 ArenaResult 동기화
     void TryEndArenaBattleIfNeeded();
 
+    // S2C 수신·브로드캐스트 시 현재 ArenaBattleState UI 갱신
+    void NotifyArenaBattlePlayerList(const Pkt_ArenaPlayerList& pkt);
+    void NotifyArenaBattleTurnStart(const std::string& turnPlayerName);
+    void NotifyArenaBattleAttackResult(const Pkt_ArenaAttackResult& pkt);
+    void NotifyArenaBattleHpSync(const Pkt_ArenaHpSync& pkt);
+    void NotifyArenaBattleItemList(const Pkt_ArenaItemList& pkt);
+    void NotifyArenaBattleDie(const std::string& playerName);
+
 
 // 네트워크 매니저의 핵심 기능=======================================================================================
 #pragma region Core
