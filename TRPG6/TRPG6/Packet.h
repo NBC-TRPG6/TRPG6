@@ -35,6 +35,7 @@ struct Pkt_Join {
 };
 #pragma pack(pop)
 
+#pragma pack(push, 1)
 // 채팅 전송용 패킷 구조체
 struct Pkt_Chat {
     PacketHeader header;
