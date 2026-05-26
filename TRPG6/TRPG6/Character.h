@@ -21,6 +21,7 @@ public:
     // Getters
     std::string GetName() const { return Name; }
     int GetHp() const { return Hp; }
+    int GetMaxHp() const { return MaxHp; }
     int GetAttack() const { return Attack; }
     int GetMoney() const { return Money; }
 
@@ -30,6 +31,10 @@ public:
         if (hp < 0) Hp = 0;
         else Hp = hp;
     }
+    void SetMaxHp(int Maxhp) {
+        if (Maxhp < 0) Hp = 0;
+        else MaxHp = Maxhp;
+    }
     void SetAttack(int attack) { Attack = (attack < 0) ? 0 : attack; }
     void SetMoney(int money) { Money = (money < 0) ? 0 : money; }
 
@@ -37,6 +42,7 @@ public:
 
 
 protected:
+    int MaxHp;
     int Hp;
     int Attack;
     int Money;
