@@ -31,6 +31,8 @@ public:
     static void DisplayUI(UIPart part, int lineIdx, const std::string& text);
 
 	/// <summary>
+    /// 되도록 사용하지 마세요
+    /// 프레임 계산에 오류가 발생할 수 있습니다.
 	/// 특정 영역의 UI를 강제로 출력하고 싶을 때 사용합니다.
 	/// </summary>
 	/// <param name="part">출력할 UI 영역입니다.</param>
@@ -51,6 +53,12 @@ public:
     /// 매 프레임 호출되어 예약된 UI를 검사하고 지우는 함수
     /// </summary>
     static void UpdateTimedUI();
+
+    /// <summary>
+    /// 외부 프롬프트에 로그를 출력합니다.
+    /// </summary>
+    /// <param name="text">출력할 로그 텍스트</param>
+    static void DisplayLog(const std::string& text);
 
 	// 편의 기능
 
@@ -76,6 +84,7 @@ private:
     static std::string topStatus;
     static std::vector<std::string> leftLines;
     static std::vector<std::string> rightLines;
+    static std::vector<std::string> screenBuffer;
 
     // 비동기 처리용 기록 저장
     static std::map<std::pair<UIPart, int>, int> timedUIMap;
