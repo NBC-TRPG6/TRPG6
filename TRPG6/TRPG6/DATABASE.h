@@ -10,7 +10,7 @@ inline double TARGET_FPS = 30;
 inline std::chrono::steady_clock::duration FRAME_DURATION =
     std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double, std::milli>(1000.0 / TARGET_FPS));
 inline int FRAMECOUNT = 0;
-inline const int SCREEN_WIDTH = 64;
+inline const int SCREEN_WIDTH = 80;
 inline const int TOP_ASCII_MAX_SIZE = SCREEN_WIDTH / 2;
 inline const int SCREEN_HEIGHT = 20 + TOP_ASCII_MAX_SIZE;
 inline bool READ_MODE = false; // 쓰기 상태 전환(숫자 이외 입력 가능)
