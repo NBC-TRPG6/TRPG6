@@ -1,6 +1,4 @@
-﻿#define _CRT_SECURE_NO_WARNINGS // strcpy 보안 경고 무시
-
-#include "NetworkManager.h"
+﻿#include "NetworkManager.h"
 #include "IPCManager.h"
 #include "GameManager.h"
 #include "GameStartState.h"
