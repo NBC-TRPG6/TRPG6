@@ -26,7 +26,7 @@ private:
 
     EBattleState CurrentBattleState = EBattleState::Locked; // 배틀상태 관리용 변수입니다. 배틀이 가능한 상태인지, 진행 중인지 등을 관리합니다.
     std::mt19937 rng{ std::random_device{}() };// random_device는 시드로 사용할 수 있는 난수 생성기입니다. mt19937은 Mersenne Twister 알고리즘을 사용하는 난수 생성기입니다.
-    std::map<std::string, int> KillCount;
+    std::map<std::string, int> KillCount; //Monster.GetName()을 키로 두는 처치회수 map
     bool isBoss; //보스면 true
     //플레이어의 원래 공격력을 OriginalPlayerAttack 에 저장합니다.
     int OriginalPlayerAttack = 0;
