@@ -6,7 +6,7 @@
 
 void ArenaLobbyState::Enter() {
     Renderer::ClearAllCenterLeftUI();
-    NetworkManager::GetInstance().SendArenaReady();
+    NetworkManager::GetInstance().SendArenaReadyPacket();
 }
 
 void ArenaLobbyState::Update(int ch, std::string& lastCommand) {

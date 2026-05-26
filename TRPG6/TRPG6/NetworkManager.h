@@ -115,37 +115,6 @@ private:
     // 호스트: 호스트+접속자 전원 스냅샷 수신 여부
     bool HasAllArenaSnapshots();
 
-    // 호스트: 플레이어별 C2S 스냅샷 원본(가변 패킷 바이트)
-    std::map<std::string, std::vector<char>> arenaPlayerSnapshots;
-    // 호스트: 전원 스냅샷 수집 후 전투 시작 1회만 수행
-    bool arenaBattleStarted = false;
-
-    // 소켓 → 플레이어 이름(INVALID_SOCKET이면 호스트 본인)
-    std::string GetPlayerNameForSocket(SOCKET sock);
-    // 게스트: 서버(방장)로 패킷 1건 전송
-    void SendToServer(const void* data, size_t size);
-    // 호스트: 접속 클라이언트 전원에 전송(exceptSock 제외 가능)
-    void BroadcastToClients(const void* data, size_t size, SOCKET exceptSock = INVALID_SOCKET);
-    // 호스트: 이름으로 소켓 찾아 1명에게만 전송
-    void SendToPlayerByName(const std::string& playerName, const void* data, size_t size);
-
-    // 호스트: PKT_C2S_ARENA_ITEM_REGISTER 처리 → ArenaBattleManager 베팅 등록
-    void OnHostArenaItemRegister(SOCKET sock, const Pkt_ArenaItemRegister& pkt);
-    // 호스트: PKT_C2S_ARENA_READY 처리 → SendStateChangeToPlayer(ArenaLobby)
-    void OnHostArenaReady(SOCKET sock);
-    // 호스트: PKT_C2S_ARENA_PLAYER_SNAPSHOT 저장 후 전원 수집 시 전투 시작
-    void OnHostArenaPlayerSnapshot(SOCKET sock, const char* packetData, size_t packetSize);
-    // 호스트: PKT_C2S_ARENA_ATTACK 처리 → 데미지·AttackResult·HpSync·Die
-    void OnHostArenaAttack(SOCKET sock, const Pkt_ArenaAttack& pkt);
-    // 호스트: PKT_C2S_ARENA_ITEM_USE 처리 → 회복 등 후 HpSync
-    void OnHostArenaItemUse(SOCKET sock, const Pkt_ArenaItemUse& pkt);
-
-    // 호스트: 스냅샷 전원 도착 시 PlayerList·TurnStart·ItemList 후 ArenaBattle
-    void TryStartArenaBattleAfterSnapshots();
-    // 호스트: 아레나 세션 맵/플래그 초기화(Shutdown 등)
-    void ClearArenaSessionData();
-    // 호스트: 호스트+접속자 전원 스냅샷 수신 여부
-    bool HasAllArenaSnapshots();
 
 // 네트워크 매니저의 핵심 기능=======================================================================================
 #pragma region Core
