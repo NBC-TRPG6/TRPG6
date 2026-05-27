@@ -11,7 +11,7 @@
 #include "ShopState.h"
 #include "ShopStockState.h"
 #include "IPCManager.h"
-#include "GoldTradeState.h"
+#include "TradeState.h"
 #include "Utils.h" //아스키 아트를 위한 include
 #include "InventoryState.h" // 인벤토리
 
@@ -76,7 +76,7 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
         break;
 
     case 6:
-        GameManager::GetInstance().SetCurrentState(new GoldTradeState());
+        Renderer::ClearAllCenterLeftUI();
+        GameManager::GetInstance().SetCurrentState(new TradeState());
         break;
-    }
 }
