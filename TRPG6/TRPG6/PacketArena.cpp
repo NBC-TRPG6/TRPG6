@@ -1,4 +1,4 @@
-#include "Packet.h"
+﻿#include "Packet.h"
 #include "Player.h"
 #include "Item.h"
 #include "IPCManager.h"
@@ -113,9 +113,9 @@ void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size
     const ArenaItemSlot* battleSlots = GetArenaSessionApplyBattleSlots(hdr);
     const ArenaItemSlot* rewardSlots = GetArenaSessionApplyRewardSlots(hdr);
 
-    player->SetMaxHp(hdr->maxHp);
-    player->SetHp(hdr->hp);
-    player->SetAttack(hdr->attack);
+    //player->SetMaxHp(hdr->maxHp);
+    //player->SetHp(hdr->hp);
+    //player->SetAttack(hdr->attack);
 
     Inventory<Item>& inventory = player->GetInventory();
 
@@ -137,7 +137,5 @@ void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size
         inventory.AddItem(new Item(itemName, itemType, slot.value, 0), slot.count);
     }
 
-    IPCManager::GetInstance().SendLog(
-        "[아레나] 로컬 플레이어 반영 완료 (HP " + std::to_string(hdr->hp) + "/" +
-        std::to_string(hdr->maxHp) + ", ATK " + std::to_string(hdr->attack) + ")");
+    IPCManager::GetInstance().SendLog("[아레나] 로컬 플레이어 반영 완료");
 }
