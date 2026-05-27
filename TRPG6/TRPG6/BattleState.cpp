@@ -3,6 +3,7 @@
 #include "GameManager.h"
 #include "ShopBranchState.h"
 #include "ClearState.h"
+#include "GameStartState.h"
 #include "DieState.h"
 #include "Utils.h"
 #include <chrono>
@@ -50,7 +51,7 @@ void BattleState::Update(int ch, std::string& lastCommand)
         if (BattleEnded && !isBattle)
         {
             if (battleManager->GetIsBoss())
-                ChangeState(new ClearState());
+                ChangeState(new GameStartState());
             else
                 ChangeState(new ShopBranchState());
             return;
