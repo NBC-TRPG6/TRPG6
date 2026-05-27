@@ -7,7 +7,7 @@
 #include "Utils.h"
 
 void COOPSelectJobState::Enter() {
-    auto art = LoadImageAsASCII("..\\..\\Resources\\dragon.png");
+    auto art = LoadImageAsASCIIColor("..\\..\\Resources\\dragon.png");
     Renderer::SetTopASCIIImage(art);
 }
 

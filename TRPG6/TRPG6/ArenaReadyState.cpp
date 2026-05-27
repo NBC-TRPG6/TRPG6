@@ -7,6 +7,7 @@
 #include "NetworkManager.h"
 #include "IPCManager.h"
 #include "Utils.h"
+#include "Player.h"
 
 
 // 아레나 준비 상태입니다.
@@ -24,6 +25,8 @@ void ArenaReadyState::Update(int ch, std::string& lastCommand) {
     Renderer::DisplayUI(UIPart::Top, 0, "아레나 준비 중");
     Renderer::DisplayUI(UIPart::CenterLeft, 8, "1. 아레나 로비 입장");
     Renderer::DisplayUI(UIPart::CenterLeft, 9, "2. 아이템 베팅");
+
+    GameManager::GetInstance().GetPlayer()->PrintStatus();
 
     if(Client::isServer)
     {

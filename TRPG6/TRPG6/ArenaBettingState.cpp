@@ -47,14 +47,10 @@ void ArenaBettingState::Update(int ch, std::string& lastCommand)
         NetworkManager::GetInstance().SendArenaItemRegisterPacket(
             itemName, 1, itemType, itemValue);
         
-        // 로컬 인벤토리에서 제거
+        // 로컬 인벤토리에서 제거 (무기는 RemoveItem이 장착 해제 포함)
         if (itemType == ItemType::WEAPON)
         {
-            WeaponItem* weapon = dynamic_cast<WeaponItem*>(selectedSlot.item);
-            player->EquipWeapon(weapon);
-
-            // 무기는 장착 해제 후 제거
-            inventory.RemoveItem(itemName, 1);
+            player->RemoveItem(itemName, 1);
         }
         else
         {

@@ -5,9 +5,14 @@
 #include "WeaponTable.h"
 #include "GameStartState.h"
 #include "IPCManager.h"
+#include "Utils.h"
 
 void SmithState::Enter()
 {
+
+    auto art = LoadImageAsASCIIColor("..\\..\\Resources\\Smith.png");
+    Renderer::SetTopASCIIImage(art);
+
     Renderer::ClearAllCenterLeftUI();
     CurrentStep = SmithUIStep::MainMenu;
     FirstSelectedIndex = -1;
@@ -281,9 +286,20 @@ void SmithState::DrawItemList()
             continue;
         }
         const auto& slot = slots[filteredIndices[i]];
-        std::string line = std::to_string(i + 1) + ". "
-            + slot.item->GetName()
-            + " (x" + std::to_string(slot.count) + ")";
+        std::string line = std::to_string(i + 1) + ". ";
+
+        if (slot.item->GetType() == ItemType::WEAPON)
+        {
+            WeaponItem* w = dynamic_cast<WeaponItem*>(slot.item);
+            if (w != nullptr)
+                line += w->GetColoredName();
+            else
+                line += slot.item->GetName(); // 캐스팅 실패 시 일반 이름 출력
+        }
+        else
+        {
+            line += slot.item->GetName();
+        }
         Renderer::DisplayUI(UIPart::CenterLeft, i + 3, line);
     }
 }

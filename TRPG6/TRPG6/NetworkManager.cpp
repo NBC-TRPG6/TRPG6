@@ -69,65 +69,65 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
 {
     switch (header->type)
     {
-    case PacketType::PKT_C2S_JOIN: {
-        Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
+        case PacketType::PKT_C2S_JOIN: {
+            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
 
-        // [추가] 방장이 클라이언트의 이름을 맵에 기억해둠
-        {
-            std::lock_guard<std::mutex> lock(clientsMutex);
-            clientNames[sock] = pkt->name;
+            // [추가] 방장이 클라이언트의 이름을 맵에 기억해둠
+            {
+                std::lock_guard<std::mutex> lock(clientsMutex);
+                clientNames[sock] = pkt->name;
+            }
+
+            IPCManager::GetInstance().SendPlayerJoin(false, pkt->name);
+
+            Pkt_Join ackPkt(PacketType::PKT_S2C_JOIN_ACK);
+            strcpy_s(ackPkt.name, sizeof(ackPkt.name), Client::playerName.c_str());
+            send(sock, reinterpret_cast<char*>(&ackPkt), ackPkt.header.size, 0);
+            break;
         }
 
-        IPCManager::GetInstance().SendPlayerJoin(false, pkt->name);
+        case PacketType::PKT_S2C_JOIN_ACK: {
+            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
+            IPCManager::GetInstance().SendPlayerJoin(true, pkt->name);
+            break;
+        }
 
-        Pkt_Join ackPkt(PacketType::PKT_S2C_JOIN_ACK);
-        strcpy_s(ackPkt.name, sizeof(ackPkt.name), Client::playerName.c_str());
-        send(sock, reinterpret_cast<char*>(&ackPkt), ackPkt.header.size, 0);
-        break;
-    }
+                                         // [추가] 방장으로부터 누군가 나갔다는 퇴장 패킷을 받았을 때의 처리
+        case PacketType::PKT_S2C_LEAVE: {
+            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
+            IPCManager::GetInstance().SendPlayerLeave(pkt->name); // 로컬 창 갱신
+            break;
+        }
 
-    case PacketType::PKT_S2C_JOIN_ACK: {
-        Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
-        IPCManager::GetInstance().SendPlayerJoin(true, pkt->name);
-        break;
-    }
+        case PacketType::PKT_CHAT: {
+            Pkt_Chat* pkt = reinterpret_cast<Pkt_Chat*>(header);
+            IPCManager::GetInstance().SendChat(pkt->sender, pkt->message);
 
-                                     // [추가] 방장으로부터 누군가 나갔다는 퇴장 패킷을 받았을 때의 처리
-    case PacketType::PKT_S2C_LEAVE: {
-        Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
-        IPCManager::GetInstance().SendPlayerLeave(pkt->name); // 로컬 창 갱신
-        break;
-    }
-
-    case PacketType::PKT_CHAT: {
-        Pkt_Chat* pkt = reinterpret_cast<Pkt_Chat*>(header);
-        IPCManager::GetInstance().SendChat(pkt->sender, pkt->message);
-
-        if (Client::isServer)
-        {
-            std::lock_guard<std::mutex> lock(clientsMutex);
-            for (SOCKET clientSock : connectedClients)
+            if (Client::isServer)
             {
-                if (clientSock != sock)
+                std::lock_guard<std::mutex> lock(clientsMutex);
+                for (SOCKET clientSock : connectedClients)
                 {
-                    send(clientSock, reinterpret_cast<char*>(pkt), pkt->header.size, 0);
+                    if (clientSock != sock)
+                    {
+                        send(clientSock, reinterpret_cast<char*>(pkt), pkt->header.size, 0);
+                    }
                 }
             }
+            break;
         }
-        break;
-    }
 
-    case PacketType::PKT_S2C_CHANGE_STATE: {
-        Pkt_ChangeState* pkt = reinterpret_cast<Pkt_ChangeState*>(header);
+        case PacketType::PKT_S2C_CHANGE_STATE: {
+            Pkt_ChangeState* pkt = reinterpret_cast<Pkt_ChangeState*>(header);
 
-        if (!Client::isServer) // 방지책: 방장 본인은 이중 전환 방지
-        {
+            if (!Client::isServer) // 방지책: 방장 본인은 이중 전환 방지
+            {
             IGameState* nextState = CreateStateFromEGameState(pkt->targetState);
             if (nextState == nullptr) break;
 
-            if (pkt->targetState == EGameState::Start)
-            {
-                IPCManager::GetInstance().SendLog("[네트워크] 방장이 게임을 시작했습니다. 인게임으로 진입합니다.");
+                if (pkt->targetState == EGameState::Start)
+                {
+                    IPCManager::GetInstance().SendLog("[네트워크] 방장이 게임을 시작했습니다. 인게임으로 진입합니다.");
             }
             else if (pkt->targetState == EGameState::ArenaReady)
             {
@@ -171,9 +171,9 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
             }
 
             GameManager::GetInstance().SetCurrentState(nextState);
+            }
+            break;
         }
-        break;
-    }
 
     case PacketType::PKT_C2S_ARENA_ITEM_REGISTER: {
         if (!Client::isServer) break;

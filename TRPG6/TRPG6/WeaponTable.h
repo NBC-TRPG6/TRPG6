@@ -5,6 +5,14 @@
 
 class WeaponItem;  // 전방 선언
 
+extern const std::string RESET = "\033[0m";
+extern const std::string COMMON = "\033[33m";
+extern const std::string UNCOMMON = "\033[31m";  // 주갈색(동색) (다크 레드/브라운)
+extern const std::string RARE = "\033[37m";  // 흰색
+extern const std::string EPIC = "\033[96m";  // 하늘색 (밝은 시안)
+extern const std::string LEGENDARY = "\033[35m";  // 보라색
+
+
 /// <summary>
 /// 웨폰데이터 구조체, 무기의 정보가 들어있습니다.
 /// </summary>
@@ -29,6 +37,7 @@ private:
     static const WeaponData weaponTable[30];
 
 
+
 public:
     //무기테이블은 하나만있으니 싱글톤 패턴으로 구현
     static WeaponTable& GetInstance()
@@ -44,6 +53,7 @@ public:
     const WeaponData* GetWeaponDataByName(const std::string& name) const; //이름으로 무기 데이터 검색
     std::string GetBaseName(WeaponData& weapon) const; // 테이블에 만들어놓은 원래 이름 사용예정
     int GetUpgradeCount(WeaponData& weapon) const; //테이블에 만들어놓은 업그레이드 카운트 사용예정
+    std::string GetRarityColor(int upgradeCount) const; //업그레이드 카운트에 따른 색반환
 
     // 조합 — MONSTER_PART 2개 → 랜덤 무기
     WeaponItem* Craft(int price1, int price2);
