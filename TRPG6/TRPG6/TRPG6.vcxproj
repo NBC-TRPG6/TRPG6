@@ -109,7 +109,6 @@
     <ClInclude Include="ShopStockState.h" />
     <ClInclude Include="TradeManager.h" />
     <ClInclude Include="Utils.h" />
-    <ClInclude Include="WeaponTable.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

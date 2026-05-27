@@ -1,4 +1,4 @@
-#include "ArenaBattleManager.h"
+﻿#include "ArenaBattleManager.h"
 #include <algorithm>
 
 ArenaBattleManager& ArenaBattleManager::GetInstance()
@@ -16,6 +16,7 @@ void ArenaBattleManager::ResetSession()
     combatLog.clear();
     rankEntries.clear();
     eliminationOrder.clear();
+    rewardPoolDisplay.clear();
     battleEnded = false;
 }
 
@@ -100,12 +101,23 @@ void ArenaBattleManager::OnSpectatorHpSync(const Pkt_ArenaHpSync& pkt)
         newEntry.maxHp = pkt.maxHp;
         newEntry.isAlive = pkt.currentHp > 0 ? 1 : 0;
         spectatorPlayers[name] = newEntry;
+
+        if (pkt.currentHp <= 0)
+        {
+            eliminationOrder.push_back(name);
+        }
         return;
     }
 
     entry->hp = pkt.currentHp;
     entry->maxHp = pkt.maxHp;
     entry->isAlive = pkt.currentHp > 0 ? 1 : 0;
+
+    if (pkt.currentHp <= 0 &&
+        std::find(eliminationOrder.begin(), eliminationOrder.end(), name) == eliminationOrder.end())
+    {
+        eliminationOrder.push_back(name);
+    }
 }
 
 // 탈락 표시 및 eliminationOrder에 순서 기록(중복 방지)
@@ -135,6 +147,16 @@ void ArenaBattleManager::OnSpectatorRankList(const Pkt_ArenaRankList& pkt)
     battleEnded = true;
 }
 
+void ArenaBattleManager::OnSpectatorRewardPool(const Pkt_ArenaRewardPool& pkt)
+{
+    rewardPoolDisplay.clear();
+    for (uint8_t i = 0; i < pkt.slotCount && i < MAX_ARENA_ITEM_SLOTS; ++i)
+    {
+        if (pkt.slots[i].count <= 0) continue;
+        rewardPoolDisplay.push_back(pkt.slots[i]);
+    }
+}
+
 // ArenaWaitState에서 관전 대상 선택용
 std::vector<std::string> ArenaBattleManager::GetAlivePlayerNames() const
 {
@@ -160,47 +182,71 @@ int ArenaBattleManager::GetAliveCount() const
     return count;
 }
 
-// 1위: 유일 생존자 또는 전원 사망 시 마지막 탈락자, 2위 이하: eliminationOrder 역순
+// spectatorPlayers 전원 순위. 1위=유일 생존자 또는 전원 사망 시 마지막 탈락자, 나머지=탈락 늦은 순
 bool ArenaBattleManager::TryBuildRankList(Pkt_ArenaRankList& out) const
 {
     out = Pkt_ArenaRankList();
     if (spectatorPlayers.size() < 2) return false;
 
-    uint8_t idx = 0;
-    int32_t nextRank = 1;
+    const auto alive = GetAlivePlayerNames();
+    std::string firstPlace;
 
-    auto alive = GetAlivePlayerNames();
     if (alive.size() == 1)
     {
-        if (idx < MAX_ARENA_PLAYERS)
-        {
-            CopyStringToPacketField(out.entries[idx].playerName,
-                sizeof(out.entries[idx].playerName), alive[0]);
-            out.entries[idx].rank = 1;
-            ++idx;
-        }
-        nextRank = 2;
+        firstPlace = alive[0];
     }
     else if (alive.empty() && !eliminationOrder.empty())
     {
-        const std::string& lastStanding = eliminationOrder.back();
-        if (idx < MAX_ARENA_PLAYERS)
-        {
-            CopyStringToPacketField(out.entries[idx].playerName,
-                sizeof(out.entries[idx].playerName), lastStanding);
-            out.entries[idx].rank = 1;
-            ++idx;
-        }
-        nextRank = 2;
+        firstPlace = eliminationOrder.back();
+    }
+    else
+    {
+        return false;
     }
 
-    for (int i = static_cast<int>(eliminationOrder.size()) - 1; i >= 0; --i)
+    std::vector<std::string> rest;
+    rest.reserve(spectatorPlayers.size());
+    for (const auto& pair : spectatorPlayers)
     {
-        const std::string& name = eliminationOrder[static_cast<size_t>(i)];
-        if (alive.size() == 1 && name == alive[0]) continue;
-        if (alive.empty() && !eliminationOrder.empty() && name == eliminationOrder.back()) continue;
+        if (pair.first != firstPlace)
+        {
+            rest.push_back(pair.first);
+        }
+    }
 
+    const auto elimIndex = [this](const std::string& name) -> int
+    {
+        const auto it = std::find(eliminationOrder.begin(), eliminationOrder.end(), name);
+        if (it == eliminationOrder.end()) return -1;
+        return static_cast<int>(std::distance(eliminationOrder.begin(), it));
+    };
+
+    std::sort(rest.begin(), rest.end(),
+        [&elimIndex](const std::string& a, const std::string& b)
+        {
+            const int ia = elimIndex(a);
+            const int ib = elimIndex(b);
+            if (ia < 0 && ib < 0) return a < b;
+            if (ia < 0) return false;
+            if (ib < 0) return true;
+            return ia > ib;
+        });
+
+    uint8_t idx = 0;
+    int32_t nextRank = 1;
+
+    if (idx < MAX_ARENA_PLAYERS)
+    {
+        CopyStringToPacketField(out.entries[idx].playerName,
+            sizeof(out.entries[idx].playerName), firstPlace);
+        out.entries[idx].rank = nextRank++;
+        ++idx;
+    }
+
+    for (const std::string& name : rest)
+    {
         if (idx >= MAX_ARENA_PLAYERS) break;
+
         CopyStringToPacketField(out.entries[idx].playerName,
             sizeof(out.entries[idx].playerName), name);
         out.entries[idx].rank = nextRank++;
@@ -208,5 +254,6 @@ bool ArenaBattleManager::TryBuildRankList(Pkt_ArenaRankList& out) const
     }
 
     out.entryCount = idx;
-    return idx > 0;
+    return idx >= 2 && static_cast<size_t>(idx) == std::min(
+        spectatorPlayers.size(), static_cast<size_t>(MAX_ARENA_PLAYERS));
 }

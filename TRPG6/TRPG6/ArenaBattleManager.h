@@ -32,18 +32,22 @@ public:
     void OnSpectatorDie(const std::string& playerName);
     // S2C RankList: 최종 순위 저장, battleEnded = true
     void OnSpectatorRankList(const Pkt_ArenaRankList& pkt);
+    // S2C RewardPool: 보상 풀 아이템 목록 저장(세션 결과 표시용)
+    void OnSpectatorRewardPool(const Pkt_ArenaRewardPool& pkt);
 
     const std::map<std::string, ArenaPlayerListEntry>& GetSpectatorPlayers() const { return spectatorPlayers; }
     const std::string& GetCurrentTurnPlayer() const { return currentTurnPlayer; }
     const std::vector<std::string>& GetCombatLog() const { return combatLog; }
     const std::vector<ArenaRankEntry>& GetRankEntries() const { return rankEntries; }
+    const std::vector<ArenaItemSlot>& GetRewardPoolDisplay() const { return rewardPoolDisplay; }
+
     // isAlive != 0 인 플레이어 이름 목록(이름 오름차순)
     std::vector<std::string> GetAlivePlayerNames() const;
     // 현재 생존 인원 수
     int GetAliveCount() const;
     // RankList 수신 후 true, ArenaWait에서 Result 전환에 사용
     bool IsBattleEnded() const { return battleEnded; }
-    // 1위=유일 생존자 또는 최후 탈락자, 2위 이하=탈락 역순. 2인 미만이면 false
+    // spectatorPlayers 전원 순위. 1위=유일 생존자 또는 최후 탈락자, 2위~=탈락 늦은 순. 2인 미만 false
     bool TryBuildRankList(Pkt_ArenaRankList& out) const;
 
 private:
@@ -67,6 +71,8 @@ private:
     std::vector<ArenaRankEntry> rankEntries;
     // 탈락 순서(먼저 죽은 사람이 앞). TryBuildRankList에서 역순으로 2위 이하 배정
     std::vector<std::string> eliminationOrder;
+    // S2C RewardPool으로 받은 보상 풀 아이템 목록(ArenaResultState 표시용)
+    std::vector<ArenaItemSlot> rewardPoolDisplay;
     // 전투 종료 여부(RankList 수신 시 true)
     bool battleEnded = false;
 

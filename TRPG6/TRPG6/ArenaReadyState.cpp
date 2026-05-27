@@ -1,8 +1,12 @@
 ﻿#include "ArenaReadyState.h"
 #include "ArenaLobbyState.h"
 #include "ArenaBettingState.h"
+#include "GameStartState.h"
 #include "GameManager.h"
 #include "Renderer.h"
+#include "DATABASE.h"
+#include "NetworkManager.h"
+#include "IPCManager.h"
 
 
 // 아레나 준비 상태입니다.
@@ -15,8 +19,20 @@ void ArenaReadyState::Enter() {
 
 void ArenaReadyState::Update(int ch, std::string& lastCommand) {
     Renderer::DisplayUI(UIPart::Top, 0, "아레나 준비 중");
-    Renderer::DisplayUI(UIPart::CenterLeft, 9, "1. 아레나 로비 입장");
-    Renderer::DisplayUI(UIPart::CenterLeft, 10, "2. 아이템 베팅");
+    Renderer::DisplayUI(UIPart::CenterLeft, 8, "1. 아레나 로비 입장");
+    Renderer::DisplayUI(UIPart::CenterLeft, 9, "2. 아이템 베팅");
+
+    if(Client::isServer)
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, 10, "3. 아레나 준비 취소");
+
+        if (ch == 3)
+        {
+            GameManager::GetInstance().SetCurrentState(new GameStartState());
+            NetworkManager::GetInstance().BroadcastChangeState(EGameState::Start);
+            IPCManager::GetInstance().SendLog("\033[1;34m방장이 아레나를 빵꾸냈습니다.\033[0m");
+        }
+    }
 
     if (ch == 1) {
         if (hasBet)
