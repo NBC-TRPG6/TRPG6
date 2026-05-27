@@ -111,7 +111,7 @@ public:
     /// </summary>
     /// <param name="percent">아이템 드롭 확률(기본값: 30%)</param>
     /// <returns>드롭된 아이템의 포인터 또는 nullptr</returns>
-    Item* DropItem(int percent = 80);
+    Item* DropItem(int percent = 40);
 
 };
 
