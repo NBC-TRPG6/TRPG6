@@ -252,6 +252,16 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
             break;
         }
 
+        case PacketType::PKT_S2C_ARENA_LOBBY_STATE: {
+            if (Client::isServer) break;
+
+            auto* pkt = reinterpret_cast<Pkt_ArenaLobbyState*>(header);
+            ApplyArenaLobbyStateCache(*pkt);
+            IPCManager::GetInstance().SendLog(
+                "[아레나] 로비 상태 수신 (" + std::to_string(pkt->playerCount) + "명)");
+            break;
+        }
+
         case PacketType::PKT_S2C_ARENA_SNAPSHOT_REQUEST: {
             if (Client::isServer) break;
 
@@ -611,7 +621,7 @@ void NetworkManager::AdvanceArenaTurnAfterAction()
 void NetworkManager::ResetArenaLobbyArrivalTracking()
 {
     arenaLobbyArrived.clear();
-    arenaAllLobbyConfirmed = false;
+    arenaLobbyDisplay.clear();
 }
 
 std::set<std::string> NetworkManager::CollectExpectedArenaPlayerNames() const
@@ -629,16 +639,43 @@ std::set<std::string> NetworkManager::CollectExpectedArenaPlayerNames() const
 
 int NetworkManager::GetExpectedArenaPlayerCount() const
 {
+    if (!arenaLobbyDisplay.empty())
+    {
+        return static_cast<int>(arenaLobbyDisplay.size());
+    }
     return static_cast<int>(CollectExpectedArenaPlayerNames().size());
 }
 
 int NetworkManager::GetArenaLobbyArrivedCount() const
 {
-    return static_cast<int>(arenaLobbyArrived.size());
+    if (!arenaLobbyDisplay.empty())
+    {
+        int arrived = 0;
+        for (const ArenaLobbyPlayerEntry& entry : arenaLobbyDisplay)
+        {
+            if (entry.hasArrived != 0) ++arrived;
+        }
+        return arrived;
+    }
+
+    if (Client::isServer)
+    {
+        return static_cast<int>(arenaLobbyArrived.size());
+    }
+    return 0;
 }
 
 bool NetworkManager::HasAllPlayersInArenaLobby() const
 {
+    if (!arenaLobbyDisplay.empty())
+    {
+        for (const ArenaLobbyPlayerEntry& entry : arenaLobbyDisplay)
+        {
+            if (entry.hasArrived == 0) return false;
+        }
+        return true;
+    }
+
     const std::set<std::string> expected = CollectExpectedArenaPlayerNames();
     if (expected.empty()) return false;
 
@@ -650,6 +687,11 @@ bool NetworkManager::HasAllPlayersInArenaLobby() const
         }
     }
     return true;
+}
+
+const std::vector<ArenaLobbyPlayerEntry>& NetworkManager::GetArenaLobbyPlayers() const
+{
+    return arenaLobbyDisplay;
 }
 
 // 호스트 이름 + clientNames 전원이 arenaPlayerSnapshots에 있는지 확인
@@ -706,16 +748,7 @@ void NetworkManager::OnHostArenaLobbyArrived(SOCKET sock)
         "[아레나] " + playerName + " 로비 도착 (" +
         std::to_string(arrived) + "/" + std::to_string(expected) + ")");
 
-    TryConfirmAllPlayersInArenaLobby();
-}
-
-void NetworkManager::TryConfirmAllPlayersInArenaLobby()
-{
-    if (!Client::isServer || arenaAllLobbyConfirmed) return;
-    if (!HasAllPlayersInArenaLobby()) return;
-
-    arenaAllLobbyConfirmed = true;
-    IPCManager::GetInstance().SendLog("[아레나] 전원 로비 도착 완료. 방장이 전투를 시작할 수 있습니다.");
+    BroadcastArenaLobbyState();
 }
 
 void NetworkManager::OnHostArenaPlayerSnapshot(SOCKET sock, const char* packetData, size_t packetSize)
@@ -1263,6 +1296,54 @@ void NetworkManager::BroadcastArenaRankList(const Pkt_ArenaRankList& pkt)
     }
 }
 
+void NetworkManager::ApplyArenaLobbyStateCache(const Pkt_ArenaLobbyState& pkt)
+{
+    //UI용 캐시 초기화
+    arenaLobbyDisplay.clear();
+    for (uint8_t i = 0; i < pkt.playerCount && i < MAX_ARENA_PLAYERS; ++i)
+    {
+        // 플레이어 ArenaLobbyPlayerEntry로 저장
+        arenaLobbyDisplay.push_back(pkt.players[i]);
+    }
+}
+
+void NetworkManager::BuildArenaLobbyStatePacket(Pkt_ArenaLobbyState& out) const
+{
+    out = Pkt_ArenaLobbyState();
+
+    //현재 있어야하는 플레이어 목록
+    const std::set<std::string> expected = CollectExpectedArenaPlayerNames();
+    uint8_t idx = 0;
+    for (const std::string& name : expected)
+    {
+        if (idx >= MAX_ARENA_PLAYERS) break;
+
+        CopyStringToPacketField(
+            out.players[idx].playerName,
+            sizeof(out.players[idx].playerName),
+            name);
+
+        // 접속 중인지 확인
+        out.players[idx].hasArrived =
+            (arenaLobbyArrived.find(name) != arenaLobbyArrived.end()) ? 1 : 0;
+
+        // 플레이어 카운트
+        ++idx;
+    }
+    out.playerCount = idx;
+}
+
+
+void NetworkManager::BroadcastArenaLobbyState()
+{
+    if (!Client::isServer) return;
+
+    Pkt_ArenaLobbyState pkt;
+    BuildArenaLobbyStatePacket(pkt);
+    ApplyArenaLobbyStateCache(pkt);
+    BroadcastToClients(&pkt, pkt.header.size);
+}
+
 #pragma endregion
 
 #pragma region Packet Sending Functions
@@ -1501,6 +1582,11 @@ void NetworkManager::ReceiveLoop(SOCKET sock)
                     for (SOCKET cSock : connectedClients)
                     {
                         send(cSock, reinterpret_cast<char*>(&leavePkt), leavePkt.header.size, 0);
+                    }
+
+                    if (GetArenaLobbyState() != nullptr && !arenaBattleStarted)
+                    {
+                        BroadcastArenaLobbyState();
                     }
                 }
             }
