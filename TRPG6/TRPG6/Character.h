@@ -33,6 +33,7 @@ public:
     // Setters
     void SetHp(int hp) {
         if (hp < 0) Hp = 0;
+
         else Hp = hp;
     }
     void SetMaxHp(int Maxhp) {

@@ -72,20 +72,20 @@ namespace Client
 
 namespace COOP_DB
 {
-    // 보스 관련 설정 (4~6인 기준 15~20턴 장기전 목표)
-    inline constexpr int BOSS_MAX_HP = 12000;
-    inline constexpr int BOSS_DMG_MEAN = 150;
-    inline constexpr int BOSS_DMG_STDDEV = 50;
-    inline constexpr int BOSS_DMG_BASE = 280;
+    // 보스 관련 설정 (파티 평균 공격력 500, 5인 15~20턴 하드코어 기준)
+    inline constexpr int BOSS_MAX_HP = 35000;     // 보스 최대 체력 대폭 상향
+    inline constexpr int BOSS_DMG_MEAN = 300;     // 보스 공격력 정규분포 평균
+    inline constexpr int BOSS_DMG_STDDEV = 200;   // 보스 공격력 정규분포 표준편차 (분산 극대화)
+    inline constexpr int BOSS_DMG_BASE = 300;     // 보스 확정 최저 데미지
 
-    // 직업별 추가 스탯 보너스 (Base)
-    inline constexpr int TANKER_BONUS_HP = 100;
-    inline constexpr int DEALER_BONUS_ATK = 10;
+    // 직업별 추가 스탯 보너스 (배율 적용 전 Base 값)
+    inline constexpr int TANKER_BONUS_HP = 100;   // 탱커 추가 체력 
+    inline constexpr int DEALER_BONUS_ATK = 20;   // 딜러(기본) 추가 공격력
 
-    // 힐러 힐량 정규분포 설정 (Base)
-    inline constexpr int HEALER_HEAL_MEAN = 15;
-    inline constexpr int HEALER_HEAL_STDDEV = 4;
+    // 힐러 힐량 정규분포 설정 (힐량 상향 조정)
+    inline constexpr int HEALER_HEAL_MEAN = 55;   // 힐량 평균 (만렙 시 평균 330)
+    inline constexpr int HEALER_HEAL_STDDEV = 15; // 힐량 표준편차 (만렙 시 표준편차 90)
 
-    // [수정] float 대신 순수 정수 백분율(%) 사용 (예: 10 = 레벨당 10% 증가)
-    inline constexpr int STAT_MULTIPLIER_PERCENT_PER_LEVEL = 10;
+    // 플레이어 레벨 비례 배율 (예: 50레벨일 때 100 + 500 = 600% 적용)
+    inline constexpr int STAT_MULTIPLIER_PERCENT_PER_LEVEL = 50;
 }

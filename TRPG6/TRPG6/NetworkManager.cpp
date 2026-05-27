@@ -56,6 +56,7 @@ static IGameState* CreateStateFromEGameState(EGameState state)
     case EGameState::COOPBattle: return new COOPBattleState();
     case EGameState::COOPReward: return new COOPRewardState();
     case EGameState::GameOver: return new DieState();
+
     default: return nullptr;
     }
 }
@@ -1175,7 +1176,7 @@ void NetworkManager::OnHostArenaItemUse(SOCKET sock, const Pkt_ArenaItemUse& pkt
     {
     case ItemType::HP_POTION:
     {
-        targetHdr->hp += effectValue;
+        targetHdr->hp += effectValue * targetHdr->maxHp / 100;
         if (targetHdr->hp > targetHdr->maxHp) targetHdr->hp = targetHdr->maxHp;
 
         Pkt_ArenaHpSync hpPkt;

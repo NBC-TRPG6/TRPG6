@@ -27,7 +27,6 @@ public:
     {
         AddItem(new Item("HP 포션", ItemType::HP_POTION, 50, 15), 3);
         AddItem(new Item("공격력 포션", ItemType::ATTACK_BUFF, 10, 30), 3);
-        AddItem(new Item("실험용 말랑젤리", ItemType::MONSTER_PART, 0, 100), 100);
     }
 
     ~Inventory()
