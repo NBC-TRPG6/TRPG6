@@ -2,8 +2,10 @@
 #include "Renderer.h"
 #include "GameManager.h"
 #include "GameStartState.h"
-#include "GoldTradePacket.h" // 골드 패킷 함수(SendGoldTradeRequest) 사용
+#include "TradeState.h"
+#include "GoldTradePacket.h"
 #include "Utils.h"
+#include "Player.h"
 #include <sstream>
 #include <vector>
 
@@ -24,69 +26,65 @@ void GoldTradeState::Enter()
 {
     // 입력 모드를 READ_MODE(문자열 입력 가능 상태)로 전환
     READ_MODE = true;
+    Renderer::ClearAllCenterLeftUI();
 }
 
 void GoldTradeState::Update(int ch, std::string& lastCommand)
 {
-    Renderer::ClearAllCenterLeftUI();
     player = GameManager::GetInstance().GetPlayer();
 
-    // 상단 아스키 아트 및 UI 출력
     auto art = LoadImageAsASCII("..\\..\\Resources\\gold.png");
     Renderer::SetTopASCIIImage(art);
 
     Renderer::DisplayUI(UIPart::CenterLeft, 0, "=== [ 골드 전송 시스템 ] ===");
     Renderer::DisplayUI(UIPart::CenterLeft, 2, "양식 입력: [받을 사람] [골드량]");
     Renderer::DisplayUI(UIPart::CenterLeft, 3, "(예시: Hero 500)");
-    Renderer::DisplayUI(UIPart::CenterLeft, 5, "0. 메인 화면");
+    Renderer::DisplayUI(UIPart::CenterLeft, 5, "0. 뒤로 가기 (거래 센터)");
 
     if (player != nullptr)
     {
         player->PrintStatus();
     }
 
-    // 1. 숫자 입력 처리 (메인 화면 복귀 등)
-    if (ch == 0 && lastCommand.empty())
+    // 0번을 누르거나 "0"을 입력하면 새로 만든 중간 다리(TradeState)로 복귀
+    if ((ch == 0 && lastCommand.empty()) || lastCommand == "0")
     {
-        READ_MODE = false; // 문자열 입력 모드 해제
-        GameManager::GetInstance().SetCurrentState(new GameStartState());
+        READ_MODE = false;
+        lastCommand.clear();
+        Renderer::ClearAllCenterLeftUI();
+        GameManager::GetInstance().SetCurrentState(new TradeState());
         return;
     }
 
-    // 2. 명령어(문자열) 입력 처리 (골드 전송 로직)
+    // -------------------------------------------------------------
+    // [1단계] 문자열 입력 처리 (if문 안에서는 로직 검사와 '메시지 저장'만 수행)
+    // -------------------------------------------------------------
     if (!lastCommand.empty())
     {
-        // 0을 입력해서 나가려고 한 경우 예외 처리
-        if (lastCommand == "0")
-        {
-            READ_MODE = false;
-            lastCommand.clear();
-            GameManager::GetInstance().SetCurrentState(new GameStartState());
-            return;
-        }
+        // 입력 버퍼 복사 후 즉시 클리어 (다음 프레임에 if문이 반복 실행되는 것 방지)
+        std::string currentInput = lastCommand;
+        lastCommand.clear();
 
-        std::vector<std::string> parts = SplitSpace(lastCommand);
+        std::vector<std::string> parts = SplitSpace(currentInput);
 
-        // 형식 검사 (받을사람, 골드량 2가지 요소가 필요)
+        // 예외 검사 : 인자 개수 부족 (오타 등)
         if (parts.size() < 2)
         {
-            Renderer::DisplayUITimed(UIPart::CenterLeft, 7, "입력 형식이 잘못되었습니다! (예: Hero 500)", 2.0f);
-            lastCommand.clear();
+            errorMessage = "입력 형식이 잘못되었습니다! (예: Hero 500)";
             return;
         }
 
         std::string receiverName = parts[0];
         std::string goldStr = parts[1];
 
-        // 예외 검사 ① : 자기 자신에게는 보낼 수 없음
+        // 예외 검사 ① : 자기 자신에게는 송금 불가
         if (receiverName == Client::playerName)
         {
-            Renderer::DisplayUITimed(UIPart::CenterLeft, 7, "자기 자신에게는 골드를 보낼 수 없습니다!", 2.0f);
-            lastCommand.clear();
+            errorMessage = "자기 자신에게는 골드를 보낼 수 없습니다!";
             return;
         }
 
-        // 예외 검사 ② : 입력한 골드가 유효한 숫자인지, 0원 이하는 아닌지 검사
+        // 예외 검사 ② : 골드 액수가 정상적인 숫자인지 검사
         int32_t amount = 0;
         try
         {
@@ -94,34 +92,31 @@ void GoldTradeState::Update(int ch, std::string& lastCommand)
         }
         catch (...)
         {
-            Renderer::DisplayUITimed(UIPart::CenterLeft, 7, "골드 액수는 올바른 숫자여야 합니다!", 2.0f);
-            lastCommand.clear();
+            errorMessage = "골드 액수는 올바른 숫자여야 합니다!";
             return;
         }
 
+        // 예외 검사 ③ : 0원 이하 전송 제한
         if (amount <= 0)
         {
-            Renderer::DisplayUITimed(UIPart::CenterLeft, 7, "0원 이하의 골드는 전송할 수 없습니다!", 2.0f);
-            lastCommand.clear();
+            errorMessage = "0원 이하의 골드는 전송할 수 없습니다!";
             return;
         }
 
-        // 예외 검사 ③ : 현재 내가 보유한 골드보다 더 많이 보내려고 하는지 검사
+        // 예외 검사 ④ : 현재 내가 가진 돈보다 더 많이 보내려 할 때
         if (player != nullptr)
         {
             if (player->GetMoney() < amount)
             {
-                Renderer::DisplayUITimed(UIPart::CenterLeft, 7, "보유 골드가 부족합니다! (현재 자산 부족)", 2.0f);
-                lastCommand.clear();
+                errorMessage = "보유 골드가 부족합니다! (현재 자산 부족)";
                 return;
             }
         }
+    }
 
-        // 모든 검사 통과 시 서버(혹은 상대방)로 골드 전송 패킷 요청
-        SendGoldTradeRequest(receiverName, amount);
-        Renderer::DisplayUITimed(UIPart::CenterLeft, 7, receiverName + "님에게 " + std::to_string(amount) + " 골드 전송을 요청했습니다!", 2.0f);
-
-        // 처리가 끝났으므로 입력 버퍼 비우기
-        lastCommand.clear();
+    //오류 메세지 출력
+    if (!errorMessage.empty())
+    {
+        Renderer::DisplayUITimed(UIPart::CenterLeft, 7, errorMessage, 2.0f);
     }
 }

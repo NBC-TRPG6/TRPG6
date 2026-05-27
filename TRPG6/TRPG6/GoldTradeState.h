@@ -10,4 +10,5 @@ public:
 
 private:
     Player* player = nullptr;
+    std::string errorMessage = ""; //에러 문구 저장용 변수
 };
