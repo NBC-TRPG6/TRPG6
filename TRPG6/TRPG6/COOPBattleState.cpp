@@ -7,6 +7,7 @@
 #include "Utils.h"
 #include "IPCManager.h" // [추가] 로그 출력을 위한 헤더 포함
 #include "DATABASE.h"   // DB 접근용 헤더 확인 (안 되어있다면 추가)
+#include <random>
 
 void COOPBattleState::Enter()
 {
@@ -57,10 +58,17 @@ void COOPBattleState::Update(int ch, std::string& lastCommand)
 
             if (ch == 1 || lastCommand == "1")
             {
-                NetworkManager::GetInstance().SendCOOPUseAttack(Client::playerName, coop.currentBossName, myInfo.atk);
+                // [수정] 0.5 ~ 2.0배 랜덤 실수 배율 적용
+                static thread_local std::random_device rd;
+                static thread_local std::mt19937 gen(rd());
+                std::uniform_real_distribution<float> dist(0.5f, 2.0f);
+                float multiplier = dist(gen);
+                int finalDamage = static_cast<int>(myInfo.atk * multiplier);
+
+                NetworkManager::GetInstance().SendCOOPUseAttack(Client::playerName, coop.currentBossName, finalDamage);
 
                 // [추가] 공격 로그
-                IPCManager::GetInstance().SendLog("[레이드] " + Client::playerName + "이(가) " + coop.currentBossName + "을(를) 공격했습니다!");
+                IPCManager::GetInstance().SendLog("[레이드] " + Client::playerName + "이(가) " + coop.currentBossName + "을(를) 공격했습니다! (피해량: " + std::to_string(finalDamage) + ")");
 
                 lastCommand = "";
             }
@@ -154,7 +162,6 @@ void COOPBattleState::Update(int ch, std::string& lastCommand)
                 Renderer::DisplayUI(UIPart::CenterLeft, 1 + i, std::to_string(i + 1) + ". " + alivePlayers[i] + " (HP: " + std::to_string(coop.players[alivePlayers[i]].hp) + ")");
             }
             Renderer::DisplayUI(UIPart::CenterLeft, 12, "0. 돌아가기");
-
             if (ch == 0 || lastCommand == "0")
             {
                 currentSubState = SubState::Main;
@@ -184,6 +191,6 @@ void COOPBattleState::Update(int ch, std::string& lastCommand)
     else
     {
         currentSubState = SubState::Main;
-        Renderer::DisplayUI(UIPart::CenterLeft, 0, "다른 플레이어의 턴을 대기 중입니다...");
+        Renderer::DisplayUI(UIPart::CenterLeft, 0, coop.currentTurnPlayer + "의 턴을 대기 중입니다...");
     }
 }

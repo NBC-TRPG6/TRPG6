@@ -145,6 +145,11 @@ void COOPManager::BossAction()
         damage *= 2;
         // (선택) 크리티컬 발생 시 로컬 창에 로그 출력
         IPCManager::GetInstance().SendLog("[경고] 보스의 치명적인 공격! (데미지 2배)");
+        NetworkManager::GetInstance().SendChatPacket("[레이드]", "보스의 치명적인 공격! " + target + "에게 " + std::to_string(damage) + "의 피해를 입혔습니다!");
+    }
+    else
+    {
+        NetworkManager::GetInstance().SendChatPacket("[레이드]", "보스 " + currentBossName + "가 " + target + "를 공격했습니다! (피해: " + std::to_string(damage) + ")");
     }
 
     int currentHp = players[target].hp - damage;
@@ -162,6 +167,8 @@ void COOPManager::OnPlayerAttack(const std::string& sourceName, const std::strin
         if (currentBossHp <= 0) currentBossHp = 0;
         NetworkManager::GetInstance().BroadcastCOOPUpdateMonster(targetName, currentBossHp);
         
+        NetworkManager::GetInstance().SendChatPacket("[레이드]", sourceName + "이(가) 보스에게 " + std::to_string(amount) + "의 피해를 입혔습니다.");
+
         if (currentBossHp <= 0) {
             NetworkManager::GetInstance().ApplySyncedStateChange(EGameState::COOPReward);
         } else {
@@ -174,6 +181,7 @@ void COOPManager::OnPlayerBlock(const std::string& sourceName, const std::string
     if (Client::isServer) {
         currentBlockSource = sourceName;
         currentBlockTarget = targetName;
+        NetworkManager::GetInstance().SendChatPacket("[레이드]", sourceName + "이(가) 도발을 사용했습니다.");
         NextTurn();
     }
 }
@@ -182,6 +190,7 @@ void COOPManager::OnPlayerHeal(const std::string& sourceName, const std::string&
     if (Client::isServer) {
         players[targetName].hp += amount;
         NetworkManager::GetInstance().BroadcastCOOPUpdateStatus(targetName, players[targetName].atk, players[targetName].hp, static_cast<int>(players[targetName].job), players[targetName].isDead);
+        NetworkManager::GetInstance().SendChatPacket("[레이드]", sourceName + "이(가) " + targetName + "에게 " + std::to_string(amount) + "만큼 힐을 했습니다.");
         NextTurn();
     }
 }
