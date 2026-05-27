@@ -39,6 +39,11 @@ void ArenaBattleManager::AddBettedItem(const std::string& itemName, int amount)
     bettedItems.push_back(newItem);
 }
 
+void ArenaBattleManager::ClearBettedItems()
+{
+    bettedItems.clear();
+}
+
 // 관전 UI용 전투 로그, 오래된 줄부터 삭제
 void ArenaBattleManager::PushCombatLog(const std::string& line)
 {

@@ -17,6 +17,7 @@ public:
 
     // 보상 풀에 베팅 아이템 등록(이름 같으면 개수만 합산)
     void AddBettedItem(const std::string& itemName, int amount);
+    void ClearBettedItems();
     const std::vector<ArenaItemSlot>& GetBettedItems() const { return bettedItems; }
 
     // S2C PlayerList: 관전용 플레이어 목록 갱신(전투 시작 시 1회)
