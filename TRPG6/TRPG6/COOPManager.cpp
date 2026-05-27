@@ -150,7 +150,7 @@ void COOPManager::BossAction()
 
             for (const auto& target : nonBlockers)
             {
-                int damage = get_normal_int(COOP_DB::BOSS_PATTERN_DMG_MEAN, COOP_DB::BOSS_PATTERN_DMG_STDDEV);
+                int damage = get_normal_int(COOP_DB::BOSS_PATTERN_DMG_MEAN, COOP_DB::BOSS_PATTERN_DMG_STDDEV) + COOP_DB::BOSS_DMG_BASE;
 
                 NetworkManager::GetInstance().SendChatPacket("[레이드]", "보스 " + currentBossName + "가 도발을 하지 않은 " + target + "를 공격했습니다! (피해: " + std::to_string(damage) + ")");
 
