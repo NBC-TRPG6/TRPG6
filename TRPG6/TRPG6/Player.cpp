@@ -55,8 +55,7 @@ void Player::EquipWeapon(WeaponItem* weapon)
 bool Player::RemoveItem(const std::string& itemName, int amount)
 {
     // 장착 무기면 먼저 해제
-    if (equippedWeapon != nullptr
-        && equippedWeapon->GetName() == itemName)
+    if (equippedWeapon != nullptr && equippedWeapon->GetName() == itemName)
     {
         EquipWeapon(nullptr);
     }

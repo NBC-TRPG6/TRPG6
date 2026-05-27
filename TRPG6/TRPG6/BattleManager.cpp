@@ -29,16 +29,16 @@ void BattleManager::StartBattle(Player* player)
     CurrentBattleState = EBattleState::InProgress;
     OriginalPlayerAttack = player->GetAttack(); //플레이어의 원래 공격력을 저장합니다.
 
-    if (player->GetLevel() > 9)
-    {
-        Renderer::DisplayUI(UIPart::CenterLeft, 2, "이제 일반 몬스터는 상대도 안 된다!");
-        Monster DEARAGON(player->GetLevel(), "대래래래래곤~~~", 1.5f); // 레벨과 이름을 기반으로 보스 몬스터 생성
-        isBoss = true;
-        isPlayerTurn = false; // 보스몬스터의 선공으로 시작
-        currentMonster = DEARAGON; // 현재 몬스터로 보스몬스터 설정
-    }
+    //if (player->GetLevel() > 9)
+    //{
+    //    Renderer::DisplayUI(UIPart::CenterLeft, 2, "이제 일반 몬스터는 상대도 안 된다!");
+    //    Monster DEARAGON(player->GetLevel(), "대래래래래곤~~~", 1.5f); // 레벨과 이름을 기반으로 보스 몬스터 생성
+    //    isBoss = true;
+    //    isPlayerTurn = false; // 보스몬스터의 선공으로 시작
+    //    currentMonster = DEARAGON; // 현재 몬스터로 보스몬스터 설정
+    //}
 
-    else if (nimochance <= 10 && !NimoDefeated)
+    if (nimochance <= 2 && !NimoDefeated)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 2, "!!!!!!!야생의 니모가 나타났다!!!!!!!!");
         Monster NIMO(player->GetLevel(), "니모", 0.5f); // 체공이 일반몹보다 낮다.
@@ -49,7 +49,6 @@ void BattleManager::StartBattle(Player* player)
     }
     else
     {
-
         //몬스터 생성
         Monster monster(player->GetLevel(), 1.f);
         monster.ResetState(player->GetLevel()); //몬스터 상태 초기화
@@ -58,7 +57,6 @@ void BattleManager::StartBattle(Player* player)
 
         if (!isPlayerTurn)
             Renderer::DisplayUI(UIPart::CenterLeft, 2, monster.GetName() + "에게 기습당했습니다!!!");
-
     }
 
 

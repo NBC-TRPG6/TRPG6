@@ -3,6 +3,7 @@
 #include "GameStartState.h"
 #include "GameManager.h"
 #include "Renderer.h"
+#include "Player.h"
 
 namespace {
     std::string FormatRewardLine(const ArenaItemSlot& slot)
