@@ -4,7 +4,6 @@
 #include <iostream>
 
 
-
 class WeaponItem : public Item
 {
 public:
@@ -19,6 +18,7 @@ public:
     int GetHPBonus() const { return hpBonus; }
     std::string GetBaseName() const { return baseName; }
     int GetUpgradeCount() const { return upgradeCount; }
+    std::string GetColoredName() const;
 
 private:
     std::string baseName;   // 무기 종류 (예: "검", "도끼")

@@ -33,7 +33,20 @@ void InventoryState::Update(int ch, std::string& lastCommand)
         std::string name = slots[i].item->GetName();
         int count = slots[i].count;
         int sellPrice = slots[i].item->GetSellPrice();
-        std::string info = std::to_string(i + 1) + ". " + name + " (x" + std::to_string(count) + ") | 가격: " + std::to_string(sellPrice) + "G";
+        std::string displayName;
+        if (slots[i].item->GetType() == ItemType::WEAPON)
+        {
+            WeaponItem* w = dynamic_cast<WeaponItem*>(slots[i].item);
+            if (w != nullptr)
+                displayName = w->GetColoredName();
+            else
+                displayName = name;
+        }
+        else
+        {
+            displayName = name;
+        }
+        std::string info = std::to_string(i + 1) + ". " + displayName + " (x" + std::to_string(count) + ") | 가격: " + std::to_string(sellPrice) + "G";
         Renderer::DisplayUI(UIPart::CenterLeft, i + 3, info);
     }
 

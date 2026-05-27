@@ -9,7 +9,7 @@
 
 void ItemReceivedTradeListState::Enter()
 {
-    auto art = LoadImageAsASCII("..\\..\\Resources\\Potion.png");
+    auto art = LoadImageAsASCIIColor("..\\..\\Resources\\Potion.png");
     Renderer::SetTopASCIIImage(art);
 }
 
