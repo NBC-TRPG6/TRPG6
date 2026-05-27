@@ -52,253 +52,253 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
 {
     switch (header->type)
     {
-        case PacketType::PKT_C2S_JOIN: {
-            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
+    case PacketType::PKT_C2S_JOIN: {
+        Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
 
-            // [추가] 방장이 클라이언트의 이름을 맵에 기억해둠
-            {
-                std::lock_guard<std::mutex> lock(clientsMutex);
-                clientNames[sock] = pkt->name;
-            }
-
-            IPCManager::GetInstance().SendPlayerJoin(false, pkt->name);
-
-            Pkt_Join ackPkt(PacketType::PKT_S2C_JOIN_ACK);
-            strcpy_s(ackPkt.name, sizeof(ackPkt.name), Client::playerName.c_str());
-            send(sock, reinterpret_cast<char*>(&ackPkt), ackPkt.header.size, 0);
-            break;
-        }
-
-        case PacketType::PKT_S2C_JOIN_ACK: {
-            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
-            IPCManager::GetInstance().SendPlayerJoin(true, pkt->name);
-            break;
-        }
-
-        // [추가] 방장으로부터 누군가 나갔다는 퇴장 패킷을 받았을 때의 처리
-        case PacketType::PKT_S2C_LEAVE: {
-            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
-            IPCManager::GetInstance().SendPlayerLeave(pkt->name); // 로컬 창 갱신
-            break;
-        }
-
-        case PacketType::PKT_CHAT: {
-            Pkt_Chat* pkt = reinterpret_cast<Pkt_Chat*>(header);
-            IPCManager::GetInstance().SendChat(pkt->sender, pkt->message);
-
-            if (Client::isServer)
-            {
-                std::lock_guard<std::mutex> lock(clientsMutex);
-                for (SOCKET clientSock : connectedClients)
-                {
-                    if (clientSock != sock)
-                    {
-                        send(clientSock, reinterpret_cast<char*>(pkt), pkt->header.size, 0);
-                    }
-                }
-            }
-            break;
-        }
-
-        case PacketType::PKT_S2C_CHANGE_STATE: {
-            Pkt_ChangeState* pkt = reinterpret_cast<Pkt_ChangeState*>(header);
-
-            if (!Client::isServer) // 방지책: 방장 본인은 이중 전환 방지
-            {
-                IGameState* nextState = CreateStateFromEGameState(pkt->targetState);
-                if (nextState == nullptr) break;
-
-                if (pkt->targetState == EGameState::Start)
-                {
-                    IPCManager::GetInstance().SendLog("[네트워크] 방장이 게임을 시작했습니다. 인게임으로 진입합니다.");
-                }
-                else if (pkt->targetState == EGameState::ArenaReady)
-                {
-                    IPCManager::GetInstance().SendLog("[아레나] 준비 단계에 진입했습니다.");
-                }
-                else if (pkt->targetState == EGameState::ArenaLobby)
-                {
-                    IPCManager::GetInstance().SendLog("[아레나] 로비에 입장했습니다.");
-                }
-                else if (pkt->targetState == EGameState::ArenaBattle)
-                {
-                    IPCManager::GetInstance().SendLog("[아레나] 전투가 시작되었습니다.");
-                }
-                else if (pkt->targetState == EGameState::ArenaWait)
-                {
-                    IPCManager::GetInstance().SendLog("[아레나] 탈락하여 대기 중입니다.");
-                }
-                else if (pkt->targetState == EGameState::ArenaResult)
-                {
-                    IPCManager::GetInstance().SendLog("[아레나] 결과 화면으로 이동합니다.");
-                }
-
-                GameManager::GetInstance().SetCurrentState(nextState);
-            }
-            break;
-        }
-
-        case PacketType::PKT_C2S_ARENA_ITEM_REGISTER: {
-            if (!Client::isServer) break;
-            OnHostArenaItemRegister(sock, *reinterpret_cast<Pkt_ArenaItemRegister*>(header));
-            break;
-        }
-
-        case PacketType::PKT_C2S_ARENA_READY: {
-            if (!Client::isServer) break;
-            OnHostArenaLobbyArrived(sock);
-            break;
-        }
-
-        case PacketType::PKT_C2S_ARENA_PLAYER_SNAPSHOT: {
-            if (!Client::isServer) break;
-            OnHostArenaPlayerSnapshot(sock, reinterpret_cast<const char*>(header), header->size);
-            break;
-        }
-
-        case PacketType::PKT_C2S_ARENA_ATTACK: {
-            if (!Client::isServer) break;
-            OnHostArenaAttack(sock, *reinterpret_cast<Pkt_ArenaAttack*>(header));
-            break;
-        }
-
-        case PacketType::PKT_C2S_ARENA_ITEM_USE: {
-            if (!Client::isServer) break;
-            OnHostArenaItemUse(sock, *reinterpret_cast<Pkt_ArenaItemUse*>(header));
-            break;
-        }
-
-        // ---------- 아레나 S2C (게스트: UI + 관전 캐시) ----------
-        case PacketType::PKT_S2C_ARENA_PLAYER_LIST: {
-            if (Client::isServer) break;
-            auto* pkt = reinterpret_cast<Pkt_ArenaPlayerList*>(header);
-            ArenaBattleManager::GetInstance().OnSpectatorPlayerList(*pkt);
-            NotifyArenaBattlePlayerList(*pkt);
-            IPCManager::GetInstance().SendLog(
-                "[아레나] 플레이어 목록 수신 (" + std::to_string(pkt->playerCount) + "명)");
-            break;
-        }
-
-        case PacketType::PKT_S2C_ARENA_TURN_START: {
-            if (Client::isServer) break;
-            auto* pkt = reinterpret_cast<Pkt_ArenaTurnStart*>(header);
-            ArenaBattleManager::GetInstance().OnSpectatorTurnStart(pkt->turnPlayerName);
-            NotifyArenaBattleTurnStart(pkt->turnPlayerName);
-            IPCManager::GetInstance().SendLog(
-                "[아레나] 턴 시작: " + std::string(pkt->turnPlayerName));
-            break;
-        }
-
-        case PacketType::PKT_S2C_ARENA_ATTACK_RESULT: {
-            if (Client::isServer) break;
-            auto* pkt = reinterpret_cast<Pkt_ArenaAttackResult*>(header);
-            ArenaBattleManager::GetInstance().OnSpectatorAttackResult(*pkt);
-            NotifyArenaBattleAttackResult(*pkt);
-            IPCManager::GetInstance().SendLog(
-                "[아레나] " + std::string(pkt->attackerName) + " -> " +
-                std::string(pkt->targetName) + " 데미지 " + std::to_string(pkt->damage));
-            break;
-        }
-
-        case PacketType::PKT_S2C_ARENA_HP_SYNC: {
-            if (Client::isServer) break;
-            auto* pkt = reinterpret_cast<Pkt_ArenaHpSync*>(header);
-            ArenaBattleManager::GetInstance().OnSpectatorHpSync(*pkt);
-            NotifyArenaBattleHpSync(*pkt);
-            IPCManager::GetInstance().SendLog(
-                "[아레나] HP: " + std::string(pkt->playerName) +
-                " " + std::to_string(pkt->currentHp) + "/" + std::to_string(pkt->maxHp));
-            break;
-        }
-
-        case PacketType::PKT_S2C_ARENA_ITEM_LIST: {
-            if (Client::isServer) break;
-            auto* pkt = reinterpret_cast<Pkt_ArenaItemList*>(header);
-            NotifyArenaBattleItemList(*pkt);
-            IPCManager::GetInstance().SendLog(
-                "[아레나] 아이템 목록: " + std::string(pkt->ownerName) +
-                " (" + std::to_string(pkt->slotCount) + "종)");
-            break;
-        }
-
-        case PacketType::PKT_S2C_ARENA_DIE: {
-            if (Client::isServer) break;
-            auto* pkt = reinterpret_cast<Pkt_ArenaDie*>(header);
-            ArenaBattleManager::GetInstance().OnSpectatorDie(pkt->playerName);
-            NotifyArenaBattleDie(pkt->playerName);
-            IPCManager::GetInstance().SendLog("[아레나] 사망: " + std::string(pkt->playerName));
-            break;
-        }
-
-        case PacketType::PKT_S2C_ARENA_RANK_LIST: {
-            if (Client::isServer) break;
-            auto* pkt = reinterpret_cast<Pkt_ArenaRankList*>(header);
-            ArenaBattleManager::GetInstance().OnSpectatorRankList(*pkt);
-            IPCManager::GetInstance().SendLog(
-                "[아레나] 순위 수신 (" + std::to_string(pkt->entryCount) + "명)");
-            break;
-        }
-
-        case PacketType::PKT_S2C_ARENA_SESSION_APPLY: {
-            if (Client::isServer) break;
-
-            Player* player = GameManager::GetInstance().GetPlayer();
-            if (player != nullptr)
-            {
-                ApplyArenaSessionToLocalPlayer(
-                    player,
-                    reinterpret_cast<const char*>(header),
-                    header->size);
-            }
-            break;
-        }
-
-        case PacketType::PKT_S2C_ARENA_LOBBY_STATE: {
-            if (Client::isServer) break;
-
-            auto* pkt = reinterpret_cast<Pkt_ArenaLobbyState*>(header);
-            ApplyArenaLobbyStateCache(*pkt);
-            IPCManager::GetInstance().SendLog(
-                "[아레나] 로비 상태 수신 (" + std::to_string(pkt->playerCount) + "명)");
-            break;
-        }
-
-        case PacketType::PKT_S2C_ARENA_SNAPSHOT_REQUEST: {
-            if (Client::isServer) break;
-
-            if (GetArenaLobbyState() == nullptr)
-            {
-                IPCManager::GetInstance().SendLog(
-                    "[아레나] 로비가 아닌 상태에서 스냅샷 요청 무시");
-                break;
-            }
-
-            Player* player = GameManager::GetInstance().GetPlayer();
-            if (player != nullptr)
-            {
-                SendArenaPlayerSnapshotPacket(player);
-                IPCManager::GetInstance().SendLog("[아레나] 방장 요청으로 스냅샷 전송");
-            }
-            break;
-        }
-
-        //--------------골드 전송 처리 부문----------------
-        case static_cast<PacketType>(210): // GoldTradePacketType::PKT_C2S_GOLD_TRADE_REQ
+        // [추가] 방장이 클라이언트의 이름을 맵에 기억해둠
         {
-            Pkt_GoldTradeRequest* pkt = reinterpret_cast<Pkt_GoldTradeRequest*>(header);
-            HandleGoldTradeRequest(sock, pkt);
-            break;
+            std::lock_guard<std::mutex> lock(clientsMutex);
+            clientNames[sock] = pkt->name;
         }
 
-        case static_cast<PacketType>(211): // GoldTradePacketType::PKT_S2C_GOLD_TRADE_ACK
+        IPCManager::GetInstance().SendPlayerJoin(false, pkt->name);
+
+        Pkt_Join ackPkt(PacketType::PKT_S2C_JOIN_ACK);
+        strcpy_s(ackPkt.name, sizeof(ackPkt.name), Client::playerName.c_str());
+        send(sock, reinterpret_cast<char*>(&ackPkt), ackPkt.header.size, 0);
+        break;
+    }
+
+    case PacketType::PKT_S2C_JOIN_ACK: {
+        Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
+        IPCManager::GetInstance().SendPlayerJoin(true, pkt->name);
+        break;
+    }
+
+                                     // [추가] 방장으로부터 누군가 나갔다는 퇴장 패킷을 받았을 때의 처리
+    case PacketType::PKT_S2C_LEAVE: {
+        Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
+        IPCManager::GetInstance().SendPlayerLeave(pkt->name); // 로컬 창 갱신
+        break;
+    }
+
+    case PacketType::PKT_CHAT: {
+        Pkt_Chat* pkt = reinterpret_cast<Pkt_Chat*>(header);
+        IPCManager::GetInstance().SendChat(pkt->sender, pkt->message);
+
+        if (Client::isServer)
         {
-            Pkt_GoldTradeAck* pkt = reinterpret_cast<Pkt_GoldTradeAck*>(header);
-            HandleGoldTradeAck(pkt);
+            std::lock_guard<std::mutex> lock(clientsMutex);
+            for (SOCKET clientSock : connectedClients)
+            {
+                if (clientSock != sock)
+                {
+                    send(clientSock, reinterpret_cast<char*>(pkt), pkt->header.size, 0);
+                }
+            }
+        }
+        break;
+    }
+
+    case PacketType::PKT_S2C_CHANGE_STATE: {
+        Pkt_ChangeState* pkt = reinterpret_cast<Pkt_ChangeState*>(header);
+
+        if (!Client::isServer) // 방지책: 방장 본인은 이중 전환 방지
+        {
+            IGameState* nextState = CreateStateFromEGameState(pkt->targetState);
+            if (nextState == nullptr) break;
+
+            if (pkt->targetState == EGameState::Start)
+            {
+                IPCManager::GetInstance().SendLog("[네트워크] 방장이 게임을 시작했습니다. 인게임으로 진입합니다.");
+            }
+            else if (pkt->targetState == EGameState::ArenaReady)
+            {
+                IPCManager::GetInstance().SendLog("[아레나] 준비 단계에 진입했습니다.");
+            }
+            else if (pkt->targetState == EGameState::ArenaLobby)
+            {
+                IPCManager::GetInstance().SendLog("[아레나] 로비에 입장했습니다.");
+            }
+            else if (pkt->targetState == EGameState::ArenaBattle)
+            {
+                IPCManager::GetInstance().SendLog("[아레나] 전투가 시작되었습니다.");
+            }
+            else if (pkt->targetState == EGameState::ArenaWait)
+            {
+                IPCManager::GetInstance().SendLog("[아레나] 탈락하여 대기 중입니다.");
+            }
+            else if (pkt->targetState == EGameState::ArenaResult)
+            {
+                IPCManager::GetInstance().SendLog("[아레나] 결과 화면으로 이동합니다.");
+            }
+
+            GameManager::GetInstance().SetCurrentState(nextState);
+        }
+        break;
+    }
+
+    case PacketType::PKT_C2S_ARENA_ITEM_REGISTER: {
+        if (!Client::isServer) break;
+        OnHostArenaItemRegister(sock, *reinterpret_cast<Pkt_ArenaItemRegister*>(header));
+        break;
+    }
+
+    case PacketType::PKT_C2S_ARENA_READY: {
+        if (!Client::isServer) break;
+        OnHostArenaLobbyArrived(sock);
+        break;
+    }
+
+    case PacketType::PKT_C2S_ARENA_PLAYER_SNAPSHOT: {
+        if (!Client::isServer) break;
+        OnHostArenaPlayerSnapshot(sock, reinterpret_cast<const char*>(header), header->size);
+        break;
+    }
+
+    case PacketType::PKT_C2S_ARENA_ATTACK: {
+        if (!Client::isServer) break;
+        OnHostArenaAttack(sock, *reinterpret_cast<Pkt_ArenaAttack*>(header));
+        break;
+    }
+
+    case PacketType::PKT_C2S_ARENA_ITEM_USE: {
+        if (!Client::isServer) break;
+        OnHostArenaItemUse(sock, *reinterpret_cast<Pkt_ArenaItemUse*>(header));
+        break;
+    }
+
+                                           // ---------- 아레나 S2C (게스트: UI + 관전 캐시) ----------
+    case PacketType::PKT_S2C_ARENA_PLAYER_LIST: {
+        if (Client::isServer) break;
+        auto* pkt = reinterpret_cast<Pkt_ArenaPlayerList*>(header);
+        ArenaBattleManager::GetInstance().OnSpectatorPlayerList(*pkt);
+        NotifyArenaBattlePlayerList(*pkt);
+        IPCManager::GetInstance().SendLog(
+            "[아레나] 플레이어 목록 수신 (" + std::to_string(pkt->playerCount) + "명)");
+        break;
+    }
+
+    case PacketType::PKT_S2C_ARENA_TURN_START: {
+        if (Client::isServer) break;
+        auto* pkt = reinterpret_cast<Pkt_ArenaTurnStart*>(header);
+        ArenaBattleManager::GetInstance().OnSpectatorTurnStart(pkt->turnPlayerName);
+        NotifyArenaBattleTurnStart(pkt->turnPlayerName);
+        IPCManager::GetInstance().SendLog(
+            "[아레나] 턴 시작: " + std::string(pkt->turnPlayerName));
+        break;
+    }
+
+    case PacketType::PKT_S2C_ARENA_ATTACK_RESULT: {
+        if (Client::isServer) break;
+        auto* pkt = reinterpret_cast<Pkt_ArenaAttackResult*>(header);
+        ArenaBattleManager::GetInstance().OnSpectatorAttackResult(*pkt);
+        NotifyArenaBattleAttackResult(*pkt);
+        IPCManager::GetInstance().SendLog(
+            "[아레나] " + std::string(pkt->attackerName) + " -> " +
+            std::string(pkt->targetName) + " 데미지 " + std::to_string(pkt->damage));
+        break;
+    }
+
+    case PacketType::PKT_S2C_ARENA_HP_SYNC: {
+        if (Client::isServer) break;
+        auto* pkt = reinterpret_cast<Pkt_ArenaHpSync*>(header);
+        ArenaBattleManager::GetInstance().OnSpectatorHpSync(*pkt);
+        NotifyArenaBattleHpSync(*pkt);
+        IPCManager::GetInstance().SendLog(
+            "[아레나] HP: " + std::string(pkt->playerName) +
+            " " + std::to_string(pkt->currentHp) + "/" + std::to_string(pkt->maxHp));
+        break;
+    }
+
+    case PacketType::PKT_S2C_ARENA_ITEM_LIST: {
+        if (Client::isServer) break;
+        auto* pkt = reinterpret_cast<Pkt_ArenaItemList*>(header);
+        NotifyArenaBattleItemList(*pkt);
+        IPCManager::GetInstance().SendLog(
+            "[아레나] 아이템 목록: " + std::string(pkt->ownerName) +
+            " (" + std::to_string(pkt->slotCount) + "종)");
+        break;
+    }
+
+    case PacketType::PKT_S2C_ARENA_DIE: {
+        if (Client::isServer) break;
+        auto* pkt = reinterpret_cast<Pkt_ArenaDie*>(header);
+        ArenaBattleManager::GetInstance().OnSpectatorDie(pkt->playerName);
+        NotifyArenaBattleDie(pkt->playerName);
+        IPCManager::GetInstance().SendLog("[아레나] 사망: " + std::string(pkt->playerName));
+        break;
+    }
+
+    case PacketType::PKT_S2C_ARENA_RANK_LIST: {
+        if (Client::isServer) break;
+        auto* pkt = reinterpret_cast<Pkt_ArenaRankList*>(header);
+        ArenaBattleManager::GetInstance().OnSpectatorRankList(*pkt);
+        IPCManager::GetInstance().SendLog(
+            "[아레나] 순위 수신 (" + std::to_string(pkt->entryCount) + "명)");
+        break;
+    }
+
+    case PacketType::PKT_S2C_ARENA_SESSION_APPLY: {
+        if (Client::isServer) break;
+
+        Player* player = GameManager::GetInstance().GetPlayer();
+        if (player != nullptr)
+        {
+            ApplyArenaSessionToLocalPlayer(
+                player,
+                reinterpret_cast<const char*>(header),
+                header->size);
+        }
+        break;
+    }
+
+    case PacketType::PKT_S2C_ARENA_LOBBY_STATE: {
+        if (Client::isServer) break;
+
+        auto* pkt = reinterpret_cast<Pkt_ArenaLobbyState*>(header);
+        ApplyArenaLobbyStateCache(*pkt);
+        IPCManager::GetInstance().SendLog(
+            "[아레나] 로비 상태 수신 (" + std::to_string(pkt->playerCount) + "명)");
+        break;
+    }
+
+    case PacketType::PKT_S2C_ARENA_SNAPSHOT_REQUEST: {
+        if (Client::isServer) break;
+
+        if (GetArenaLobbyState() == nullptr)
+        {
+            IPCManager::GetInstance().SendLog(
+                "[아레나] 로비가 아닌 상태에서 스냅샷 요청 무시");
             break;
         }
 
-        default:
-            break;
+        Player* player = GameManager::GetInstance().GetPlayer();
+        if (player != nullptr)
+        {
+            SendArenaPlayerSnapshotPacket(player);
+            IPCManager::GetInstance().SendLog("[아레나] 방장 요청으로 스냅샷 전송");
+        }
+        break;
+    }
+
+                                                   //--------------골드 전송 처리 부문----------------
+    case static_cast<PacketType>(210): // GoldTradePacketType::PKT_C2S_GOLD_TRADE_REQ
+    {
+        Pkt_GoldTradeRequest* pkt = reinterpret_cast<Pkt_GoldTradeRequest*>(header);
+        HandleGoldTradeRequest(sock, pkt);
+        break;
+    }
+
+    case static_cast<PacketType>(211): // GoldTradePacketType::PKT_S2C_GOLD_TRADE_ACK
+    {
+        Pkt_GoldTradeAck* pkt = reinterpret_cast<Pkt_GoldTradeAck*>(header);
+        HandleGoldTradeAck(pkt);
+        break;
+    }
+
+    default:
+        break;
     }
 }
 #pragma endregion

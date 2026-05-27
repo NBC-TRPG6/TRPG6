@@ -9,5 +9,5 @@ public:
     virtual void Update(int ch, std::string& lastCommand) override;
 
 private:
-    Player* player;
+    Player* player = nullptr;
 };
