@@ -11,6 +11,7 @@
 #include "ShopState.h"
 #include "ShopStockState.h"
 #include "IPCManager.h"
+#include "TradeState.h"
 #include "Utils.h" //아스키 아트를 위한 include
 #include "InventoryState.h" // 인벤토리
 #include "ItemTradeState.h" 
@@ -67,7 +68,7 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
     case 5:
         if (!Client::isServer)
         {
-            Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "\033[1;31m아레나는 방장만 개최할 수 있습니다!\033[0m", 2.0f);   
+            Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "\033[1;31m아레나는 방장만 개최할 수 있습니다!\033[0m", 2.0f);
             break;
         }
         GameManager::GetInstance().SetCurrentState(new ArenaReadyState());
@@ -76,8 +77,7 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
         break;
 
     case 6:
-        GameManager::GetInstance().SetCurrentState(new ItemTradeState());
+        Renderer::ClearAllCenterLeftUI();
+        GameManager::GetInstance().SetCurrentState(new TradeState());
         break;
-    }
-
 }
