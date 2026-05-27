@@ -1176,7 +1176,7 @@ void NetworkManager::OnHostArenaItemUse(SOCKET sock, const Pkt_ArenaItemUse& pkt
     {
     case ItemType::HP_POTION:
     {
-        targetHdr->hp += effectValue;
+        targetHdr->hp += effectValue * targetHdr->maxHp / 100;
         if (targetHdr->hp > targetHdr->maxHp) targetHdr->hp = targetHdr->maxHp;
 
         Pkt_ArenaHpSync hpPkt;
