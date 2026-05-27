@@ -9,23 +9,6 @@
 void ArenaWaitState::Enter()
 {
     Renderer::ClearAllCenterLeftUI();
-    spectateIndex = 0;
-    ClampSpectateIndex();
-}
-
-void ArenaWaitState::ClampSpectateIndex()
-{
-    auto alive = ArenaBattleManager::GetInstance().GetAlivePlayerNames();
-    if (alive.empty())
-    {
-        spectateIndex = 0;
-        return;
-    }
-    if (spectateIndex < 0) spectateIndex = 0;
-    if (spectateIndex >= static_cast<int>(alive.size()))
-    {
-        spectateIndex = static_cast<int>(alive.size()) - 1;
-    }
 }
 
 void ArenaWaitState::RenderSpectatorUI()
@@ -45,7 +28,7 @@ void ArenaWaitState::RenderSpectatorUI()
     int line = 0;
     for (const auto& pair : arena.GetSpectatorPlayers())
     {
-        if (line >= 10) break;
+        if (line >= 8) break;
 
         const std::string& name = pair.first;
         const ArenaPlayerListEntry& e = pair.second;
@@ -53,12 +36,6 @@ void ArenaWaitState::RenderSpectatorUI()
         if (e.isAlive == 0)
         {
             row += " (탈락)";
-        }
-
-        if (!alive.empty() && spectateIndex >= 0 && spectateIndex < static_cast<int>(alive.size())
-            && name == alive[static_cast<size_t>(spectateIndex)])
-        {
-            row = "> " + row + " < 관전 중";
         }
 
         Renderer::DisplayUI(UIPart::CenterLeft, line, row);
@@ -71,21 +48,12 @@ void ArenaWaitState::RenderSpectatorUI()
         ++line;
     }
 
-    const auto& log = arena.GetCombatLog();
-    int logLine = 0;
-    for (int i = static_cast<int>(log.size()) - 1; i >= 0 && logLine < 6; --i, ++logLine)
-    {
-        Renderer::DisplayUI(UIPart::CenterRight, logLine, log[static_cast<size_t>(i)]);
-    }
+    Renderer::DisplayUI(UIPart::CenterLeft, 9, lastActionLog);
 
-    if (!alive.empty())
-    {
-        Renderer::DisplayUI(UIPart::CenterLeft, 11, "1~: 생존자 관전 대상 변경 (숫자)");
-    }
     Renderer::DisplayUI(UIPart::CenterLeft, 12, "전투 종료 시 자동으로 결과 화면으로 이동");
 }
 
-// RankList 수신(battleEnded) 시 Result로 전환. ch 1~N으로 관전 대상 변경
+// RankList 수신(battleEnded) 시 Result로 전환
 void ArenaWaitState::Update(int ch, std::string& lastCommand)
 {
     (void)lastCommand;
@@ -96,14 +64,17 @@ void ArenaWaitState::Update(int ch, std::string& lastCommand)
         return;
     }
 
-    auto alive = ArenaBattleManager::GetInstance().GetAlivePlayerNames();
-    if (ch >= 1 && ch <= static_cast<int>(alive.size()))
-    {
-        spectateIndex = ch - 1;
-        ClampSpectateIndex();
-    }
 
     RenderSpectatorUI();
+}
+
+void ArenaWaitState::OnAttackResult(const std::string& attacker, const std::string& target, int damage)
+{
+    lastActionLog = attacker + "이(가) " + target + "을(를) 공격! 데미지: " + std::to_string(damage);
+}
+void ArenaWaitState::OnItemResult(const std::string& userName, const std::string& itemName, int itemType, int value) {
+    lastActionLog = userName + "이(가) " + itemName + " 사용! 효과: " +
+        (itemType == 0 ? "HP 회복 " : "버프 ") + std::to_string(value);
 }
 
 void ArenaWaitState::Exit()
