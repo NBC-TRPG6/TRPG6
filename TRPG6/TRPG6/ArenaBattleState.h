@@ -20,7 +20,7 @@ public:
     // NetworkManager가 S2C 수신 시 호출되는 함수들
     void OnPlayerList(const std::vector<ArenaPlayerListEntry>& playerStats);
     void OnTurnStart(const std::string& turnPlayerName);
-    void OnHPSync(const std::vector<ArenaPlayerListEntry>& playerStats);
+    void OnHpSync(const std::string& playerName, int32_t currentHp, int32_t maxHp);
     void OnAttackResult(const std::string& attacker, const std::string& target, int damage);
     void OnItemList(const std::vector<ArenaItemSlot>& items);
     void OnPlayerDie(const std::string& playerName);
@@ -30,7 +30,7 @@ private:
     void DrawMainMenu();
     void DrawTargetList();
     void DrawItemList();
-
+    bool HasUsableArenaItems() const;
 
     /// <summary>
     /// 플레이어 기본: 대기(턴X)
