@@ -73,7 +73,7 @@ namespace Client
 namespace COOP_DB
 {
     // 보스 관련 설정 (파티 평균 공격력 500, 5인 15~20턴 하드코어 기준)
-    inline constexpr int BOSS_MAX_HP = 35000;     // 보스 최대 체력 대폭 상향
+    inline constexpr int BOSS_MAX_HP = 40000;     // 보스 최대 체력 대폭 상향
     inline constexpr int BOSS_DMG_MEAN = 300;     // 보스 공격력 정규분포 평균
     inline constexpr int BOSS_DMG_STDDEV = 200;   // 보스 공격력 정규분포 표준편차 (분산 극대화)
     inline constexpr int BOSS_DMG_BASE = 300;     // 보스 확정 최저 데미지
