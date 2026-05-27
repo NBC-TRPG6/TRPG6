@@ -69,7 +69,7 @@ void ArenaBattleState::Update(int ch, std::string& lastCommand)
             ++idx;
             if (ch == idx)
             {
-                //TODO:: 어택포켓 받아오기 NetworkManager::GetInstance().SendArenaAttackPacket(p.playerName);
+                NetworkManager::GetInstance().SendArenaAttackPacket(p.playerName);
                 CurrentStep = BattleUIStep::WaitingTurn;
                 break;
             }
@@ -87,7 +87,7 @@ void ArenaBattleState::Update(int ch, std::string& lastCommand)
             auto& slot = ItemSnapshot[ch - 1];
             if (slot.count > 0)
             {
-                //아이템 사용 포켓 가져오기 NetworkManager::GetInstance().SendArenaItemUsePacket(slot.itemName, "");
+                NetworkManager::GetInstance().SendArenaItemUsePacket(slot.itemName, "");
                 slot.count--;
                 CurrentStep = BattleUIStep::WaitingTurn;
             }
