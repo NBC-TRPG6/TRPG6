@@ -45,7 +45,18 @@ void ArenaBettingState::Update(int ch, std::string& lastCommand)
             itemName, 1, itemType, itemValue);
         
         // 로컬 인벤토리에서 제거
-        inventory.UseItem(nullptr, itemName, 1);
+        if (itemType == ItemType::WEAPON)
+        {
+            WeaponItem* weapon = dynamic_cast<WeaponItem*>(selectedSlot.item);
+            player->EquipWeapon(weapon);
+
+            // 무기는 장착 해제 후 제거
+            inventory.RemoveItem(itemName, 1);
+        }
+        else
+        {
+            inventory.UseItem(nullptr, itemName, 1);
+        }
 
         Renderer::DisplayUITimed(UIPart::CenterLeft, 14, itemName + "을(를) 베팅했습니다!", 2.0f);
 

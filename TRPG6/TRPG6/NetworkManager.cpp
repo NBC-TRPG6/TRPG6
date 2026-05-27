@@ -56,6 +56,7 @@ static IGameState* CreateStateFromEGameState(EGameState state)
     case EGameState::COOPBattle: return new COOPBattleState();
     case EGameState::COOPReward: return new COOPRewardState();
     case EGameState::GameOver: return new DieState();
+
     default: return nullptr;
     }
 }

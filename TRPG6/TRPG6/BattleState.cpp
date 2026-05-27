@@ -49,10 +49,12 @@ void BattleState::Update(int ch, std::string& lastCommand)
 
         if (BattleEnded && !isBattle)
         {
-            if (battleManager->GetIsBoss())
-                ChangeState(new ClearState());
-            else
-                ChangeState(new ShopBranchState());
+            //if (battleManager->GetIsBoss())
+            //    ChangeState(new ClearState());
+            //else
+            //    ChangeState(new ShopBranchState());
+
+            ChangeState(new ShopBranchState());
             return;
         }
 
