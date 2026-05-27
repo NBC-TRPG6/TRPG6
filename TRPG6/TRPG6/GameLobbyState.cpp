@@ -22,11 +22,6 @@ void GameLobbyState::Enter()
 
 void GameLobbyState::Update(int ch, std::string& lastCommand)
 {
-    if (1)
-    {
-        GameManager::GetInstance().SetCurrentState(new GameStartState());
-        return;
-    }
 
     Renderer::DisplayUI(UIPart::Top, 0, "[ GAME LOBBY ]");
 
