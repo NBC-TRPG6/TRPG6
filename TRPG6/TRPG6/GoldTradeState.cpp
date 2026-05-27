@@ -22,8 +22,7 @@ static std::vector<std::string> SplitSpace(const std::string& s)
 
 void GoldTradeState::Enter()
 {
-    // 입력 모드를 READ_MODE(문자열 입력 가능 상태)로 전환하여 유저가 이름과 골드를 타이핑할 수 있게 합니다.
-    // (만약 프레임워크 구조상 숫자 선택과 문자열 입력을 수동 전환해야 한다면 여기서 켜주는 것이 좋습니다)
+    // 입력 모드를 READ_MODE(문자열 입력 가능 상태)로 전환
     READ_MODE = true;
 }
 
@@ -31,11 +30,6 @@ void GoldTradeState::Update(int ch, std::string& lastCommand)
 {
     Renderer::ClearAllCenterLeftUI();
     player = GameManager::GetInstance().GetPlayer();
-
-    if (player != nullptr)
-    {
-        player->PrintStatus();
-    }
 
     // 상단 아스키 아트 및 UI 출력
     auto art = LoadImageAsASCII("..\\..\\Resources\\gold.png");
@@ -45,6 +39,11 @@ void GoldTradeState::Update(int ch, std::string& lastCommand)
     Renderer::DisplayUI(UIPart::CenterLeft, 2, "양식 입력: [받을 사람] [골드량]");
     Renderer::DisplayUI(UIPart::CenterLeft, 3, "(예시: Hero 500)");
     Renderer::DisplayUI(UIPart::CenterLeft, 5, "0. 메인 화면");
+
+    if (player != nullptr)
+    {
+        player->PrintStatus();
+    }
 
     // 1. 숫자 입력 처리 (메인 화면 복귀 등)
     if (ch == 0 && lastCommand.empty())
