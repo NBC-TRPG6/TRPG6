@@ -41,7 +41,7 @@ void COOPBattleState::Update(int ch, std::string& lastCommand) {
         if (currentSubState == SubState::Main) {
             Renderer::DisplayUI(UIPart::CenterLeft, 0, "당신의 턴입니다!");
             Renderer::DisplayUI(UIPart::CenterLeft, 9, "1. 공격");
-            Renderer::DisplayUI(UIPart::CenterLeft, 10, "2. 방어 (탱커 전용)");
+            Renderer::DisplayUI(UIPart::CenterLeft, 10, "2. 도발");
             Renderer::DisplayUI(UIPart::CenterLeft, 11, "3. 힐 (힐러 전용)");
             Renderer::DisplayUI(UIPart::CenterLeft, 12, "4. 아이템 사용");
 
@@ -49,7 +49,7 @@ void COOPBattleState::Update(int ch, std::string& lastCommand) {
                 NetworkManager::GetInstance().SendCOOPUseAttack(Client::playerName, coop.currentBossName, myInfo.atk);
                 lastCommand = "";
             } else if (ch == 2 || lastCommand == "2") {
-                if (myInfo.job == PlayerJob::Tanker) NetworkManager::GetInstance().SendCOOPUseBlock(Client::playerName, "ANY");
+                if (1) NetworkManager::GetInstance().SendCOOPUseBlock(Client::playerName, "ANY");
                 else Renderer::DisplayUITimed(UIPart::CenterLeft, 11, "탱커만 사용할 수 있습니다.", 2.0f);
                 lastCommand = "";
             } else if (ch == 3 || lastCommand == "3") {
@@ -109,7 +109,8 @@ void COOPBattleState::Update(int ch, std::string& lastCommand) {
                 lastCommand = "";
             } else if (ch > 0 && ch <= (int)alivePlayers.size()) {
                 std::string targetName = alivePlayers[ch - 1];
-                NetworkManager::GetInstance().SendCOOPUseHeal(Client::playerName, targetName, 50); // 기본 50 힐링
+                int healAmount = get_normal_int(30, 10);
+                NetworkManager::GetInstance().SendCOOPUseHeal(Client::playerName, targetName, healAmount);
                 currentSubState = SubState::Main;
                 lastCommand = "";
             }

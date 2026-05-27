@@ -66,8 +66,20 @@ void COOPReadyState::Update(int ch, std::string& lastCommand)
         Player* p = GameManager::GetInstance().GetPlayer();
         if (p)
         {
-            NetworkManager::GetInstance().SendCOOPUpdateStatus(Client::playerName, p->GetAttack(), p->GetHp(), static_cast<int>(myJob), false);
-            COOPManager::GetInstance().UpdatePlayerStatus(Client::playerName, p->GetAttack(), p->GetHp(), myJob, false);
+            int finalAtk = p->GetAttack();
+            int finalHp = p->GetHp();
+
+            if (myJob == PlayerJob::Tanker)
+            {
+                finalHp += 200; // 탱커: 추가 체력 200
+            }
+            else if (myJob == PlayerJob::None)
+            {
+                finalAtk += 30; // 기본(딜러): 추가 공격력 30
+            }
+
+            NetworkManager::GetInstance().SendCOOPUpdateStatus(Client::playerName, finalAtk, finalHp, static_cast<int>(myJob), false);
+            COOPManager::GetInstance().UpdatePlayerStatus(Client::playerName, finalAtk, finalHp, myJob, false);
             // 로컬 플레이어의 준비 상태도 UI에 즉시 반영되도록 명시적 처리
             COOPManager::GetInstance().SetPlayerReady(Client::playerName, true);
         }

@@ -3,12 +3,13 @@
 #include "GameManager.h"
 #include "DATABASE.h"
 #include "Player.h"
+#include "Utils.h"
 #include "Item.h"
 
 void COOPManager::Reset() {
     players.clear();
     currentBossName = "드래곤";
-    currentBossHp = 999;
+    currentBossHp = 3000;
     currentTurnPlayer = "";
     currentTurnCount = 0;
     currentBlockSource = "";
@@ -133,7 +134,8 @@ void COOPManager::BossAction()
         target = currentBlockSource;
     }
 
-    int currentHp = players[target].hp - 50;
+    int damage = get_normal_int(90, 30) + 30;
+    int currentHp = players[target].hp - damage;
     if (currentHp < 0) currentHp = 0;
     bool isDead = (currentHp == 0);
 
