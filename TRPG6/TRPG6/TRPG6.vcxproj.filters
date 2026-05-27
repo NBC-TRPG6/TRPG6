@@ -99,27 +99,60 @@
     <ClCompile Include="ArenaBettingState.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-      <ClCompile Include="ArenaBattleManager.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
-      <ClCompile Include="ArenaBattleState.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
-      <ClCompile Include="ArenaLobbyState.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
-      <ClCompile Include="ArenaReadyState.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
-      <ClCompile Include="ArenaResultState.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
-      <ClCompile Include="ArenaWaitState.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
-      <ClCompile Include="PacketArena.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
+    <ClCompile Include="ArenaBattleManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ArenaBattleState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ArenaLobbyState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ArenaReadyState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ArenaResultState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ArenaWaitState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketArena.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="COOPBattleState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="COOPManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="COOPReadyState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="COOPRewardState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="COOPSelectJobState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemReceivedTradeListState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemSentTradeListState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemTradeRequestState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemTradeState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="TradeManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponItem.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Controller.h">
@@ -209,23 +242,59 @@
     <ClInclude Include="ArenaBettingState.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-      <ClInclude Include="ArenaBattleManager.h">
-          <Filter>헤더 파일</Filter>
-      </ClInclude>
-      <ClInclude Include="ArenaBattleState.h">
-          <Filter>헤더 파일</Filter>
-      </ClInclude>
-      <ClInclude Include="ArenaLobbyState.h">
-          <Filter>헤더 파일</Filter>
-      </ClInclude>
-      <ClInclude Include="ArenaReadyState.h">
-          <Filter>헤더 파일</Filter>
-      </ClInclude>
-      <ClInclude Include="ArenaResultState.h">
-          <Filter>헤더 파일</Filter>
-      </ClInclude>
-      <ClInclude Include="ArenaWaitState.h">
-          <Filter>헤더 파일</Filter>
-      </ClInclude>
+    <ClInclude Include="ArenaBattleManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ArenaBattleState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ArenaLobbyState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ArenaReadyState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ArenaResultState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ArenaWaitState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="COOPBattleState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="COOPManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="COOPReadyState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="COOPRewardState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="COOPSelectJobState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemReceivedTradeListState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemSentTradeListState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemTradeRequestState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemTradeState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Shop.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="TradeManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
