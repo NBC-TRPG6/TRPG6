@@ -10,7 +10,7 @@
 
 void COOPBattleState::Enter()
 {
-    auto art = LoadImageAsASCII("..\\..\\Resources\\RAID.jpg");
+    auto art = LoadImageAsASCIIColor("..\\..\\Resources\\RAID.jpg");
     Renderer::SetTopASCIIImage(art);
     currentSubState = SubState::Main;
 

@@ -3,6 +3,7 @@
 #include "Character.h"
 #include "Inventory.h"
 #include "WeaponItem.h"
+#include "WeaponTable.h"
 
 class Player : public Character {
 private:

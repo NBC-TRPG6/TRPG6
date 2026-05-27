@@ -7,7 +7,7 @@
 
 void ShopBranchState::Enter()
 {
-    auto art = LoadImageAsASCII("..\\..\\Resources\\nemo.png");
+    auto art = LoadImageAsASCIIColor("..\\..\\Resources\\nemo.png");
     Renderer::SetTopASCIIImage(art);
 }
 

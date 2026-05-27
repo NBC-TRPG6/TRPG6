@@ -75,7 +75,7 @@ void Player::PrintStatus() const
     {
         if (invSlot.item == equippedWeapon && invSlot.count > 0)
         {
-            Renderer::DisplayUI(UIPart::CenterRight, 7, invSlot.item->GetName());
+            Renderer::DisplayUI(UIPart::CenterRight, 7, "장착: " + equippedWeapon->GetColoredName());
             break;
         }
     }

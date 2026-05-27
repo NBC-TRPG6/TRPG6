@@ -3,6 +3,7 @@
 #include <random>
 #include <algorithm>
 #include "IPCManager.h"
+
 const WeaponData WeaponTable::weaponTable[30] = {
     // 검
     {"나무 검",       "검", 0, 3,  2,  100},
@@ -169,3 +170,15 @@ WeaponItem* WeaponTable::Upgrade(WeaponItem* weapon1, WeaponItem* weapon2)
         data->AttackBonus, data->HPBonus, data->Price);
 }
 
+std::string WeaponTable::GetRarityColor(int upgradeCount) const
+{
+    switch (upgradeCount)
+    {
+    case 0: return COMMON;
+    case 1: return UNCOMMON;
+    case 2: return RARE;
+    case 3: return EPIC;
+    case 4: return LEGENDARY;
+    default: return RESET;
+    }
+}

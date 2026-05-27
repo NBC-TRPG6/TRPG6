@@ -16,7 +16,7 @@ void GameLobbyState::Enter()
     IPCManager::GetInstance().SendPlayerJoin(Client::isServer, Client::playerName);
     IPCManager::GetInstance().SendChat(Client::playerName, "로비에 입장했습니다.");
 
-    auto art = LoadImageAsASCII("..\\..\\Resources\\Lobby.jpg");
+    auto art = LoadImageAsASCIIColor("..\\..\\Resources\\Lobby.jpg");
     Renderer::SetTopASCIIImage(art);
 }
 
