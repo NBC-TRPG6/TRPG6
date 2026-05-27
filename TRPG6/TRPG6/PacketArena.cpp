@@ -1,4 +1,4 @@
-#include "Packet.h"
+﻿#include "Packet.h"
 #include "Player.h"
 #include "Item.h"
 #include "IPCManager.h"
@@ -113,9 +113,9 @@ void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size
     const ArenaItemSlot* battleSlots = GetArenaSessionApplyBattleSlots(hdr);
     const ArenaItemSlot* rewardSlots = GetArenaSessionApplyRewardSlots(hdr);
 
-    player->SetMaxHp(hdr->maxHp);
-    player->SetHp(hdr->hp);
-    player->SetAttack(hdr->attack);
+    //player->SetMaxHp(hdr->maxHp);
+    //player->SetHp(hdr->hp);
+    //player->SetAttack(hdr->attack);
 
     Inventory<Item>& inventory = player->GetInventory();
 
@@ -137,7 +137,24 @@ void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size
         inventory.AddItem(new Item(itemName, itemType, slot.value, 0), slot.count);
     }
 
-    IPCManager::GetInstance().SendLog(
-        "[아레나] 로컬 플레이어 반영 완료 (HP " + std::to_string(hdr->hp) + "/" +
-        std::to_string(hdr->maxHp) + ", ATK " + std::to_string(hdr->attack) + ")");
+    IPCManager::GetInstance().SendLog("[아레나] 로컬 플레이어 반영 완료");
+}
+
+void ApplyArenaBetRefundToLocalPlayer(Player* player, const Pkt_ArenaBetRefund& pkt)
+{
+    if (player == nullptr) return;
+
+    Inventory<Item>& inventory = player->GetInventory();
+
+    for (uint8_t i = 0; i < pkt.slotCount && i < MAX_ARENA_ITEM_SLOTS; ++i)
+    {
+        const ArenaItemSlot& slot = pkt.slots[i];
+        if (slot.count <= 0) continue;
+
+        const std::string itemName = slot.itemName;
+        const ItemType itemType = static_cast<ItemType>(slot.itemType);
+        inventory.AddItem(new Item(itemName, itemType, slot.value, 0), slot.count);
+    }
+
+    IPCManager::GetInstance().SendLog("[아레나] 베팅 아이템이 인벤토리로 반환되었습니다.");
 }

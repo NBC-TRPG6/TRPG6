@@ -8,6 +8,8 @@
 #include <vector>
 #include <string>
 #include <cwchar>
+#include <random>
+#include <cmath>
 
 // stb_image.h 인클루드 (구현체 정의는 Renderer.cpp에서 수행)
 #include "stb_image.h"
@@ -63,3 +65,20 @@ inline std::vector<std::string> LoadImageAsASCII(const char* filepath)
     return asciiScreen;
 }
 
+// 정규분포 샘플링
+// 확률참고
+// mean +- 1sigma: 약 68.27%
+// mean +- 2sigma: 약 95.45%
+// mean +- 3sigma: 약 99.73%
+static inline int get_normal_int(double mean, double sigma)
+{
+    // 난수 생성기와 시드는 스레드별로 한 번만 초기화되도록 static thread_local 사용
+    static thread_local std::random_device rd;
+    static thread_local std::mt19937 gen(rd());
+
+    // 전달받은 평균과 시그마로 정규분포 객체 생성 (비용이 적으므로 매번 생성해도 무방)
+    std::normal_distribution<double> dist(mean, sigma);
+
+    // 난수 추출 후 반올림하여 정수형으로 반환
+    return static_cast<int>(std::round(dist(gen)));
+}
