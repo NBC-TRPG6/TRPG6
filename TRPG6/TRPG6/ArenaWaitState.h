@@ -8,12 +8,14 @@ public:
     void Update(int ch, std::string& lastCommand) override;
     void Exit() override;
 
+    void OnAttackResult(const std::string& attacker, const std::string& target, int damage);
+    void OnItemResult(const std::string& userName, const std::string& itemName, int itemType, int value);
+
+
 private:
     // CenterLeft/CenterRight에 HP·턴·전투 로그·관전 대상 표시
     void RenderSpectatorUI();
-    // spectateIndex를 생존자 목록 범위 안으로 맞춤
-    void ClampSpectateIndex();
 
-    // GetAlivePlayerNames()[spectateIndex] 를 강조 표시
-    int spectateIndex = 0;
+
+    std::string lastActionLog;
 };

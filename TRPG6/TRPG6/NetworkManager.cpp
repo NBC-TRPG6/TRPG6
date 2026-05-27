@@ -35,6 +35,11 @@ static ArenaLobbyState* GetArenaLobbyState()
     return dynamic_cast<ArenaLobbyState*>(GameManager::GetInstance().GetCurrentState());
 }
 
+static ArenaWaitState* GetArenaWaitState()
+{
+    return dynamic_cast<ArenaWaitState*>(GameManager::GetInstance().GetCurrentState());
+}
+
 // PKT_S2C_CHANGE_STATE 수신 시 EGameState에 맞는 IGameState 인스턴스 생성
 static IGameState* CreateStateFromEGameState(EGameState state)
 {
@@ -231,16 +236,28 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         break;
     }
 
-    case PacketType::PKT_S2C_ARENA_HP_SYNC: {
-        if (Client::isServer) break;
-        auto* pkt = reinterpret_cast<Pkt_ArenaHpSync*>(header);
-        ArenaBattleManager::GetInstance().OnSpectatorHpSync(*pkt);
-        NotifyArenaBattleHpSync(*pkt);
-        IPCManager::GetInstance().SendLog(
-            "[아레나] HP: " + std::string(pkt->playerName) +
-            " " + std::to_string(pkt->currentHp) + "/" + std::to_string(pkt->maxHp));
-        break;
-    }
+        case PacketType::PKT_S2C_ARENA_ITEM_RESULT:
+        {
+            if (Client::isServer) break;
+            auto* pkt = reinterpret_cast<Pkt_ArenaItemResult*>(header);
+
+            NotifyArenaItemResult(*pkt);
+            IPCManager::GetInstance().SendLog(
+                "[아레나] " + std::string(pkt->userName) + " 사용 " +
+                std::string(pkt->itemName) + " -> 효과: " + std::to_string(pkt->value));
+            break;
+        }
+
+        case PacketType::PKT_S2C_ARENA_HP_SYNC: {
+            if (Client::isServer) break;
+            auto* pkt = reinterpret_cast<Pkt_ArenaHpSync*>(header);
+            ArenaBattleManager::GetInstance().OnSpectatorHpSync(*pkt);
+            NotifyArenaBattleHpSync(*pkt);
+            IPCManager::GetInstance().SendLog(
+                "[아레나] HP: " + std::string(pkt->playerName) +
+                " " + std::to_string(pkt->currentHp) + "/" + std::to_string(pkt->maxHp));
+            break;
+        }
 
     case PacketType::PKT_S2C_ARENA_ITEM_LIST: {
         if (Client::isServer) break;
@@ -270,8 +287,17 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         break;
     }
 
-    case PacketType::PKT_S2C_ARENA_SESSION_APPLY: {
-        if (Client::isServer) break;
+        case PacketType::PKT_S2C_ARENA_REWARD_POOL: {
+            if (Client::isServer) break;
+            auto* pkt = reinterpret_cast<Pkt_ArenaRewardPool*>(header);
+            ArenaBattleManager::GetInstance().OnSpectatorRewardPool(*pkt);
+            IPCManager::GetInstance().SendLog(
+                "[아레나] 보상 풀 수신 (" + std::to_string(pkt->slotCount) + "종)");
+            break;
+        }
+
+        case PacketType::PKT_S2C_ARENA_SESSION_APPLY: {
+            if (Client::isServer) break;
 
         Player* player = GameManager::GetInstance().GetPlayer();
         if (player != nullptr)
@@ -294,8 +320,20 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         break;
     }
 
-    case PacketType::PKT_S2C_ARENA_SNAPSHOT_REQUEST: {
-        if (Client::isServer) break;
+        case PacketType::PKT_S2C_ARENA_BET_REFUND: {
+            if (Client::isServer) break;
+
+            auto* pkt = reinterpret_cast<Pkt_ArenaBetRefund*>(header);
+            Player* player = GameManager::GetInstance().GetPlayer();
+            if (player != nullptr)
+            {
+                ApplyArenaBetRefundToLocalPlayer(player, *pkt);
+            }
+            break;
+        }
+
+        case PacketType::PKT_S2C_ARENA_SNAPSHOT_REQUEST: {
+            if (Client::isServer) break;
 
         if (GetArenaLobbyState() == nullptr)
         {
@@ -693,6 +731,27 @@ void NetworkManager::SendArenaSessionApplyToAllPlayers(const Pkt_ArenaRankList& 
     ArenaBattleManager::GetInstance().ClearBettedItems();
 }
 
+void NetworkManager::BuildArenaRewardPoolPacket(Pkt_ArenaRewardPool& out) const
+{
+    out = Pkt_ArenaRewardPool();
+
+    const std::vector<ArenaItemSlot>& bettedItems =
+        ArenaBattleManager::GetInstance().GetBettedItems();
+
+    uint8_t idx = 0;
+    for(const ArenaItemSlot& bet : bettedItems)
+    {
+        if (idx >= MAX_ARENA_ITEM_SLOTS) break;
+        if (bet.count <= 0) continue;
+        out.slots[idx] = bet;
+        ++idx;
+    }
+
+    out.slotCount = idx;
+    out.header.size = static_cast<uint16_t>(
+        offsetof(Pkt_ArenaRewardPool, slots) + idx * sizeof(ArenaItemSlot));
+}
+
 bool NetworkManager::BuildArenaItemListPacket(const std::string& ownerName, Pkt_ArenaItemList& out) const
 {
     auto it = arenaPlayerSnapshots.find(ownerName);
@@ -727,6 +786,17 @@ void NetworkManager::BroadcastArenaTurnAndItems(const std::string& playerName)
     {
         BroadcastArenaItemList(itemPkt);
     }
+}
+
+void NetworkManager::BroadcastArenaRewardPool()
+{
+    if (!Client::isServer) return;
+
+    Pkt_ArenaRewardPool pkt;
+    BuildArenaRewardPoolPacket(pkt);
+
+    ArenaBattleManager::GetInstance().OnSpectatorRewardPool(pkt);
+    BroadcastToClients(&pkt,pkt.header.size);
 }
 
 void NetworkManager::StartFirstArenaTurn()
@@ -868,7 +938,14 @@ bool NetworkManager::HasAllArenaSnapshots()
 void NetworkManager::OnHostArenaItemRegister(SOCKET sock, const Pkt_ArenaItemRegister& pkt)
 {
     std::string playerName = GetPlayerNameForSocket(sock);
-    ArenaBattleManager::GetInstance().AddBettedItem(pkt.itemName, pkt.amount);
+
+    ArenaItemSlot slot{};
+    CopyStringToPacketField(slot.itemName, sizeof(slot.itemName), pkt.itemName);
+    slot.count = pkt.amount;
+    slot.itemType = pkt.itemType;
+    slot.value = pkt.value;
+
+    ArenaBattleManager::GetInstance().RegisterPlayerBet(playerName, slot);
     IPCManager::GetInstance().SendLog(
         "[아레나] " + playerName + " 아이템 등록: " +
         std::string(pkt.itemName) + " (x" + std::to_string(pkt.amount) + ")");
@@ -935,7 +1012,6 @@ void NetworkManager::OnHostArenaPlayerSnapshot(SOCKET sock, const char* packetDa
     }
 }
 
-// 스냅샷 기준 데미지 계산 -> AttackResult/HpSync/Die 브로드캐스트, 탈락자는 ArenaWait
 void NetworkManager::OnHostArenaAttack(SOCKET sock, const Pkt_ArenaAttack& pkt)
 {
     std::string attackerName = GetPlayerNameForSocket(sock);
@@ -1002,7 +1078,6 @@ void NetworkManager::OnHostArenaAttack(SOCKET sock, const Pkt_ArenaAttack& pkt)
     AdvanceArenaTurnAfterAction();
 }
 
-// 참가 2명 이상·생존 1명 이하일 때 RankList 전송 + ApplySyncedStateChange(ArenaResult)
 void NetworkManager::TryEndArenaBattleIfNeeded()
 {
     if (!Client::isServer || !arenaBattleStarted) return;
@@ -1024,6 +1099,7 @@ void NetworkManager::TryEndArenaBattleIfNeeded()
     }
 
     BroadcastArenaRankList(rankPkt);
+    BroadcastArenaRewardPool();
     SendArenaSessionApplyToAllPlayers(rankPkt);
 
     arenaBattleStarted = false;
@@ -1038,7 +1114,7 @@ void NetworkManager::TryEndArenaBattleIfNeeded()
 void NetworkManager::OnHostArenaItemUse(SOCKET sock, const Pkt_ArenaItemUse& pkt)
 {
     std::string userName = GetPlayerNameForSocket(sock);
-    std::string targetName = pkt.targetName[0] != '\0' ? std::string(pkt.targetName) : userName;
+    std::string targetName = userName;
 
     if (!IsActorsArenaTurn(userName))
     {
@@ -1082,11 +1158,18 @@ void NetworkManager::OnHostArenaItemUse(SOCKET sock, const Pkt_ArenaItemUse& pkt
     ArenaItemSlot& usedSlot = slots[static_cast<size_t>(slotIndex)];
     const ItemType itemType = static_cast<ItemType>(usedSlot.itemType);
     const int32_t effectValue = usedSlot.value;
-
+    
     auto targetIt = arenaPlayerSnapshots.find(targetName);
     if (targetIt == arenaPlayerSnapshots.end()) return;
 
     auto* targetHdr = reinterpret_cast<Pkt_ArenaPlayerSnapshotHeader*>(targetIt->second.data());
+
+    Pkt_ArenaItemResult rptk;
+    CopyStringToPacketField(rptk.userName, sizeof(rptk.userName), userName);
+    CopyStringToPacketField(rptk.itemName, sizeof(rptk.itemName), pkt.itemName);
+    rptk.value = effectValue;
+    rptk.itemType = usedSlot.itemType;
+    BroadcastArenaItemResult(rptk);
 
     switch (itemType)
     {
@@ -1136,7 +1219,6 @@ void NetworkManager::OnHostArenaItemUse(SOCKET sock, const Pkt_ArenaItemUse& pkt
     AdvanceArenaTurnAfterAction();
 }
 
-// 전원 스냅샷 수집 완료 시 PlayerList/TurnStart/ItemList 후 ArenaBattle 시작
 void NetworkManager::TryStartArenaBattleAfterSnapshots()
 {
     if (arenaBattleStarted || !HasAllArenaSnapshots()) return;
@@ -1161,7 +1243,6 @@ void NetworkManager::TryStartArenaBattleAfterSnapshots()
     StartFirstArenaTurn();
 }
 
-// 호스트 로컬 상태 전환 + 모든 게스트에 PKT_S2C_CHANGE_STATE
 void NetworkManager::ApplySyncedStateChange(EGameState stateType)
 {
     if (!Client::isServer) return;
@@ -1185,7 +1266,6 @@ void NetworkManager::ApplySyncedStateChange(EGameState stateType)
     BroadcastChangeState(stateType);
 }
 
-// 한 명만 상태 변경(탈락 ArenaWait 등). 호스트 본인은 SetCurrentState, 게스트는 CHANGE_STATE 전송
 void NetworkManager::SendStateChangeToPlayer(const std::string& playerName, EGameState stateType)
 {
     if (!Client::isServer) return;
@@ -1247,7 +1327,6 @@ void NetworkManager::BroadcastArenaSnapshotRequest()
     BroadcastToClients(&pkt, pkt.header.size);
 }
 
-// C2S: 로컬은 이미 ArenaLobby, 서버에 도착만 알림(상태 전환 없음)
 void NetworkManager::SendArenaLobbyArrivedPacket()
 {
     if (Client::isServer)
@@ -1261,7 +1340,6 @@ void NetworkManager::SendArenaLobbyArrivedPacket()
     }
 }
 
-// C2S 가변 스냅샷: BuildArenaPlayerSnapshotPacket 후 호스트/게스트 분기
 void NetworkManager::SendArenaPlayerSnapshotPacket(Player* player)
 {
     std::vector<char> buffer = BuildArenaPlayerSnapshotPacket(player);
@@ -1335,9 +1413,10 @@ void NetworkManager::NotifyArenaBattleAttackResult(const Pkt_ArenaAttackResult& 
 {
     ArenaBattleState* battle = GetArenaBattleState();
     if (battle != nullptr)
-    {
         battle->OnAttackResult(pkt.attackerName, pkt.targetName, pkt.damage);
-    }
+    ArenaWaitState* wait = GetArenaWaitState();
+    if (wait != nullptr)
+        wait->OnAttackResult(pkt.attackerName, pkt.targetName, pkt.damage);
 }
 
 void NetworkManager::NotifyArenaBattleHpSync(const Pkt_ArenaHpSync& pkt)
@@ -1373,7 +1452,17 @@ void NetworkManager::NotifyArenaBattleDie(const std::string& playerName)
     }
 }
 
-// 게스트에 전송 + 호스트 로컬 관전·전투 UI 갱신
+void NetworkManager::NotifyArenaItemResult(const Pkt_ArenaItemResult& pkt)
+{
+    ArenaBattleState* battle = GetArenaBattleState();
+    if (battle != nullptr)
+        battle->OnItemResult(pkt.userName, pkt.itemName, pkt.itemType, pkt.value);
+
+    ArenaWaitState* wait = GetArenaWaitState();
+    if (wait != nullptr)
+        wait->OnItemResult(pkt.userName, pkt.itemName, pkt.itemType, pkt.value);
+}
+
 void NetworkManager::BroadcastArenaPlayerList(const Pkt_ArenaPlayerList& pkt)
 {
     BroadcastToClients(&pkt, pkt.header.size);
@@ -1435,13 +1524,31 @@ void NetworkManager::BroadcastArenaDie(const std::string& playerName)
     NotifyArenaBattleDie(playerName);
 }
 
-// 전투 종료 순위. 호스트·게스트 모두 battleEnded 및 rankEntries 갱신
 void NetworkManager::BroadcastArenaRankList(const Pkt_ArenaRankList& pkt)
 {
     BroadcastToClients(&pkt, pkt.header.size);
     if (Client::isServer)
     {
         ArenaBattleManager::GetInstance().OnSpectatorRankList(pkt);
+    }
+}
+
+void NetworkManager::BroadcastArenaLobbyState()
+{
+    if (!Client::isServer) return;
+
+    Pkt_ArenaLobbyState pkt;
+    BuildArenaLobbyStatePacket(pkt);
+    ApplyArenaLobbyStateCache(pkt);
+    BroadcastToClients(&pkt, pkt.header.size);
+}
+
+void NetworkManager::BroadcastArenaItemResult(const Pkt_ArenaItemResult& pkt)
+{
+    BroadcastToClients(&pkt, pkt.header.size);
+    if(Client::isServer)
+    {
+        NotifyArenaItemResult(pkt);
     }
 }
 
@@ -1483,15 +1590,7 @@ void NetworkManager::BuildArenaLobbyStatePacket(Pkt_ArenaLobbyState& out) const
 }
 
 
-void NetworkManager::BroadcastArenaLobbyState()
-{
-    if (!Client::isServer) return;
 
-    Pkt_ArenaLobbyState pkt;
-    BuildArenaLobbyStatePacket(pkt);
-    ApplyArenaLobbyStateCache(pkt);
-    BroadcastToClients(&pkt, pkt.header.size);
-}
 
 #pragma endregion
 
@@ -1572,28 +1671,79 @@ void NetworkManager::SendChatPacket(const std::string& sender, const std::string
     }
 }
 
+#pragma endregion
+
 #pragma region Arena Packet Sending
 
-void NetworkManager::SendArenaItemRegisterPacket(const std::string& itemName, int count)
+namespace {
+    void BuildArenaBetRefundPacket(const std::vector<ArenaItemSlot>& bets, Pkt_ArenaBetRefund& out)
+    {
+        out = Pkt_ArenaBetRefund();
+        uint8_t idx = 0;
+        for (const ArenaItemSlot& slot : bets)
+        {
+            if (idx >= MAX_ARENA_ITEM_SLOTS) break;
+            if (slot.count <= 0) continue;
+            out.slots[idx++] = slot;
+        }
+        out.slotCount = idx;
+        out.header.size = static_cast<uint16_t>(
+            offsetof(Pkt_ArenaBetRefund, slots) + idx * sizeof(ArenaItemSlot));
+    }
+}
+
+void NetworkManager::SendArenaItemRegisterPacket(const std::string& itemName, int count,
+    ItemType itemType, int32_t value)
 {
     Pkt_ArenaItemRegister pkt;
     CopyStringToPacketField(pkt.itemName, sizeof(pkt.itemName), itemName);
     pkt.amount = count;
+    pkt.itemType = static_cast<uint8_t>(itemType);
+    pkt.value = value;
 
     if (Client::isServer)
     {
-        // 서버(방장)인 경우 바로 ArenaBattleManager에 추가
-        ArenaBattleManager::GetInstance().AddBettedItem(itemName, count);
-        IPCManager::GetInstance().SendLog("[아레나] 호스트 아이템 등록됨: " + itemName + " (x" + std::to_string(count) + ")");
+        OnHostArenaItemRegister(INVALID_SOCKET, pkt);
+        IPCManager::GetInstance().SendLog(
+            "[아레나] 호스트 아이템 등록됨: " + itemName + " (x" + std::to_string(count) + ")");
     }
-    else
+    else if (clientSocket != INVALID_SOCKET)
     {
-        // 클라이언트인 경우 서버로 전송
-        if (clientSocket != INVALID_SOCKET)
+        send(clientSocket, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
+    }
+}
+
+void NetworkManager::CancelArenaPreparation()
+{
+    if (!Client::isServer) return;
+
+    ArenaBattleManager& arena = ArenaBattleManager::GetInstance();
+    const std::map<std::string, std::vector<ArenaItemSlot>>& betsByPlayer = arena.GetBetsByPlayer();
+
+    for (const auto& pair : betsByPlayer)
+    {
+        Pkt_ArenaBetRefund refundPkt;
+        BuildArenaBetRefundPacket(pair.second, refundPkt);
+
+        if (pair.first == Client::playerName)
         {
-            send(clientSocket, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
+            Player* player = GameManager::GetInstance().GetPlayer();
+            if (player != nullptr)
+            {
+                ApplyArenaBetRefundToLocalPlayer(player, refundPkt);
+            }
+        }
+        else
+        {
+            SendToPlayerByName(pair.first, &refundPkt, refundPkt.header.size);
         }
     }
+
+    arena.ClearAllArenaBets();
+    ResetArenaLobbyArrivalTracking();
+
+    IPCManager::GetInstance().SendLog("\033[1;34m방장이 아레나를 취소했습니다. 베팅 아이템을 반환합니다.\033[0m");
+    ApplySyncedStateChange(EGameState::Start);
 }
 
 #pragma endregion

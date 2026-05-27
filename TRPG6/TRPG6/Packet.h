@@ -27,11 +27,13 @@ enum class PacketType : uint16_t {
     PKT_C2S_ARENA_PLAYER_SNAPSHOT, // 전투 입장 스냅샷 (스탯 + 인벤, 가변 길이)
     PKT_C2S_ARENA_ATTACK,          // 공격 (targetName만, 공격자는 소켓 기준)
     PKT_C2S_ARENA_ITEM_USE,        // 아이템 사용
+    
 
     // 아레나 S2C (서버 -> 클라이언트)
     PKT_S2C_ARENA_PLAYER_LIST,     // 전원 요약 스탯 UI
     PKT_S2C_ARENA_TURN_START,      // 현재 턴 플레이어
     PKT_S2C_ARENA_ATTACK_RESULT,   // 공격 결과 (서버 계산 damage)
+    PKT_S2C_ARENA_ITEM_RESULT,     // 아이템 사용 결과
     PKT_S2C_ARENA_HP_SYNC,         // HP 동기화 (전투 중 재스냅샷 없음, 방법 A)
     PKT_S2C_ARENA_ITEM_LIST,       // 턴 보유자 아이템 목록 (최대 MAX_ARENA_ITEM_SLOTS)
     PKT_S2C_ARENA_DIE,             // 사망 통지
@@ -39,6 +41,8 @@ enum class PacketType : uint16_t {
     PKT_S2C_ARENA_SNAPSHOT_REQUEST,  // 방장 전투 시작 시 게스트에게 스냅샷 전송 요청
     PKT_S2C_ARENA_SESSION_APPLY,     // 전투 종료 후 로컬 Player에 HP/인벤/보상 반영
     PKT_S2C_ARENA_LOBBY_STATE,       // 아레나 로비 상태
+    PKT_S2C_ARENA_REWARD_POOL,      // 아레나 보상 화면 상태 (보상 아이템 목록 + 순위)
+    PKT_S2C_ARENA_BET_REFUND,       // 아레나 준비 취소 시 베팅 아이템 인벤 반환
 
     // 아이템 거래
     PKT_C2S_TRADE_REQUEST,    // 거래 신청 (클라 -> 서버)
@@ -146,6 +150,8 @@ struct Pkt_ArenaItemRegister {
     PacketHeader header;
     char itemName[32];
     int32_t amount;
+    uint8_t itemType;
+    int32_t value;
 
     Pkt_ArenaItemRegister()
     {
@@ -153,6 +159,8 @@ struct Pkt_ArenaItemRegister {
         header.type = PacketType::PKT_C2S_ARENA_ITEM_REGISTER;
         std::memset(itemName, 0, sizeof(itemName));
         amount = 0;
+        itemType = 0;
+        value = 0;
     }
 };
 
@@ -210,7 +218,7 @@ struct Pkt_ArenaItemUse {
         std::memset(targetName, 0, sizeof(targetName));
     }
 };
-
+#pragma endregion
 #pragma region Arena S2C
 
 
@@ -279,6 +287,23 @@ struct Pkt_ArenaAttackResult {
         std::memset(attackerName, 0, sizeof(attackerName));
         std::memset(targetName, 0, sizeof(targetName));
         damage = 0;
+    }
+};
+
+struct Pkt_ArenaItemResult {
+    PacketHeader header;
+    char userName[32];
+    char itemName[32];
+    int32_t value; // 회복량 또는 버프 수치
+    uint8_t itemType;
+    Pkt_ArenaItemResult()
+    {
+        header.size = sizeof(Pkt_ArenaItemResult);
+        header.type = PacketType::PKT_S2C_ARENA_ITEM_RESULT;
+        std::memset(userName, 0, sizeof(userName));
+        std::memset(itemName, 0, sizeof(itemName));
+        value = 0;
+        itemType = 0;
     }
 };
 
@@ -354,6 +379,34 @@ struct Pkt_ArenaSessionApplyHeader {
     uint8_t rewardSlotCount;
 };
 
+// S2C — 1위가 가져가는 베팅 풀(전원 결과 화면용)
+struct Pkt_ArenaRewardPool {
+    PacketHeader header;
+    uint8_t slotCount;
+    ArenaItemSlot slots[MAX_ARENA_ITEM_SLOTS];
+    Pkt_ArenaRewardPool()
+    {
+        header.size = static_cast<uint16_t>(offsetof(Pkt_ArenaRewardPool, slots));
+        header.type = PacketType::PKT_S2C_ARENA_REWARD_POOL;
+        slotCount = 0;
+        std::memset(slots, 0, sizeof(slots));
+    }
+};
+
+// S2C — 아레나 준비 취소 시 해당 플레이어 베팅 아이템 반환
+struct Pkt_ArenaBetRefund {
+    PacketHeader header;
+    uint8_t slotCount;
+    ArenaItemSlot slots[MAX_ARENA_ITEM_SLOTS];
+
+    Pkt_ArenaBetRefund()
+    {
+        header.size = static_cast<uint16_t>(offsetof(Pkt_ArenaBetRefund, slots));
+        header.type = PacketType::PKT_S2C_ARENA_BET_REFUND;
+        slotCount = 0;
+        std::memset(slots, 0, sizeof(slots));
+    }
+};
 
 #pragma endregion
 #pragma pack(pop)
@@ -639,5 +692,7 @@ const ArenaItemSlot* GetArenaSessionApplyRewardSlots(const Pkt_ArenaSessionApply
 
 // S2C ArenaSessionApply 수신 후 로컬 Player HP/공격력/인벤(전투 소모+보상) 반영
 void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size_t packetSize);
+// S2C ArenaBetRefund 수신 후 베팅했던 아이템을 로컬 인벤에 반환
+void ApplyArenaBetRefundToLocalPlayer(Player* player, const Pkt_ArenaBetRefund& pkt);
 
 #pragma endregion
