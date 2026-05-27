@@ -27,11 +27,6 @@ public:
     {
         AddItem(new Item("HP 포션", ItemType::HP_POTION, 50, 15), 3);
         AddItem(new Item("공격력 포션", ItemType::ATTACK_BUFF, 10, 30), 3);
-        AddItem(new Item("시험용 뿔", ItemType::MONSTER_PART, 10, 5), 13);
-        AddItem(new Item("시험용 가지", ItemType::MONSTER_PART, 10, 50), 13);
-        AddItem(new Item("시험용 콩", ItemType::MONSTER_PART, 10, 80), 23);
-        AddItem(new Item("시험용 상추", ItemType::MONSTER_PART, 10, 100), 23);
-
     }
 
     ~Inventory()

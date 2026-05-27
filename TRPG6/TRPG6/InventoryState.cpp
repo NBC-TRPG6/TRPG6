@@ -20,6 +20,8 @@ void InventoryState::Update(int ch, std::string& lastCommand)
 {
     Renderer::DisplayUI(UIPart::Top, 0, "인벤토리");
     Renderer::DisplayUI(UIPart::CenterLeft, 1, "[ 소지한 물품 ]");
+    Renderer::DisplayUI(UIPart::CenterLeft, 2, "[ 무기를 선택하면 장착이 가능합니다.]");
+
 
     Player* player = GameManager::GetInstance().GetPlayer();
     auto& inventory = player->GetInventory();
