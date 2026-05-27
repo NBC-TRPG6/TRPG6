@@ -52,5 +52,6 @@ public:
 
     //무기 장착,해제 함수
     void EquipWeapon(WeaponItem* weapon);
-
+    //아이템 삭제 함수(강화,조합등에서 사용)
+    bool RemoveItem(const std::string& itemName, int amount = 1);
 };

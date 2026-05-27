@@ -52,6 +52,18 @@ void Player::EquipWeapon(WeaponItem* weapon)
     }
 }
 
+bool Player::RemoveItem(const std::string& itemName, int amount)
+{
+    // 장착 무기면 먼저 해제
+    if (equippedWeapon != nullptr
+        && equippedWeapon->GetName() == itemName)
+    {
+        EquipWeapon(nullptr);
+    }
+    return inventory.RemoveItem(itemName, amount);
+}
+
+
 void Player::PrintStatus() const
 {
     Renderer::DisplayUI(UIPart::CenterRight, 0, "[ 캐릭터 정보 ]");

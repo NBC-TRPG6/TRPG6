@@ -34,6 +34,7 @@ private:
     bool isNIMO = false;
     bool NimoDefeated = false;
     Monster currentMonster; // 현재 전투 중인 몬스터를 저장하는 변수입니다.
+    std::string useItemName = "";
 
 
 public:

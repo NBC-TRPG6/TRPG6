@@ -36,13 +36,13 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
     GameManager::GetInstance().GetPlayer()->PrintStatus();
 
     Renderer::DisplayUI(UIPart::Top, 0, "메인 화면");
-    Renderer::DisplayUI(UIPart::CenterLeft, 6, "1. 던전 입장");
-    Renderer::DisplayUI(UIPart::CenterLeft, 7, "2. 상점 입장");
-    Renderer::DisplayUI(UIPart::CenterLeft, 8, "3. 인벤토리 확인");
-    Renderer::DisplayUI(UIPart::CenterLeft, 9, "4. 킬로그 확인");
-    Renderer::DisplayUI(UIPart::CenterLeft, 10, "5. 아레나 개최");
-    Renderer::DisplayUI(UIPart::CenterLeft, 11, "6. 아이템 거래 센터");
-    Renderer::DisplayUI(UIPart::CenterLeft, 12, "7. 대장간 입장");
+    Renderer::DisplayUI(UIPart::CenterLeft, 4, "1. 던전 입장");
+    Renderer::DisplayUI(UIPart::CenterLeft, 5, "2. 상점 입장");
+    Renderer::DisplayUI(UIPart::CenterLeft, 6, "3. 인벤토리 확인");
+    Renderer::DisplayUI(UIPart::CenterLeft, 7, "4. 킬로그 확인");
+    Renderer::DisplayUI(UIPart::CenterLeft, 9, "5. 아레나 개최");
+    Renderer::DisplayUI(UIPart::CenterLeft, 10, "6. 아이템 거래 센터");
+    Renderer::DisplayUI(UIPart::CenterLeft, 12, "8. 대장간 입장");
 
     switch (ch) {
     case 1: {
@@ -81,7 +81,7 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
         GameManager::GetInstance().SetCurrentState(new ItemTradeState());
         break;
 
-    case 7:
+    case 8:
         GameManager::GetInstance().SetCurrentState(new SmithState());
 
     }

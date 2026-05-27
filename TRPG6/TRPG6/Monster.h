@@ -15,6 +15,7 @@ protected:
     static int RandomHp(int pLevel, float multi = 1);
     static int RandomAttack(int pLevel, float multi = 1);
     static int RandomMoney(int pLevel, float multi = 1);
+    int itemMoney = 0; //몬스터가 드랍하는 아이템의 가격을 저장하는 변수입니다. DropItem에서 사용됩니다.
 
     static std::string MonsterNames[11];
     static std::string MonsterImageNames[11];
@@ -29,25 +30,27 @@ public:
     /// </summary>
     /// <param name="playerLevel"></param>
     Monster(int playerLevel = 1) :
-                Character(
+        Character(
             RandomName(),
             RandomHp(playerLevel),
             RandomAttack(playerLevel),
             RandomMoney(playerLevel))
-    {}
+    {
+    }
 
     /// <summary>
     /// 플레이어 레벨과 돈을 기반으로 몬스터의 이름, 체력, 공격력, 돈을 랜덤하게 생성하여 초기화하는 생성자입니다.
     /// </summary>
     /// <param name="playerLevel"></param>
     /// <param name="money"></param>
-    Monster(int playerLevel,int money) :
+    Monster(int playerLevel, int money) :
         Character(
             RandomName(),
             RandomHp(playerLevel),
             RandomAttack(playerLevel),
             money)
-    {}
+    {
+    }
 
     /// <summary>
     /// 플레이어 레벨과 이름을 기반으로 몬스터의 체력, 공격력, 돈을 랜덤하게 생성하여 초기화하는 생성자입니다.
@@ -60,23 +63,26 @@ public:
             RandomHp(playerLevel),
             RandomAttack(playerLevel),
             RandomMoney(playerLevel))
-    {}
+    {
+    }
 
-    Monster(int playerLevel, float multiyState = 1):
+    Monster(int playerLevel, float multiyState = 1) :
         Character(
             RandomName(),
             RandomHp(playerLevel, multiyState),
             RandomAttack(playerLevel, multiyState),
             RandomMoney(playerLevel, multiyState))
-    {}
+    {
+    }
 
-    Monster(int playerLevel,std::string name, float multiyState = 1) :
+    Monster(int playerLevel, std::string name, float multiyState = 1) :
         Character(
             name,
             RandomHp(playerLevel, multiyState),
             RandomAttack(playerLevel, multiyState),
             RandomMoney(playerLevel, multiyState))
-    {}
+    {
+    }
 
 #pragma endregion
 
@@ -105,7 +111,7 @@ public:
     /// </summary>
     /// <param name="percent">아이템 드롭 확률(기본값: 30%)</param>
     /// <returns>드롭된 아이템의 포인터 또는 nullptr</returns>
-    Item* DropItem(int percent = 30);
+    Item* DropItem(int percent = 80);
 
 };
 

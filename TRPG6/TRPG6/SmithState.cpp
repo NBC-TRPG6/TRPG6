@@ -131,8 +131,8 @@ void SmithState::Update(int ch, std::string& lastCommand)
             std::string resultName = result->GetName();
 
             // 인벤토리에서 재료 제거
-            inventory.RemoveItem(name1, 1);
-            inventory.RemoveItem(name2, 1);
+            player->RemoveItem(name1, 1);
+            player->RemoveItem(name2, 1);
 
             // 결과 무기 인벤토리 추가
             inventory.AddItem(result, 1);
@@ -219,8 +219,8 @@ void SmithState::Update(int ch, std::string& lastCommand)
 
 
             // 인벤토리에서 무기 2개 제거
-            inventory.RemoveItem(name1, 1);
-            inventory.RemoveItem(name2, 1);
+            player->RemoveItem(name1, 1);
+            player->RemoveItem(name2, 1);
 
             // 강화된 무기 추가
             inventory.AddItem(result, 1);

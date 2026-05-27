@@ -31,7 +31,7 @@ void BattleState::Update(int ch, std::string& lastCommand)
         auto now = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - lastActionTime).count();
 
-        if (duration >= 2)
+        if (duration >= 1)
         {
             waiting = false; 
         }
