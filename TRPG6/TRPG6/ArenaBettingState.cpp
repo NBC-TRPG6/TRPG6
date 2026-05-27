@@ -11,6 +11,9 @@
 void ArenaBettingState::Enter()
 {
     Renderer::ClearAllCenterLeftUI();
+
+    auto art = LoadImageAsASCII("..\\..\\Resources\\Betting.png");
+    Renderer::SetTopASCIIImage(art);
 }
 
 void ArenaBettingState::Update(int ch, std::string& lastCommand)

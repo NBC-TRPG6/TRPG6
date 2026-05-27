@@ -6,6 +6,7 @@
 #include "DATABASE.h"
 #include "NetworkManager.h"
 #include "IPCManager.h"
+#include "Utils.h"
 #include "Player.h"
 
 
@@ -15,6 +16,9 @@
 // 아레나에 소집되면 나가는 것을 불가능
 void ArenaReadyState::Enter() {
     Renderer::ClearAllCenterLeftUI();
+
+    auto art = LoadImageAsASCII("..\\..\\Resources\\ArenaReady.png");
+    Renderer::SetTopASCIIImage(art);
 }
 
 void ArenaReadyState::Update(int ch, std::string& lastCommand) {
