@@ -72,6 +72,12 @@ void Player::PrintStatus() const
     Renderer::DisplayUI(UIPart::CenterRight, 4, "HP: " + std::to_string(Hp) + "/" + std::to_string(MaxHp));
     Renderer::DisplayUI(UIPart::CenterRight, 5, "공격력: " + std::to_string(Attack));
     Renderer::DisplayUI(UIPart::CenterRight, 6, "보유 골드: " + std::to_string(Money));
-    if (equippedWeapon != nullptr)
-        Renderer::DisplayUI(UIPart::CenterRight, 7,  equippedWeapon->GetName());
+    for (const auto& invSlot : inventory.GetSlots())
+    {
+        if (invSlot.item == equippedWeapon && invSlot.count > 0)
+        {
+            Renderer::DisplayUI(UIPart::CenterRight, 7, invSlot.item->GetName());
+            break;
+        }
+    }
 }

@@ -5,13 +5,25 @@
 
 namespace
 {
-    void SetLocalInventoryItemCount(Inventory<Item>& inventory, const std::string& itemName,
-        ItemType itemType, int32_t value, int32_t count)
+    void UnequipWeaponIfMatches(Player* player, const std::string& itemName)
+    {
+        if (player == nullptr) return;
+
+        WeaponItem* equipped = player->GetEquippedWeapon();
+        if (equipped != nullptr && equipped->GetName() == itemName)
+        {
+            player->EquipWeapon(nullptr);
+        }
+    }
+
+    void SetLocalInventoryItemCount(Player* player, Inventory<Item>& inventory,
+        const std::string& itemName, ItemType itemType, int32_t value, int32_t count)
     {
         InventorySlot<Item>* slot = inventory.GetItemSlot(itemName);
 
         if (count <= 0)
         {
+            UnequipWeaponIfMatches(player, itemName);
             if (slot != nullptr && slot->count > 0)
             {
                 inventory.UseItem(nullptr, itemName, slot->count);
@@ -23,6 +35,10 @@ namespace
         {
             if (slot->count > count)
             {
+                if (count == 0)
+                {
+                    UnequipWeaponIfMatches(player, itemName);
+                }
                 inventory.UseItem(nullptr, itemName, slot->count - count);
             }
             else if (slot->count < count)
@@ -33,6 +49,35 @@ namespace
         }
 
         inventory.AddItem(new Item(itemName, itemType, value, 0), count);
+    }
+
+    void SyncEquippedWeaponPointer(Player* player)
+    {
+        if (player == nullptr) return;
+
+        WeaponItem* equipped = player->GetEquippedWeapon();
+        if (equipped == nullptr) return;
+
+        const std::string weaponName = equipped->GetName();
+        InventorySlot<Item>* slot = player->GetInventory().GetItemSlot(weaponName);
+        if (slot == nullptr || slot->count <= 0 || slot->item == nullptr
+            || slot->item->GetType() != ItemType::WEAPON)
+        {
+            player->EquipWeapon(nullptr);
+            return;
+        }
+
+        WeaponItem* weaponInInventory = dynamic_cast<WeaponItem*>(slot->item);
+        if (weaponInInventory == nullptr)
+        {
+            player->EquipWeapon(nullptr);
+            return;
+        }
+
+        if (weaponInInventory != equipped)
+        {
+            player->EquipWeapon(weaponInInventory);
+        }
     }
 }
 
@@ -124,7 +169,7 @@ void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size
         const ArenaItemSlot& slot = battleSlots[i];
         const std::string itemName = slot.itemName;
         const ItemType itemType = static_cast<ItemType>(slot.itemType);
-        SetLocalInventoryItemCount(inventory, itemName, itemType, slot.value, slot.count);
+        SetLocalInventoryItemCount(player, inventory, itemName, itemType, slot.value, slot.count);
     }
 
     for (uint8_t i = 0; i < hdr->rewardSlotCount; ++i)
@@ -136,6 +181,8 @@ void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size
         const ItemType itemType = static_cast<ItemType>(slot.itemType);
         inventory.AddItem(new Item(itemName, itemType, slot.value, 0), slot.count);
     }
+
+    SyncEquippedWeaponPointer(player);
 
     IPCManager::GetInstance().SendLog("[아레나] 로컬 플레이어 반영 완료");
 }
