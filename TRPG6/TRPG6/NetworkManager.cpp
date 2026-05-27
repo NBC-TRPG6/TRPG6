@@ -263,6 +263,18 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
             break;
         }
 
+        case PacketType::PKT_S2C_ARENA_BET_REFUND: {
+            if (Client::isServer) break;
+
+            auto* pkt = reinterpret_cast<Pkt_ArenaBetRefund*>(header);
+            Player* player = GameManager::GetInstance().GetPlayer();
+            if (player != nullptr)
+            {
+                ApplyArenaBetRefundToLocalPlayer(player, *pkt);
+            }
+            break;
+        }
+
         case PacketType::PKT_S2C_ARENA_SNAPSHOT_REQUEST: {
             if (Client::isServer) break;
 
@@ -788,7 +800,14 @@ bool NetworkManager::HasAllArenaSnapshots()
 void NetworkManager::OnHostArenaItemRegister(SOCKET sock, const Pkt_ArenaItemRegister& pkt)
 {
     std::string playerName = GetPlayerNameForSocket(sock);
-    ArenaBattleManager::GetInstance().AddBettedItem(pkt.itemName, pkt.amount);
+
+    ArenaItemSlot slot{};
+    CopyStringToPacketField(slot.itemName, sizeof(slot.itemName), pkt.itemName);
+    slot.count = pkt.amount;
+    slot.itemType = pkt.itemType;
+    slot.value = pkt.value;
+
+    ArenaBattleManager::GetInstance().RegisterPlayerBet(playerName, slot);
     IPCManager::GetInstance().SendLog(
         "[아레나] " + playerName + " 아이템 등록: " +
         std::string(pkt.itemName) + " (x" + std::to_string(pkt.amount) + ")");
@@ -1513,26 +1532,75 @@ void NetworkManager::SendChatPacket(const std::string& sender, const std::string
 
 #pragma region Arena Packet Sending
 
-void NetworkManager::SendArenaItemRegisterPacket(const std::string& itemName, int count)
+namespace {
+    void BuildArenaBetRefundPacket(const std::vector<ArenaItemSlot>& bets, Pkt_ArenaBetRefund& out)
+    {
+        out = Pkt_ArenaBetRefund();
+        uint8_t idx = 0;
+        for (const ArenaItemSlot& slot : bets)
+        {
+            if (idx >= MAX_ARENA_ITEM_SLOTS) break;
+            if (slot.count <= 0) continue;
+            out.slots[idx++] = slot;
+        }
+        out.slotCount = idx;
+        out.header.size = static_cast<uint16_t>(
+            offsetof(Pkt_ArenaBetRefund, slots) + idx * sizeof(ArenaItemSlot));
+    }
+}
+
+void NetworkManager::SendArenaItemRegisterPacket(const std::string& itemName, int count,
+    ItemType itemType, int32_t value)
 {
     Pkt_ArenaItemRegister pkt;
     CopyStringToPacketField(pkt.itemName, sizeof(pkt.itemName), itemName);
     pkt.amount = count;
+    pkt.itemType = static_cast<uint8_t>(itemType);
+    pkt.value = value;
 
     if (Client::isServer)
     {
-        // 서버(방장)인 경우 바로 ArenaBattleManager에 추가
-        ArenaBattleManager::GetInstance().AddBettedItem(itemName, count);
-        IPCManager::GetInstance().SendLog("[아레나] 호스트 아이템 등록됨: " + itemName + " (x" + std::to_string(count) + ")");
+        OnHostArenaItemRegister(INVALID_SOCKET, pkt);
+        IPCManager::GetInstance().SendLog(
+            "[아레나] 호스트 아이템 등록됨: " + itemName + " (x" + std::to_string(count) + ")");
     }
-    else
+    else if (clientSocket != INVALID_SOCKET)
     {
-        // 클라이언트인 경우 서버로 전송
-        if (clientSocket != INVALID_SOCKET)
+        send(clientSocket, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
+    }
+}
+
+void NetworkManager::CancelArenaPreparation()
+{
+    if (!Client::isServer) return;
+
+    ArenaBattleManager& arena = ArenaBattleManager::GetInstance();
+    const std::map<std::string, std::vector<ArenaItemSlot>>& betsByPlayer = arena.GetBetsByPlayer();
+
+    for (const auto& pair : betsByPlayer)
+    {
+        Pkt_ArenaBetRefund refundPkt;
+        BuildArenaBetRefundPacket(pair.second, refundPkt);
+
+        if (pair.first == Client::playerName)
         {
-            send(clientSocket, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
+            Player* player = GameManager::GetInstance().GetPlayer();
+            if (player != nullptr)
+            {
+                ApplyArenaBetRefundToLocalPlayer(player, refundPkt);
+            }
+        }
+        else
+        {
+            SendToPlayerByName(pair.first, &refundPkt, refundPkt.header.size);
         }
     }
+
+    arena.ClearAllArenaBets();
+    ResetArenaLobbyArrivalTracking();
+
+    IPCManager::GetInstance().SendLog("\033[1;34m방장이 아레나를 취소했습니다. 베팅 아이템을 반환합니다.\033[0m");
+    ApplySyncedStateChange(EGameState::Start);
 }
 
 #pragma endregion

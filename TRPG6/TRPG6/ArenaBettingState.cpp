@@ -38,9 +38,11 @@ void ArenaBettingState::Update(int ch, std::string& lastCommand)
         // 아이템 베팅 처리
         auto& selectedSlot = slots[ch - 1];
         std::string itemName = selectedSlot.item->GetName();
-        
-        // 서버로 패킷 전송
-        NetworkManager::GetInstance().SendArenaItemRegisterPacket(itemName, 1);
+        const ItemType itemType = selectedSlot.item->GetType();
+        const int32_t itemValue = static_cast<int32_t>(selectedSlot.item->GetValue());
+
+        NetworkManager::GetInstance().SendArenaItemRegisterPacket(
+            itemName, 1, itemType, itemValue);
         
         // 로컬 인벤토리에서 제거
         inventory.UseItem(nullptr, itemName, 1);

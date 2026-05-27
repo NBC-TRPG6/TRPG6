@@ -1,7 +1,6 @@
 ﻿#include "ArenaReadyState.h"
 #include "ArenaLobbyState.h"
 #include "ArenaBettingState.h"
-#include "GameStartState.h"
 #include "GameManager.h"
 #include "Renderer.h"
 #include "DATABASE.h"
@@ -28,20 +27,22 @@ void ArenaReadyState::Update(int ch, std::string& lastCommand) {
 
         if (ch == 3)
         {
-            GameManager::GetInstance().SetCurrentState(new GameStartState());
-            NetworkManager::GetInstance().BroadcastChangeState(EGameState::Start);
-            IPCManager::GetInstance().SendLog("\033[1;34m방장이 아레나를 빵꾸냈습니다.\033[0m");
+            NetworkManager::GetInstance().CancelArenaPreparation();
         }
     }
 
     if (ch == 1) {
-        if (hasBet)
+        if (hasBet && NetworkManager::GetInstance().GetExpectedArenaPlayerCount() > 1)
         {
             GameManager::GetInstance().SetCurrentState(new ArenaLobbyState());
         }
-        else
+        else if(!hasBet)
         {
             Renderer::DisplayUITimed(UIPart::CenterLeft, 12, "먼저 아이템을 베팅해야 합니다!", 2.0f);
+        }
+        else
+        {
+            Renderer::DisplayUITimed(UIPart::CenterLeft, 12, "참여 인원이 부족합니다!", 2.0f);
         }
     }
     else if (ch == 2) {

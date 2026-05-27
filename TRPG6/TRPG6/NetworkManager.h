@@ -17,6 +17,7 @@
 #include <mutex>
 #include "Packet.h"
 #include "DATABASE.h"
+#include "Item.h"
 
 class Player;
 
@@ -45,7 +46,10 @@ public:
     // ---------- C2S (클라이언트 → 호스트) ----------
 
     // C2S PKT_C2S_ARENA_ITEM_REGISTER: 베팅 아이템 등록(ArenaReady / ArenaBetting)
-    void SendArenaItemRegisterPacket(const std::string& itemName, int count);
+    void SendArenaItemRegisterPacket(const std::string& itemName, int count,
+        ItemType itemType, int32_t value);
+    // 호스트: 아레나 준비 취소 — 베팅 반환 S2C + Start 동기화
+    void CancelArenaPreparation();
     // C2S PKT_C2S_ARENA_READY: 로비 화면 진입 후 “도착” 신고(상태 전환 없음)
     void SendArenaLobbyArrivedPacket();
     // C2S PKT_C2S_ARENA_PLAYER_SNAPSHOT: 전투용 스탯·인벤 스냅샷 전송(가변 길이, 최대 14슬롯)
