@@ -142,7 +142,7 @@ void COOPBattleState::Update(int ch, std::string& lastCommand)
         }
         else if (currentSubState == SubState::HealSelect)
         {
-            Renderer::DisplayUI(UIPart::CenterLeft, 5, "--- 치료할 대상 선택 ---");
+            Renderer::DisplayUI(UIPart::CenterLeft, 0, "--- 치료할 대상 선택 ---");
             std::vector<std::string> alivePlayers;
             for (const auto& pair : coop.players)
             {
@@ -150,7 +150,7 @@ void COOPBattleState::Update(int ch, std::string& lastCommand)
             }
             for (int i = 0; i < (int)alivePlayers.size(); ++i)
             {
-                Renderer::DisplayUI(UIPart::CenterLeft, 6 + i, std::to_string(i + 1) + ". " + alivePlayers[i] + " (HP: " + std::to_string(coop.players[alivePlayers[i]].hp) + ")");
+                Renderer::DisplayUI(UIPart::CenterLeft, 1 + i, std::to_string(i + 1) + ". " + alivePlayers[i] + " (HP: " + std::to_string(coop.players[alivePlayers[i]].hp) + ")");
             }
             Renderer::DisplayUI(UIPart::CenterLeft, 12, "0. 돌아가기");
 
