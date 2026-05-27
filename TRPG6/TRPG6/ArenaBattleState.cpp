@@ -18,6 +18,7 @@ void ArenaBattleState::Update(int ch, std::string& lastCommand)
 {
     Renderer::ClearAllCenterLeftUI();
     (void)lastCommand;
+    DrawMyStatus();
 
     DrawPlayerList();
 
@@ -241,5 +242,21 @@ void ArenaBattleState::DrawItemList()
             + slot.itemName
             + "  x" + std::to_string(slot.count));
         ++displayIdx;
+    }
+}
+
+void ArenaBattleState::DrawMyStatus()
+{
+    for (const auto& p : PlayerList)
+    {
+        if (std::string(p.playerName) == Client::playerName)
+        {
+            Renderer::DisplayUI(UIPart::CenterRight, 0, "[ 내 정보 ]");
+            Renderer::DisplayUI(UIPart::CenterRight, 1, "이름: " + std::string(p.playerName));
+            Renderer::DisplayUI(UIPart::CenterRight, 2, "HP: " + std::to_string(p.hp) + "/" + std::to_string(p.maxHp));
+            Renderer::DisplayUI(UIPart::CenterRight, 3, "공격력: " + std::to_string(p.attack));
+            Renderer::DisplayUI(UIPart::CenterRight, 4, "레벨: " + std::to_string(p.level));
+            return;
+        }
     }
 }
