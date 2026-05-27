@@ -5,9 +5,12 @@
 #include "ItemTradeRequestState.h"
 #include "ItemSentTradeListState.h"
 #include "ItemReceivedTradeListState.h"
+#include "Utils.h"
 
 void ItemTradeState::Enter()
 {
+    auto art = LoadImageAsASCII("..\\..\\Resources\\Potion.png");
+    Renderer::SetTopASCIIImage(art);
 }
 
 void ItemTradeState::Update(int ch, std::string & lastCommand)

@@ -7,6 +7,7 @@
 #include "Shop.h"
 #include <sstream>
 #include <vector>
+#include "Utils.h"
 
 // 문자열을 구분자로 나누는 유틸리티 함수
 std::vector<std::string> Split(const std::string & s, char delimiter)
@@ -22,7 +23,10 @@ std::vector<std::string> Split(const std::string & s, char delimiter)
 }
 
 void ItemTradeRequestState::Enter()
-{}
+{
+    auto art = LoadImageAsASCII("..\\..\\Resources\\Potion.png");
+    Renderer::SetTopASCIIImage(art);
+}
 
 void ItemTradeRequestState::Update(int ch, std::string & lastCommand)
 {

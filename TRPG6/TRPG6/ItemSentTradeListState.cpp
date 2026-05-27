@@ -4,9 +4,12 @@
 #include "GameManager.h"
 #include "ItemTradeState.h"
 #include "DATABASE.h"
+#include "Utils.h"
 
 void ItemSentTradeListState::Enter()
 {
+    auto art = LoadImageAsASCII("..\\..\\Resources\\Potion.png");
+    Renderer::SetTopASCIIImage(art);
 }
 
 void ItemSentTradeListState::Update(int ch, std::string & lastCommand)

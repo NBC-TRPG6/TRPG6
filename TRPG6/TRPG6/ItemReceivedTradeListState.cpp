@@ -5,9 +5,12 @@
 #include "Player.h"
 #include "ItemTradeState.h"
 #include "NetworkManager.h"
+#include "Utils.h"
 
 void ItemReceivedTradeListState::Enter()
 {
+    auto art = LoadImageAsASCII("..\\..\\Resources\\Potion.png");
+    Renderer::SetTopASCIIImage(art);
 }
 
 void ItemReceivedTradeListState::Update(int ch, std::string & lastCommand)
