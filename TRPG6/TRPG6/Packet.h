@@ -27,11 +27,13 @@ enum class PacketType : uint16_t {
     PKT_C2S_ARENA_PLAYER_SNAPSHOT, // 전투 입장 스냅샷 (스탯 + 인벤, 가변 길이)
     PKT_C2S_ARENA_ATTACK,          // 공격 (targetName만, 공격자는 소켓 기준)
     PKT_C2S_ARENA_ITEM_USE,        // 아이템 사용
+    
 
     // 아레나 S2C (서버 -> 클라이언트)
     PKT_S2C_ARENA_PLAYER_LIST,     // 전원 요약 스탯 UI
     PKT_S2C_ARENA_TURN_START,      // 현재 턴 플레이어
     PKT_S2C_ARENA_ATTACK_RESULT,   // 공격 결과 (서버 계산 damage)
+    PKT_S2C_ARENA_ITEM_RESULT,     // 아이템 사용 결과
     PKT_S2C_ARENA_HP_SYNC,         // HP 동기화 (전투 중 재스냅샷 없음, 방법 A)
     PKT_S2C_ARENA_ITEM_LIST,       // 턴 보유자 아이템 목록 (최대 MAX_ARENA_ITEM_SLOTS)
     PKT_S2C_ARENA_DIE,             // 사망 통지
@@ -39,6 +41,14 @@ enum class PacketType : uint16_t {
     PKT_S2C_ARENA_SNAPSHOT_REQUEST,  // 방장 전투 시작 시 게스트에게 스냅샷 전송 요청
     PKT_S2C_ARENA_SESSION_APPLY,     // 전투 종료 후 로컬 Player에 HP/인벤/보상 반영
     PKT_S2C_ARENA_LOBBY_STATE,       // 아레나 로비 상태
+    PKT_S2C_ARENA_REWARD_POOL,      // 아레나 보상 화면 상태 (보상 아이템 목록 + 순위)
+    PKT_S2C_ARENA_BET_REFUND,       // 아레나 준비 취소 시 베팅 아이템 인벤 반환
+
+    // 아이템 거래
+    PKT_C2S_TRADE_REQUEST,    // 거래 신청 (클라 -> 서버)
+    PKT_C2S_TRADE_RESPONSE,        // 거래 수락/거절 (클라 -> 서버)
+    PKT_S2C_TRADE_SYNC,            // 거래 목록 동기화 (서버 -> 클라)
+    
 };
 
 #pragma pack(push, 1)
@@ -128,6 +138,8 @@ struct Pkt_ArenaItemRegister {
     PacketHeader header;
     char itemName[32];
     int32_t amount;
+    uint8_t itemType;
+    int32_t value;
 
     Pkt_ArenaItemRegister()
     {
@@ -135,6 +147,8 @@ struct Pkt_ArenaItemRegister {
         header.type = PacketType::PKT_C2S_ARENA_ITEM_REGISTER;
         std::memset(itemName, 0, sizeof(itemName));
         amount = 0;
+        itemType = 0;
+        value = 0;
     }
 };
 
@@ -192,7 +206,7 @@ struct Pkt_ArenaItemUse {
         std::memset(targetName, 0, sizeof(targetName));
     }
 };
-
+#pragma endregion
 #pragma region Arena S2C
 
 
@@ -261,6 +275,23 @@ struct Pkt_ArenaAttackResult {
         std::memset(attackerName, 0, sizeof(attackerName));
         std::memset(targetName, 0, sizeof(targetName));
         damage = 0;
+    }
+};
+
+struct Pkt_ArenaItemResult {
+    PacketHeader header;
+    char userName[32];
+    char itemName[32];
+    int32_t value; // 회복량 또는 버프 수치
+    uint8_t itemType;
+    Pkt_ArenaItemResult()
+    {
+        header.size = sizeof(Pkt_ArenaItemResult);
+        header.type = PacketType::PKT_S2C_ARENA_ITEM_RESULT;
+        std::memset(userName, 0, sizeof(userName));
+        std::memset(itemName, 0, sizeof(itemName));
+        value = 0;
+        itemType = 0;
     }
 };
 
@@ -336,7 +367,109 @@ struct Pkt_ArenaSessionApplyHeader {
     uint8_t rewardSlotCount;
 };
 
+// S2C — 1위가 가져가는 베팅 풀(전원 결과 화면용)
+struct Pkt_ArenaRewardPool {
+    PacketHeader header;
+    uint8_t slotCount;
+    ArenaItemSlot slots[MAX_ARENA_ITEM_SLOTS];
+    Pkt_ArenaRewardPool()
+    {
+        header.size = static_cast<uint16_t>(offsetof(Pkt_ArenaRewardPool, slots));
+        header.type = PacketType::PKT_S2C_ARENA_REWARD_POOL;
+        slotCount = 0;
+        std::memset(slots, 0, sizeof(slots));
+    }
+};
 
+// S2C — 아레나 준비 취소 시 해당 플레이어 베팅 아이템 반환
+struct Pkt_ArenaBetRefund {
+    PacketHeader header;
+    uint8_t slotCount;
+    ArenaItemSlot slots[MAX_ARENA_ITEM_SLOTS];
+
+    Pkt_ArenaBetRefund()
+    {
+        header.size = static_cast<uint16_t>(offsetof(Pkt_ArenaBetRefund, slots));
+        header.type = PacketType::PKT_S2C_ARENA_BET_REFUND;
+        slotCount = 0;
+        std::memset(slots, 0, sizeof(slots));
+    }
+};
+
+#pragma endregion
+#pragma pack(pop)
+
+#pragma region Item
+#pragma pack(push, 1)
+// 거래 하나에 대한 모든 정보를 담는 구조체
+struct TradeInfo
+{
+    uint32_t tradeId;      // 방장(서버)이 부여하는 거래 고유 번호
+    char sender[32];       // 거래를 신청한 사람 이름
+    char receiver[32];     // 거래를 받을 사람 이름
+
+    // [주는 아이템 정보]
+    char itemGiveName[32];
+    int itemGiveType;      // 0: HP_POTION, 1: ATTACK_BUFF, 2: MONSTER_PART
+    int itemGiveValue;
+    int itemGivePrice;
+    int itemGiveCount;     // 몇 개 줄 것인지
+
+    // [받고 싶은 아이템 정보]
+    char itemReceiveName[32];
+    int itemReceiveType;   // 0: HP_POTION, 1: ATTACK_BUFF, 2: MONSTER_PART
+    int itemReceiveValue;
+    int itemReceivePrice;
+    int itemReceiveCount;  // 몇 개 받을 것인지
+
+    // 거래 상태 (0: 대기 중, 1: 수락됨, 2: 거절됨, 3: 취소됨)
+    uint8_t status;
+};
+
+// 거래 신청 패킷 (클라이언트가 서버로 보냄)
+struct Pkt_TradeRequest
+{
+    PacketHeader header;
+    TradeInfo info;
+
+    Pkt_TradeRequest()
+    {
+        header.size = sizeof(Pkt_TradeRequest);
+        header.type = PacketType::PKT_C2S_TRADE_REQUEST;
+        std::memset(&info, 0, sizeof(info));
+        info.status = 0; // 0: 대기 중 (Pending)
+    }
+};
+
+// 거래 응답 패킷 (클라이언트가 서버로 보냄)
+struct Pkt_TradeResponse
+{
+    PacketHeader header;
+    uint32_t tradeId;      // 어떤 거래에 대한 응답인지
+    uint8_t response;      // 1: 수락(Accepted), 2: 거절(Declined)
+
+    Pkt_TradeResponse()
+    {
+        header.size = sizeof(Pkt_TradeResponse);
+        header.type = PacketType::PKT_C2S_TRADE_RESPONSE;
+        tradeId = 0;
+        response = 2; // 기본값 거절
+    }
+};
+
+// 거래 목록 동기화 패킷 (서버가 모든 클라이언트에게 보냄)
+struct Pkt_TradeSync
+{
+    PacketHeader header;
+    TradeInfo info; // 업데이트된 거래 정보
+
+    Pkt_TradeSync()
+    {
+        header.size = sizeof(Pkt_TradeSync);
+        header.type = PacketType::PKT_S2C_TRADE_SYNC;
+        std::memset(&info, 0, sizeof(info));
+    }
+};
 #pragma endregion
 
 #pragma pack(pop)
@@ -396,5 +529,7 @@ const ArenaItemSlot* GetArenaSessionApplyRewardSlots(const Pkt_ArenaSessionApply
 
 // S2C ArenaSessionApply 수신 후 로컬 Player HP/공격력/인벤(전투 소모+보상) 반영
 void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size_t packetSize);
+// S2C ArenaBetRefund 수신 후 베팅했던 아이템을 로컬 인벤에 반환
+void ApplyArenaBetRefundToLocalPlayer(Player* player, const Pkt_ArenaBetRefund& pkt);
 
 #pragma endregion

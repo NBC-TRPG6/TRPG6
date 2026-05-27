@@ -14,7 +14,7 @@
 #include "TradeState.h"
 #include "Utils.h" //아스키 아트를 위한 include
 #include "InventoryState.h" // 인벤토리
-
+#include "ItemTradeState.h" 
 #include "ArenaReadyState.h"
 
 void GameStartState::Enter()
@@ -42,6 +42,7 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
     Renderer::DisplayUI(UIPart::CenterLeft, 10, "4. 킬로그 확인");
     Renderer::DisplayUI(UIPart::CenterLeft, 11, "5. 아레나 개최");
     Renderer::DisplayUI(UIPart::CenterLeft, 12, "6. 아이템 거래 센터");
+
     switch (ch) {
     case 1: {
         GameManager::GetInstance().SetCurrentState(new BattleState());
