@@ -48,7 +48,10 @@ enum class PacketType : uint16_t {
     PKT_C2S_TRADE_REQUEST,    // 거래 신청 (클라 -> 서버)
     PKT_C2S_TRADE_RESPONSE,        // 거래 수락/거절 (클라 -> 서버)
     PKT_S2C_TRADE_SYNC,            // 거래 목록 동기화 (서버 -> 클라)
-    
+
+    // 골드 전송
+    PKT_C2S_GOLD_TRADE_REQ,
+    PKT_S2C_GOLD_TRADE_ACK,
 };
 
 #pragma pack(push, 1)

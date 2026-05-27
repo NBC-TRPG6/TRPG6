@@ -267,14 +267,14 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         break;
     }
 
-    case static_cast<PacketType>(210): // GoldTradePacketType::PKT_C2S_GOLD_TRADE_REQ
+    case PacketType::PKT_C2S_GOLD_TRADE_REQ:
     {
         Pkt_GoldTradeRequest* pkt = reinterpret_cast<Pkt_GoldTradeRequest*>(header);
         HandleGoldTradeRequest(sock, pkt);
         break;
     }
 
-    case static_cast<PacketType>(211): // GoldTradePacketType::PKT_S2C_GOLD_TRADE_ACK
+    case PacketType::PKT_S2C_GOLD_TRADE_ACK:
     {
         Pkt_GoldTradeAck* pkt = reinterpret_cast<Pkt_GoldTradeAck*>(header);
         HandleGoldTradeAck(pkt);
@@ -1811,7 +1811,16 @@ void NetworkManager::HandleGoldTradeRequest(SOCKET sock, Pkt_GoldTradeRequest* p
 {
     if (!Client::isServer) return;
 
+    // 1. 소켓을 통해 보낸 사람 이름 검색
     std::string senderName = GetPlayerNameForSocket(sock);
+
+    // 이름이 없을 시 서버 본인으로 설정
+    if (senderName.empty())
+    {
+        senderName = Client::playerName;
+    }
+
+    //
     std::string receiverName = pkt->receiverName;
     int32_t amount = pkt->goldAmount;
 
@@ -1822,21 +1831,27 @@ void NetworkManager::HandleGoldTradeRequest(SOCKET sock, Pkt_GoldTradeRequest* p
 
     bool isTransactionValid = false;
 
-    // [유저 이름 검증] 방에 있는 유저 목록 중 수신자 이름이 실제로 존재하는지 체크
+    // 수신 대상 유저가 실제로 존재하는지 체크 (서버 유저 본인이거나, 연결된 클라이언트 중 하나여야 함)
     bool isReceiverExist = false;
-    if (receiverName == Client::playerName) {
+    if (receiverName == Client::playerName)
+    {
         isReceiverExist = true;
+
     }
-    else {
-        for (SOCKET cSock : connectedClients) {
-            if (GetPlayerNameForSocket(cSock) == receiverName) {
+    else
+    {
+        std::lock_guard<std::mutex> lock(clientsMutex);
+        for (SOCKET cSock : connectedClients)
+        {
+            if (GetPlayerNameForSocket(cSock) == receiverName)
+            {
                 isReceiverExist = true;
                 break;
             }
         }
     }
 
-    // 존재하는 유저이고, 자기 자신이 아니고, 0원 이상일 때만 승인
+    // 자기 자신이 아니고, 금액이 0보다 크고, 존재하는 유저일 때만 성공
     if (senderName != receiverName && amount > 0 && isReceiverExist)
     {
         isTransactionValid = true;
@@ -1850,24 +1865,28 @@ void NetworkManager::HandleGoldTradeRequest(SOCKET sock, Pkt_GoldTradeRequest* p
     else
     {
         ackPkt.isSuccess = 0;
-        IPCManager::GetInstance().SendLog("[골드 거래] " + senderName + "님의 요청 실패 (대상 유저가 없거나 조건 부적합)");
+        IPCManager::GetInstance().SendLog("[골드 거래] " + senderName + "님의 요청 실패");
     }
 
+    // 모든 클라이언트에게 결과 브로드캐스트
     std::lock_guard<std::mutex> lock(clientsMutex);
-    for (SOCKET cSock : connectedClients) {
+    for (SOCKET cSock : connectedClients)
+    {
         send(cSock, reinterpret_cast<char*>(&ackPkt), ackPkt.header.size, 0);
     }
+
+    // 서버 유저 본인도 결과를 처리할 수 있도록 직접 호출
     HandleGoldTradeAck(&ackPkt);
 }
 
 void NetworkManager::HandleGoldTradeAck(Pkt_GoldTradeAck* pkt)
 {
-    // 서버가 거절(이름이 틀렸거나 돈이 부족 등)했다면 돈을 깎지 않고 경고 로그만 띄우고 종료!
+    //서버가 실패(0)라고 판정했으면 돈을 깎지 않고 종료
     if (pkt->isSuccess == 0)
     {
         if (Client::playerName == std::string(pkt->senderName))
         {
-            IPCManager::GetInstance().SendLog("[골드 거래] 존재하지 않는 유저명이거나 잘못된 요청입니다. 다시 시도해주세요!");
+            IPCManager::GetInstance().SendLog("[골드 거래] 존재하지 않는 유저명이거나 잘못된 요청입니다. 다시 시도해주세요.");
         }
         return;
     }
@@ -1879,7 +1898,7 @@ void NetworkManager::HandleGoldTradeAck(Pkt_GoldTradeAck* pkt)
     Player* myPlayer = GameManager::GetInstance().GetPlayer();
     if (!myPlayer) return;
 
-    // [Case A] 내가 보낸 사람인 경우 -> 서버 승인이 났으므로 여기서 안전하게 차감
+    // [Case A] 내가 돈을 보낸 사람(Sender)인 경우
     if (Client::playerName == sender)
     {
         int currentMoney = myPlayer->GetMoney();
@@ -1890,7 +1909,7 @@ void NetworkManager::HandleGoldTradeAck(Pkt_GoldTradeAck* pkt)
             IPCManager::GetInstance().SendLog("[거래 완료] " + std::to_string(amount) + " 골드를 성공적으로 송금했습니다.");
         }
     }
-    // [Case B] 내가 받은 사람인 경우 -> 돈 합산
+    // [Case B] 내가 돈을 받은 사람(Receiver)인 경우
     else if (Client::playerName == receiver)
     {
         int currentMoney = myPlayer->GetMoney();

@@ -21,7 +21,6 @@ static std::vector<std::string> SplitSpace(const std::string& s)
 void GoldTradeState::Enter()
 {
     READ_MODE = true;
-    Renderer::ClearAllCenterLeftUI();
 }
 
 void GoldTradeState::Update(int ch, std::string& lastCommand)
@@ -42,6 +41,7 @@ void GoldTradeState::Update(int ch, std::string& lastCommand)
         player->PrintStatus();
     }
 
+    // 이전으로 돌아가기
     if ((ch == 0 && lastCommand.empty()) || lastCommand == "0")
     {
         READ_MODE = false;
@@ -91,19 +91,18 @@ void GoldTradeState::Update(int ch, std::string& lastCommand)
         {
             if (player->GetMoney() < amount)
             {
-                errorMessage = "보유 골드가 부족합니다! (현재 자산 부족)";
+                errorMessage = "골드가 부족합니다!";
                 return;
             }
         }
 
-        // 여기서 돈을 미리 깎지 않고, 서버에 안전하게 요청 패킷만 보냅니다.
+        // 서버에 요청 패킷 전송
         SendGoldTradeRequest(receiverName, amount);
         errorMessage = receiverName + "님에게 " + std::to_string(amount) + " 골드 전송 요청 중...";
     }
 
-    // 7번 줄 에러 메시지가 1프레임만에 사라지지 않도록 지켜주는 안전지대
     if (!errorMessage.empty())
     {
-        Renderer::DisplayUITimed(UIPart::CenterLeft, 7, errorMessage, 2.0f);
+        Renderer::DisplayUITimed(UIPart::CenterLeft, 10, errorMessage, 2.0f);
     }
 }
