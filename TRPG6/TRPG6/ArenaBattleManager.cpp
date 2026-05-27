@@ -11,6 +11,7 @@ ArenaBattleManager& ArenaBattleManager::GetInstance()
 void ArenaBattleManager::ResetSession()
 {
     bettedItems.clear();
+    betsByPlayer.clear();
     spectatorPlayers.clear();
     currentTurnPlayer.clear();
     combatLog.clear();
@@ -20,29 +21,32 @@ void ArenaBattleManager::ResetSession()
     battleEnded = false;
 }
 
-void ArenaBattleManager::AddBettedItem(const std::string& itemName, int amount)
+void ArenaBattleManager::RegisterPlayerBet(const std::string& playerName, const ArenaItemSlot& slot)
 {
+    if (slot.count <= 0) return;
+
+    betsByPlayer[playerName].push_back(slot);
+
     for (auto& item : bettedItems)
     {
-        if (std::string(item.itemName) == itemName)
+        if (std::string(item.itemName) == std::string(slot.itemName))
         {
-            item.count += amount;
+            item.count += slot.count;
             return;
         }
     }
-
-    ArenaItemSlot newItem;
-    CopyStringToPacketField(newItem.itemName, sizeof(newItem.itemName), itemName);
-    newItem.count = amount;
-    newItem.itemType = 0;
-    newItem.value = 0;
-
-    bettedItems.push_back(newItem);
+    bettedItems.push_back(slot);
 }
 
 void ArenaBattleManager::ClearBettedItems()
 {
     bettedItems.clear();
+}
+
+void ArenaBattleManager::ClearAllArenaBets()
+{
+    bettedItems.clear();
+    betsByPlayer.clear();
 }
 
 // 관전 UI용 전투 로그, 오래된 줄부터 삭제

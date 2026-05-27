@@ -66,7 +66,6 @@
     <ClCompile Include="ShopState.cpp" />
     <ClCompile Include="ShopStockState.cpp" />
     <ClCompile Include="TradeManager.cpp" />
-    <ClCompile Include="WeaponTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArenaBattleManager.h" />

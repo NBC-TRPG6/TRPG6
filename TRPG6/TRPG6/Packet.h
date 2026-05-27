@@ -42,6 +42,7 @@ enum class PacketType : uint16_t {
     PKT_S2C_ARENA_SESSION_APPLY,     // 전투 종료 후 로컬 Player에 HP/인벤/보상 반영
     PKT_S2C_ARENA_LOBBY_STATE,       // 아레나 로비 상태
     PKT_S2C_ARENA_REWARD_POOL,      // 아레나 보상 화면 상태 (보상 아이템 목록 + 순위)
+    PKT_S2C_ARENA_BET_REFUND,       // 아레나 준비 취소 시 베팅 아이템 인벤 반환
 
     // 아이템 거래
     PKT_C2S_TRADE_REQUEST,    // 거래 신청 (클라 -> 서버)
@@ -137,6 +138,8 @@ struct Pkt_ArenaItemRegister {
     PacketHeader header;
     char itemName[32];
     int32_t amount;
+    uint8_t itemType;
+    int32_t value;
 
     Pkt_ArenaItemRegister()
     {
@@ -144,6 +147,8 @@ struct Pkt_ArenaItemRegister {
         header.type = PacketType::PKT_C2S_ARENA_ITEM_REGISTER;
         std::memset(itemName, 0, sizeof(itemName));
         amount = 0;
+        itemType = 0;
+        value = 0;
     }
 };
 
@@ -376,6 +381,21 @@ struct Pkt_ArenaRewardPool {
     }
 };
 
+// S2C — 아레나 준비 취소 시 해당 플레이어 베팅 아이템 반환
+struct Pkt_ArenaBetRefund {
+    PacketHeader header;
+    uint8_t slotCount;
+    ArenaItemSlot slots[MAX_ARENA_ITEM_SLOTS];
+
+    Pkt_ArenaBetRefund()
+    {
+        header.size = static_cast<uint16_t>(offsetof(Pkt_ArenaBetRefund, slots));
+        header.type = PacketType::PKT_S2C_ARENA_BET_REFUND;
+        slotCount = 0;
+        std::memset(slots, 0, sizeof(slots));
+    }
+};
+
 #pragma endregion
 #pragma pack(pop)
 
@@ -509,5 +529,7 @@ const ArenaItemSlot* GetArenaSessionApplyRewardSlots(const Pkt_ArenaSessionApply
 
 // S2C ArenaSessionApply 수신 후 로컬 Player HP/공격력/인벤(전투 소모+보상) 반영
 void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size_t packetSize);
+// S2C ArenaBetRefund 수신 후 베팅했던 아이템을 로컬 인벤에 반환
+void ApplyArenaBetRefundToLocalPlayer(Player* player, const Pkt_ArenaBetRefund& pkt);
 
 #pragma endregion

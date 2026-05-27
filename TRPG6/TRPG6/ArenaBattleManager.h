@@ -15,10 +15,12 @@ public:
     // 베팅, 관전, 순위 등 아레나 세션 전체 초기화
     void ResetSession();
 
-    // 보상 풀에 베팅 아이템 등록(이름 같으면 개수만 합산)
-    void AddBettedItem(const std::string& itemName, int amount);
+    // 보상 풀 + 플레이어별 베팅 기록(취소 시 반환용)
+    void RegisterPlayerBet(const std::string& playerName, const ArenaItemSlot& slot);
     void ClearBettedItems();
+    void ClearAllArenaBets();
     const std::vector<ArenaItemSlot>& GetBettedItems() const { return bettedItems; }
+    const std::map<std::string, std::vector<ArenaItemSlot>>& GetBetsByPlayer() const { return betsByPlayer; }
 
     // S2C PlayerList: 관전용 플레이어 목록 갱신(전투 시작 시 1회)
     void OnSpectatorPlayerList(const Pkt_ArenaPlayerList& pkt);
@@ -61,6 +63,8 @@ private:
 
     // 아레나 보상(베팅) 풀에 올라간 아이템 목록
     std::vector<ArenaItemSlot> bettedItems;
+    // 플레이어별 베팅 내역(준비 취소 시 인벤 반환)
+    std::map<std::string, std::vector<ArenaItemSlot>> betsByPlayer;
     // 관전 UI용 플레이어별 HP, 공격력, 생존 여부
     std::map<std::string, ArenaPlayerListEntry> spectatorPlayers;
     // 현재 턴을 진행 중인 플레이어 이름
