@@ -53,8 +53,4 @@ void InventoryState::Update(int ch, std::string& lastCommand)
                 player->EquipWeapon(weapon);
         }
     }
-    {
-
-        }
-
 }

@@ -34,18 +34,17 @@ void Player::LevelUp()
 
 void Player::EquipWeapon(WeaponItem* weapon)
 {
-    // 기존 무기 해제
     if (equippedWeapon != nullptr)
     {
         Attack -= equippedWeapon->GetValue();
         MaxHp -= equippedWeapon->GetHPBonus();
         Hp -= equippedWeapon->GetHPBonus();
+        equippedWeapon = nullptr;
     }
 
-    // 새 무기 장착
-    equippedWeapon = weapon;
     if (weapon != nullptr)
     {
+        equippedWeapon = weapon;
         Attack += weapon->GetValue();
         MaxHp += weapon->GetHPBonus();
         Hp += weapon->GetHPBonus();
