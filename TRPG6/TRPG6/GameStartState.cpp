@@ -41,7 +41,7 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
     Renderer::DisplayUI(UIPart::CenterLeft, 9, "3. 인벤토리 확인");
     Renderer::DisplayUI(UIPart::CenterLeft, 10, "4. 킬로그 확인");
     Renderer::DisplayUI(UIPart::CenterLeft, 11, "5. 아레나 개최");
-    Renderer::DisplayUI(UIPart::CenterLeft, 12, "6. 아이템 거래 센터");
+    Renderer::DisplayUI(UIPart::CenterLeft, 12, "6. 거래 센터");
 
     switch (ch) {
     case 1: {
@@ -80,4 +80,5 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
         Renderer::ClearAllCenterLeftUI();
         GameManager::GetInstance().SetCurrentState(new TradeState());
         break;
+    }
 }

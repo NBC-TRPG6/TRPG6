@@ -106,20 +106,17 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         break;
     }
 
-        case PacketType::PKT_S2C_CHANGE_STATE: {
-            Pkt_ChangeState* pkt = reinterpret_cast<Pkt_ChangeState*>(header);
+    case PacketType::PKT_S2C_CHANGE_STATE: {
+        Pkt_ChangeState* pkt = reinterpret_cast<Pkt_ChangeState*>(header);
 
-            if (!Client::isServer) // 방지책: 방장 본인은 이중 전환 방지
-            {
-                IGameState* nextState = CreateStateFromEGameState(pkt->targetState);
-                if (nextState == nullptr) break;
-                GameManager::GetInstance().SetCurrentState(nextState);
-            }
-
+        if (!Client::isServer) // 방지책: 방장 본인은 이중 전환 방지
+        {
+            IGameState* nextState = CreateStateFromEGameState(pkt->targetState);
+            if (nextState == nullptr) break;
             GameManager::GetInstance().SetCurrentState(nextState);
         }
         break;
-    }
+    }  
 
     case PacketType::PKT_C2S_ARENA_ITEM_REGISTER: {
         if (!Client::isServer) break;
@@ -195,17 +192,6 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
             break;
         }
 
-    case PacketType::PKT_S2C_ARENA_HP_SYNC: {
-        if (Client::isServer) break;
-        auto* pkt = reinterpret_cast<Pkt_ArenaHpSync*>(header);
-        ArenaBattleManager::GetInstance().OnSpectatorHpSync(*pkt);
-        NotifyArenaBattleHpSync(*pkt);
-        IPCManager::GetInstance().SendLog(
-            "[아레나] HP: " + std::string(pkt->playerName) +
-            " " + std::to_string(pkt->currentHp) + "/" + std::to_string(pkt->maxHp));
-        break;
-    }
-
     case PacketType::PKT_S2C_ARENA_ITEM_LIST: {
         if (Client::isServer) break;
         auto* pkt = reinterpret_cast<Pkt_ArenaItemList*>(header);
@@ -225,17 +211,14 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         break;
     }
 
-        case PacketType::PKT_S2C_ARENA_REWARD_POOL: {
-            if (Client::isServer) break;
-            auto* pkt = reinterpret_cast<Pkt_ArenaRewardPool*>(header);
-            ArenaBattleManager::GetInstance().OnSpectatorRewardPool(*pkt);
-            IPCManager::GetInstance().SendLog(
-                "[아레나] 보상 풀 수신 (" + std::to_string(pkt->slotCount) + "종)");
-            break;
-        }
-
-        case PacketType::PKT_S2C_ARENA_SESSION_APPLY: {
-            if (Client::isServer) break;
+    case PacketType::PKT_S2C_ARENA_REWARD_POOL: {
+        if (Client::isServer) break;
+        auto* pkt = reinterpret_cast<Pkt_ArenaRewardPool*>(header);
+        ArenaBattleManager::GetInstance().OnSpectatorRewardPool(*pkt);
+        IPCManager::GetInstance().SendLog(
+            "[아레나] 보상 풀 수신 (" + std::to_string(pkt->slotCount) + "종)");
+        break;
+    }
 
     case PacketType::PKT_S2C_ARENA_SESSION_APPLY: {
         if (Client::isServer) break;
@@ -270,23 +253,20 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
                 "[아레나] 로비가 아닌 상태에서 스냅샷 요청 무시");
             break;
         }
+    }
 
-        case PacketType::PKT_S2C_ARENA_BET_REFUND: {
-            if (Client::isServer) break;
+    case PacketType::PKT_S2C_ARENA_BET_REFUND: {
+        if (Client::isServer) break;
 
-            auto* pkt = reinterpret_cast<Pkt_ArenaBetRefund*>(header);
-            Player* player = GameManager::GetInstance().GetPlayer();
-            if (player != nullptr)
-            {
-                ApplyArenaBetRefundToLocalPlayer(player, *pkt);
-            }
-            break;
+        auto* pkt = reinterpret_cast<Pkt_ArenaBetRefund*>(header);
+        Player* player = GameManager::GetInstance().GetPlayer();
+        if (player != nullptr)
+        {
+            ApplyArenaBetRefundToLocalPlayer(player, *pkt);
         }
+        break;
+    }
 
-        case PacketType::PKT_S2C_ARENA_SNAPSHOT_REQUEST: {
-            if (Client::isServer) break;
-
-                                                   //--------------골드 전송 처리 부문----------------
     case static_cast<PacketType>(210): // GoldTradePacketType::PKT_C2S_GOLD_TRADE_REQ
     {
         Pkt_GoldTradeRequest* pkt = reinterpret_cast<Pkt_GoldTradeRequest*>(header);
