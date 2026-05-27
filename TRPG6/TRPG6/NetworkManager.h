@@ -1,5 +1,4 @@
-﻿// NetworkManager.h
-#pragma once
+﻿#pragma once
 
 // ★ 무조건 winsock2.h 및 windows.h 관련 인클루드보다 위에 선언되어야 합니다!
 #ifndef WIN32_LEAN_AND_MEAN
@@ -117,6 +116,23 @@ public:
     void SendTradeResponse(const Pkt_TradeResponse& pkt);
     void BroadcastTradeSync(const Pkt_TradeSync& pkt);
 #pragma endregion
+
+#pragma region COOP
+    // COOP Send Functions
+    void SendCOOPReady(bool isReady);
+    void SendCOOPUpdateStatus(const std::string& name, int atk, int hp, int job, bool isDead);
+    void SendCOOPUseItem(const std::string& targetName, const std::string& itemName, int amount);
+    void SendCOOPUseAttack(const std::string& sourceName, const std::string& targetName, int amount);
+    void SendCOOPUseBlock(const std::string& sourceName, const std::string& targetName);
+    void SendCOOPUseHeal(const std::string& sourceName, const std::string& targetName, int amount);
+    
+    // COOP Broadcast Functions
+    void BroadcastCOOPUpdateStatus(const std::string& name, int atk, int hp, int job, bool isDead);
+    void BroadcastCOOPUpdateTurn(const std::string& targetName, int turn);
+    void BroadcastCOOPUpdateMonster(const std::string& targetName, int hp);
+    void BroadcastCOOPTakeItem(const std::string& targetName, const std::string& itemName);
+#pragma endregion
+
 // 브로드 캐스팅 함수=======================================================================================
 public:
     void BroadcastChangeState(EGameState stateType);
@@ -257,6 +273,11 @@ public:
 
     bool StartHost(int port); // 방장(서버) 기능
     bool ConnectToServer(const std::string& ip, int port); // 참가자(클라이언트) 기능
+
+    int GetConnectedClientCount() const {
+        std::lock_guard<std::mutex> lock(clientsMutex);
+        return (int)connectedClients.size();
+    }
 
 private:
     SOCKET listenSocket = INVALID_SOCKET;

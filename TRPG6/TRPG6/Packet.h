@@ -48,7 +48,19 @@ enum class PacketType : uint16_t {
     PKT_C2S_TRADE_REQUEST,    // 거래 신청 (클라 -> 서버)
     PKT_C2S_TRADE_RESPONSE,        // 거래 수락/거절 (클라 -> 서버)
     PKT_S2C_TRADE_SYNC,            // 거래 목록 동기화 (서버 -> 클라)
-    
+
+#pragma region COOP
+    PKT_C2S_COOP_READY,
+    PKT_C2S_COOP_UPDATE_STATUS,
+    PKT_C2S_COOP_USE_ITEM,
+    PKT_C2S_COOP_USE_ATTACK,
+    PKT_C2S_COOP_USE_BLOCK,
+    PKT_C2S_COOP_USE_HEAL,
+    PKT_S2C_COOP_UPDATE_STATUS,
+    PKT_S2C_COOP_UPDATE_TURN,
+    PKT_S2C_COOP_UPDATE_MONSTER,
+    PKT_S2C_COOP_TAKE_ITEM,
+#pragma endregion
 };
 
 #pragma pack(push, 1)
@@ -470,6 +482,157 @@ struct Pkt_TradeSync
         std::memset(&info, 0, sizeof(info));
     }
 };
+#pragma endregion
+
+#pragma region COOP
+
+enum class PlayerJob : int32_t {
+    None = 0,
+    Tanker = 1,
+    Healer = 2
+};
+
+struct Pkt_C2S_COOP_Ready {
+    PacketHeader header;
+    bool isReady;
+    
+    Pkt_C2S_COOP_Ready() {
+        header.size = sizeof(Pkt_C2S_COOP_Ready);
+        header.type = PacketType::PKT_C2S_COOP_READY;
+        isReady = false;
+    }
+};
+
+struct Pkt_C2S_COOP_Update_Status {
+    PacketHeader header;
+    char name[32];
+    int32_t atk;
+    int32_t hp;
+    PlayerJob job;
+    bool isDead;
+    
+    Pkt_C2S_COOP_Update_Status() {
+        header.size = sizeof(Pkt_C2S_COOP_Update_Status);
+        header.type = PacketType::PKT_C2S_COOP_UPDATE_STATUS;
+        std::memset(name, 0, sizeof(name));
+        atk = 0; hp = 0; job = PlayerJob::None; isDead = false;
+    }
+};
+
+struct Pkt_C2S_COOP_Use_Item {
+    PacketHeader header;
+    char targetName[32];
+    char itemName[32];
+    int32_t amount;
+    
+    Pkt_C2S_COOP_Use_Item() {
+        header.size = sizeof(Pkt_C2S_COOP_Use_Item);
+        header.type = PacketType::PKT_C2S_COOP_USE_ITEM;
+        std::memset(targetName, 0, sizeof(targetName));
+        std::memset(itemName, 0, sizeof(itemName));
+        amount = 0;
+    }
+};
+
+struct Pkt_C2S_COOP_Use_Attack {
+    PacketHeader header;
+    char sourceName[32];
+    char targetName[32];
+    int32_t amount;
+    
+    Pkt_C2S_COOP_Use_Attack() {
+        header.size = sizeof(Pkt_C2S_COOP_Use_Attack);
+        header.type = PacketType::PKT_C2S_COOP_USE_ATTACK;
+        std::memset(sourceName, 0, sizeof(sourceName));
+        std::memset(targetName, 0, sizeof(targetName));
+        amount = 0;
+    }
+};
+
+struct Pkt_C2S_COOP_Use_Block {
+    PacketHeader header;
+    char sourceName[32];
+    char targetName[32];
+    
+    Pkt_C2S_COOP_Use_Block() {
+        header.size = sizeof(Pkt_C2S_COOP_Use_Block);
+        header.type = PacketType::PKT_C2S_COOP_USE_BLOCK;
+        std::memset(sourceName, 0, sizeof(sourceName));
+        std::memset(targetName, 0, sizeof(targetName));
+    }
+};
+
+struct Pkt_C2S_COOP_Use_Heal {
+    PacketHeader header;
+    char sourceName[32];
+    char targetName[32];
+    int32_t amount;
+    
+    Pkt_C2S_COOP_Use_Heal() {
+        header.size = sizeof(Pkt_C2S_COOP_Use_Heal);
+        header.type = PacketType::PKT_C2S_COOP_USE_HEAL;
+        std::memset(sourceName, 0, sizeof(sourceName));
+        std::memset(targetName, 0, sizeof(targetName));
+        amount = 0;
+    }
+};
+
+struct Pkt_S2C_COOP_Update_Status {
+    PacketHeader header;
+    char name[32];
+    int32_t atk;
+    int32_t hp;
+    PlayerJob job;
+    bool isDead;
+    
+    Pkt_S2C_COOP_Update_Status() {
+        header.size = sizeof(Pkt_S2C_COOP_Update_Status);
+        header.type = PacketType::PKT_S2C_COOP_UPDATE_STATUS;
+        std::memset(name, 0, sizeof(name));
+        atk = 0; hp = 0; job = PlayerJob::None; 
+        isDead = false;
+    }
+};
+
+struct Pkt_S2C_COOP_Update_Turn {
+    PacketHeader header;
+    char targetName[32];
+    int32_t turn;
+    
+    Pkt_S2C_COOP_Update_Turn() {
+        header.size = sizeof(Pkt_S2C_COOP_Update_Turn);
+        header.type = PacketType::PKT_S2C_COOP_UPDATE_TURN;
+        std::memset(targetName, 0, sizeof(targetName));
+        turn = 0;
+    }
+};
+
+struct Pkt_S2C_COOP_Update_Monster {
+    PacketHeader header;
+    char targetName[32];
+    int32_t hp;
+    
+    Pkt_S2C_COOP_Update_Monster() {
+        header.size = sizeof(Pkt_S2C_COOP_Update_Monster);
+        header.type = PacketType::PKT_S2C_COOP_UPDATE_MONSTER;
+        std::memset(targetName, 0, sizeof(targetName));
+        hp = 0;
+    }
+};
+
+struct Pkt_S2C_COOP_Take_Item {
+    PacketHeader header;
+    char targetName[32];
+    char itemName[32];
+    
+    Pkt_S2C_COOP_Take_Item() {
+        header.size = sizeof(Pkt_S2C_COOP_Take_Item);
+        header.type = PacketType::PKT_S2C_COOP_TAKE_ITEM;
+        std::memset(targetName, 0, sizeof(targetName));
+        std::memset(itemName, 0, sizeof(itemName));
+    }
+};
+
 #pragma endregion
 
 #pragma pack(pop)

@@ -40,6 +40,11 @@
     <ClCompile Include="BossMonster.cpp" />
     <ClCompile Include="ClearState.cpp" />
     <ClCompile Include="Controller.cpp" />
+    <ClCompile Include="COOPBattleState.cpp" />
+    <ClCompile Include="COOPManager.cpp" />
+    <ClCompile Include="COOPReadyState.cpp" />
+    <ClCompile Include="COOPRewardState.cpp" />
+    <ClCompile Include="COOPSelectJobState.cpp" />
     <ClCompile Include="DieState.cpp" />
     <ClCompile Include="GameCreateState.cpp" />
     <ClCompile Include="GameLobbyState.cpp" />
@@ -81,6 +86,11 @@
     <ClInclude Include="Character.h" />
     <ClInclude Include="ClearState.h" />
     <ClInclude Include="Controller.h" />
+    <ClInclude Include="COOPBattleState.h" />
+    <ClInclude Include="COOPManager.h" />
+    <ClInclude Include="COOPReadyState.h" />
+    <ClInclude Include="COOPRewardState.h" />
+    <ClInclude Include="COOPSelectJobState.h" />
     <ClInclude Include="DATABASE.h" />
     <ClInclude Include="DieState.h" />
     <ClInclude Include="GameCreateState.h" />
@@ -101,11 +111,13 @@
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Shop.h" />
     <ClInclude Include="ShopBranchState.h" />
     <ClInclude Include="ShopBuyState.h" />
     <ClInclude Include="ShopSellState.h" />
     <ClInclude Include="ShopState.h" />
     <ClInclude Include="ShopStockState.h" />
+    <ClInclude Include="stb_image.h" />
     <ClInclude Include="TradeManager.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>

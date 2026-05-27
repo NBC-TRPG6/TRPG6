@@ -45,6 +45,11 @@ enum class EGameState
     ArenaBattle,
     ArenaWait,
     ArenaResult,
+
+    COOPReady,
+    COOPSelectJob,
+    COOPBattle,
+    COOPReward
 };
 
 // 아레나 네트워크 상수 ======================================================================
