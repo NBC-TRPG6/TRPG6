@@ -61,7 +61,6 @@
     <ClCompile Include="ShopSellState.cpp" />
     <ClCompile Include="ShopState.cpp" />
     <ClCompile Include="ShopStockState.cpp" />
-    <ClCompile Include="WeaponTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArenaBattleManager.h" />
@@ -99,7 +98,6 @@
     <ClInclude Include="ShopState.h" />
     <ClInclude Include="ShopStockState.h" />
     <ClInclude Include="Utils.h" />
-    <ClInclude Include="WeaponTable.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
