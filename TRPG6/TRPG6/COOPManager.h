@@ -20,6 +20,8 @@ public:
         return instance;
     }
 
+    bool isChargingPattern = false;
+
     void Reset();
 
     // C2S processing

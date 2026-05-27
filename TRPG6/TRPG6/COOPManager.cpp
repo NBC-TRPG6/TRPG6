@@ -16,6 +16,7 @@ void COOPManager::Reset() {
     currentBlockSource = "";
     currentBlockTarget = "";
     turnOrder.clear();
+    isChargingPattern = false;
 }
 
 void COOPManager::SetPlayerReady(const std::string& name, bool isReady) {
@@ -120,45 +121,101 @@ void COOPManager::NextTurn() {
 
 void COOPManager::BossAction()
 {
-    if (!Client::isServer) return;
+    if (!Client::isServer) return; //
 
     std::vector<std::string> aliveTargets;
-    for (auto& pair : players) {
-        if (!pair.second.isDead) aliveTargets.push_back(pair.first);
-    }
-    if (aliveTargets.empty()) return;
-
-    std::string target = aliveTargets[rand() % aliveTargets.size()]; // 보스는 살아있는 무작위 1명만 공격합니다.
-
-    if (currentBlockTarget == "ANY" || currentBlockTarget == target)
+    for (auto& pair : players)
     {
-        target = currentBlockSource;
+        if (!pair.second.isDead) aliveTargets.push_back(pair.first); //
     }
+    if (aliveTargets.empty()) return; //
 
-    // 기존 데미지 계산
-    int damage = get_normal_int(COOP_DB::BOSS_DMG_MEAN, COOP_DB::BOSS_DMG_STDDEV) + COOP_DB::BOSS_DMG_BASE;
-
-    // 10% 확률로 2배 데미지 (크리티컬)
-    bool isCritical = (rand() % 100) < 10;
-    if (isCritical)
+    // 1. 만약 보스가 이전 턴에서 패턴을 준비(차징) 중이었다면 발동
+    if (isChargingPattern)
     {
-        damage *= 2;
-        // (선택) 크리티컬 발생 시 로컬 창에 로그 출력
-        IPCManager::GetInstance().SendLog("[경고] 보스의 치명적인 공격! (데미지 2배)");
-        NetworkManager::GetInstance().SendChatPacket("[레이드]", "보스의 치명적인 공격! " + target + "에게 " + std::to_string(damage) + "의 피해를 입혔습니다!");
+        isChargingPattern = false; // 발동 후 상태 초기화
+
+        std::vector<std::string> nonBlockers;
+        for (const auto& name : aliveTargets)
+        {
+            if (name != currentBlockSource)
+            {
+                nonBlockers.push_back(name);
+            }
+        }
+
+        if (!nonBlockers.empty())
+        {
+            IPCManager::GetInstance().SendLog("[경고] 보스 이승재의 광역 마킹 패턴이 발동되었습니다!");
+
+            for (const auto& target : nonBlockers)
+            {
+                int damage = get_normal_int(COOP_DB::BOSS_PATTERN_DMG_MEAN, COOP_DB::BOSS_PATTERN_DMG_STDDEV);
+
+                NetworkManager::GetInstance().SendChatPacket("[레이드]", "보스 " + currentBossName + "가 도발을 하지 않은 " + target + "를 공격했습니다! (피해: " + std::to_string(damage) + ")");
+
+                int currentHp = players[target].hp - damage;
+                if (currentHp < 0) currentHp = 0;
+                bool isDead = (currentHp == 0);
+
+                UpdatePlayerStatus(target, players[target].atk, currentHp, players[target].job, isDead);
+            }
+        }
+        else
+        {
+            // 전원 도발 상태거나 탱커만 남았을 경우의 예외 처리 (패턴 무효화)
+            NetworkManager::GetInstance().SendChatPacket("[레이드]", "모든 플레이어가 도발 효과로 보호받아 보스의 광역 공격이 빗나갔습니다!");
+        }
+
+        currentBlockSource = "";
+        currentBlockTarget = "";
+        return; // 발동 후 턴 종료
     }
-    else
+
+    // 2. 특수 패턴을 충전 중이 아닐 때, 10% 확률로 전조 현상 발생 (차징 턴)
+    bool isSpecialPattern = (rand() % 100) < COOP_DB::BOSS_PATTERN_CHANCE;
+
+    if (isSpecialPattern)
     {
-        NetworkManager::GetInstance().SendChatPacket("[레이드]", "보스 " + currentBossName + "가 " + target + "를 공격했습니다! (피해: " + std::to_string(damage) + ")");
+        isChargingPattern = true; // 차징 상태 진입
+
+        IPCManager::GetInstance().SendLog("[경고] 보스 이승재가 크게 숨을 들이마시며 광역 공격을 준비합니다!");
+        NetworkManager::GetInstance().SendChatPacket("[레이드]", "보스 " + currentBossName + "가 모두를 노려봅니다... 다음 턴에 강력한 광역 공격이 예상됩니다! (도발 필요)");
+
+        currentBlockSource = "";
+        currentBlockTarget = "";
+        return; // 전조 현상만 보여주고 턴을 넘김 (이 턴에는 공격 안 함)
     }
 
-    int currentHp = players[target].hp - damage;
-    if (currentHp < 0) currentHp = 0;
-    bool isDead = (currentHp == 0);
+    // 3. 차징도 발동도 아닐 경우 기존 일반 공격 로직 수행
+    std::string target = aliveTargets[rand() % aliveTargets.size()]; //
 
-    UpdatePlayerStatus(target, players[target].atk, currentHp, players[target].job, isDead);
-    currentBlockSource = "";
-    currentBlockTarget = "";
+    if (currentBlockTarget == "ANY" || currentBlockTarget == target) //
+    {
+        target = currentBlockSource; //
+    }
+
+    int damage = get_normal_int(COOP_DB::BOSS_DMG_MEAN, COOP_DB::BOSS_DMG_STDDEV) + COOP_DB::BOSS_DMG_BASE; //
+
+    bool isCritical = (rand() % 100) < 10; //
+    if (isCritical) //
+    {
+        damage *= 2; //
+        IPCManager::GetInstance().SendLog("[경고] 보스의 치명적인 공격! (데미지 2배)"); //
+        NetworkManager::GetInstance().SendChatPacket("[레이드]", "보스의 치명적인 공격! " + target + "에게 " + std::to_string(damage) + "의 피해를 입혔습니다!"); //
+    }
+    else //
+    {
+        NetworkManager::GetInstance().SendChatPacket("[레이드]", "보스 " + currentBossName + "가 " + target + "를 공격했습니다! (피해: " + std::to_string(damage) + ")"); //
+    }
+
+    int currentHp = players[target].hp - damage; //
+    if (currentHp < 0) currentHp = 0; //
+    bool isDead = (currentHp == 0); //
+
+    UpdatePlayerStatus(target, players[target].atk, currentHp, players[target].job, isDead); //
+    currentBlockSource = ""; //
+    currentBlockTarget = ""; //
 }
 
 void COOPManager::OnPlayerAttack(const std::string& sourceName, const std::string& targetName, int amount) {

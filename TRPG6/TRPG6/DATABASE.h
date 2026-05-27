@@ -86,6 +86,11 @@ namespace COOP_DB
     inline constexpr int HEALER_HEAL_MEAN = 55;   // 힐량 평균 (만렙 시 평균 330)
     inline constexpr int HEALER_HEAL_STDDEV = 15; // 힐량 표준편차 (만렙 시 표준편차 90)
 
+    // [추가됨] 특수 패턴 관련 설정
+    inline constexpr int BOSS_PATTERN_DMG_MEAN = 300;   // 패턴 데미지 정규분포 평균
+    inline constexpr int BOSS_PATTERN_DMG_STDDEV = 10;  // 패턴 데미지 정규분포 표준편차
+    inline constexpr int BOSS_PATTERN_CHANCE = 10;      // 패턴 발동 확률 (%)
+
     // 플레이어 레벨 비례 배율 (예: 50레벨일 때 100 + 300 = 400% 적용)
     inline constexpr int STAT_MULTIPLIER_PERCENT_PER_LEVEL = 30;
 }
