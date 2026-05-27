@@ -45,10 +45,10 @@ void ItemReceivedTradeListState::Update(int ch, std::string & lastCommand)
 
             Renderer::DisplayUI(UIPart::CenterLeft, line++, tradeLine);
         }
-        Renderer::DisplayUI(UIPart::CenterLeft, line + 1, "거래를 진행할 번호를 입력하세요.");
+        Renderer::DisplayUI(UIPart::CenterLeft, line + 1, "0. 뒤로 가기");
+        Renderer::DisplayUI(UIPart::CenterLeft, line + 3, "거래를 진행할 번호를 입력하세요.");
     }
 
-    Renderer::DisplayUI(UIPart::CenterLeft, 15, "0. 뒤로 가기");
     
     // 2. 번호 선택 처리 (거래 수락 로직)
     if (ch > 0 && ch <= (int)currentDisplayedTrades.size())

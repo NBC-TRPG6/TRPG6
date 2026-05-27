@@ -101,25 +101,24 @@ void TradeManager::Server_HandleResponse(uint32_t tradeId, uint8_t response)
     TradeInfo * trade = GetTradeById(tradeId);
     if (!trade || trade->status != 0) return; // 이미 처리된 거래면 무시
 
-    trade->status = response; // 1: 수락, 2: 거절
+    TradeInfo updatedInfo = *trade;
+    updatedInfo.status = response; // 1: 수락, 2: 거절
 
     if (response == 1)
-    {
-        // [수락됨] 아이템 이동 시작
-        Pkt_TradeSync syncPkt;
-        syncPkt.info = *trade;
-
-        NetworkManager::GetInstance().BroadcastTradeSync(syncPkt);
+    {   // [수락됨]
         IPCManager::GetInstance().SendLog("[서버] 거래 성사! (ID: " + std::to_string(tradeId) + ")");
     }
     else
     {
         // [거절됨]
-        Pkt_TradeSync syncPkt;
-        syncPkt.info = *trade;
-        NetworkManager::GetInstance().BroadcastTradeSync(syncPkt);
         IPCManager::GetInstance().SendLog("[서버] 거래 거절됨. (ID: " + std::to_string(tradeId) + ")");
     }
+
+    Pkt_TradeSync syncPkt;
+    syncPkt.info = updatedInfo;
+    NetworkManager::GetInstance().BroadcastTradeSync(syncPkt);
+
+    SyncTrade(updatedInfo);
 }
 
 // 실제로 인벤토리를 건드리는 함수
