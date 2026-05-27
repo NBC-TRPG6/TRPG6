@@ -8,7 +8,7 @@ Shop::Shop()
 {
     // 상점 초기 재고 설정(추후에 다른 곳에 옮겨 작성할지도..!!!)
     stock.AddItem(new Item("HP 포션", ItemType::HP_POTION, 18, 15), 27);
-    stock.AddItem(new Item("공격력 포션", ItemType::ATTACK_BUFF, 10, 30), 27);
+    stock.AddItem(new Item("공격력 포션", ItemType::ATTACK_BUFF, 4, 30), 27);
 }
 
 /*
