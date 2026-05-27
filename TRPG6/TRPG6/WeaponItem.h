@@ -26,3 +26,7 @@ private:
     int hpBonus;            // HP 보너스
 
 };
+
+
+
+//TODO:: 장비 장착 시 모든 UI가 색이 변함
