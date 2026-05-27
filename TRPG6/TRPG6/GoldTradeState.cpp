@@ -3,7 +3,7 @@
 #include "GameManager.h"
 #include "GameStartState.h"
 #include "TradeState.h"       
-#include "GoldTradePacket.h" 
+#include "NetworkManager.h" 
 #include "Utils.h"
 #include "Player.h"
 #include <sstream>
@@ -97,7 +97,7 @@ void GoldTradeState::Update(int ch, std::string& lastCommand)
         }
 
         // 서버에 요청 패킷 전송
-        SendGoldTradeRequest(receiverName, amount);
+        NetworkManager::GetInstance().SendGoldTradeRequest(receiverName, amount);
         errorMessage = receiverName + "님에게 " + std::to_string(amount) + " 골드 전송 요청 중...";
     }
 

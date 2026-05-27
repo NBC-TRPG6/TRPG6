@@ -63,6 +63,8 @@ public:
     void SendArenaAttackPacket(const std::string& targetName);
     // C2S PKT_C2S_ARENA_ITEM_USE: 아이템 사용(targetName 비우면 자신에게 사용)
     void SendArenaItemUsePacket(const std::string& itemName, const std::string& targetName);
+    // 클라이언트 UI 등에서 호출할 송금 요청 함수 선언
+    void SendGoldTradeRequest(const std::string& receiverName, int32_t amount);
 
     // ---------- 로비 UI (S2C PKT_S2C_ARENA_LOBBY_STATE 캐시) ----------
 

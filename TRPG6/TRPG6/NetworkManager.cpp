@@ -14,7 +14,6 @@
 #include "DATABASE.h"
 #include "ArenaBattleState.h"
 #include "TradeManager.h"
-#include "GoldTradePacket.h"
 #include <algorithm>
 #include <set>
 
@@ -1465,6 +1464,7 @@ void NetworkManager::SendTradeResponse(const Pkt_TradeResponse & pkt)
     }
 }
 
+
 void NetworkManager::BroadcastTradeSync(const Pkt_TradeSync & pkt)
 {
     if (!Client::isServer) return; // 방장만 브로드캐스트 가능
@@ -1821,9 +1821,8 @@ void NetworkManager::HandleGoldTradeRequest(SOCKET sock, Pkt_GoldTradeRequest* p
     std::strncpy(ackPkt.receiverName, receiverName.c_str(), sizeof(ackPkt.receiverName) - 1);
     ackPkt.goldAmount = amount;
 
+    // 이미 클라이언트가 자기 돈을 깎고 보냈으므로, 여기서는 무조건 승인 처리
     bool isTransactionValid = false;
-
-    // 기초적인 예외 검사 (자기 자신에게 보낼 수 없고, 0원 이하는 전송 불가)
     if (senderName != receiverName && amount > 0) {
         isTransactionValid = true;
     }
@@ -1847,7 +1846,7 @@ void NetworkManager::HandleGoldTradeRequest(SOCKET sock, Pkt_GoldTradeRequest* p
     HandleGoldTradeAck(&ackPkt);
 }
 
-// [클라이언트 공통] 서버가 최종 승인하여 브로드캐스트한 결과를 수신했을 때 데이터를 실제 깎고 더하는 함수
+// [클라이언트 공통] 서버가 최종 승인하여 브로드캐스트한 결과를 수신했을 때 데이터를 깎고 더하는 함수
 void NetworkManager::HandleGoldTradeAck(Pkt_GoldTradeAck* pkt) {
     // 서버가 실패 처리한 거래라면 로그만 띄우고 취소
     if (pkt->isSuccess == 0) {
@@ -1865,17 +1864,9 @@ void NetworkManager::HandleGoldTradeAck(Pkt_GoldTradeAck* pkt) {
     Player* myPlayer = GameManager::GetInstance().GetPlayer();
     if (!myPlayer) return;
 
-    // [Case A] 내가 돈을 보낸 사람(Sender)인 경우 -> 내 소지금 삭감 처리
+    // [Case A] 내가 돈을 보낸 사람(Sender)인 경우 -> 이미 돈은 Request 보낼 때 깎았음
     if (Client::playerName == sender) {
-        int currentMoney = myPlayer->GetMoney(); // 상속받은 Character의 GetMoney 함수 활용
-        if (currentMoney >= amount) {
-            myPlayer->SetMoney(currentMoney - amount); // SetMoney 함수로 데이터 갱신
-            myPlayer->PrintStatus(); // UI 상태창 새로고침
-            IPCManager::GetInstance().SendLog("[거래 완료] " + std::to_string(amount) + " 골드를 송금했습니다. (현재 잔액: " + std::to_string(myPlayer->GetMoney()) + " 골드)");
-        }
-        else {
-            IPCManager::GetInstance().SendLog("[거래 실패] 보유하신 골드가 부족합니다.");
-        }
+        IPCManager::GetInstance().SendLog("[거래 완료] " + std::to_string(amount) + " 골드를 송금했습니다.");
     }
     // [Case B] 내가 돈을 받은 사람(Receiver)인 경우 -> 내 소지금 증가 처리
     else if (Client::playerName == receiver) {
@@ -1884,8 +1875,44 @@ void NetworkManager::HandleGoldTradeAck(Pkt_GoldTradeAck* pkt) {
         myPlayer->PrintStatus(); // UI 상태창 새로고침
         IPCManager::GetInstance().SendLog("[거래 완료] " + sender + "님으로부터 " + std::to_string(amount) + " 골드가 입금되었습니다! (현재 잔액: " + std::to_string(myPlayer->GetMoney()) + " 골드)");
     }
-    // [Case C] 나랑 관련 없는 제3자 유저들인 경우 -> 귓속말이나 알림처럼 구경만 하도록 시스템 메세지만 출력
+    // [Case C] 나랑 관련 없는 제3자 유저들인 경우 -> 시스템 메세지만 출력
     else {
         IPCManager::GetInstance().SendLog("[시스템] " + sender + "님이 " + receiver + "님에게 " + std::to_string(amount) + " 골드를 전달했습니다.");
     }
 }
+
+// [클라이언트] 유저가 UI 등에서 '골드 보내기'를 수행했을 때 호출하는 함수
+void NetworkManager::SendGoldTradeRequest(const std::string& receiverName, int32_t amount)
+{
+    if (amount <= 0) return;
+
+    // 1. 선 결제 로직 (보내는 사람 돈 먼저 깎기)
+    Player * myPlayer = GameManager::GetInstance().GetPlayer();
+    if (!myPlayer || myPlayer->GetMoney() < amount)
+    {
+        IPCManager::GetInstance().SendLog("[오류] 골드가 부족합니다.");
+        return;
+    }
+
+    myPlayer->SetMoney(myPlayer->GetMoney() - amount);
+    myPlayer->PrintStatus();
+
+    // 2. 패킷 조립
+    Pkt_GoldTradeRequest pkt;
+    pkt.goldAmount = amount;
+    std::strncpy(pkt.receiverName, receiverName.c_str(), sizeof(pkt.receiverName) - 1);
+
+    // 3. 전송
+    if (Client::isServer)
+    {
+        HandleGoldTradeRequest(INVALID_SOCKET, &pkt);
+    }
+    else
+    {
+        if (clientSocket != INVALID_SOCKET)
+        {
+            send(clientSocket, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
+        }
+    }
+}
+
