@@ -1,40 +1,34 @@
 ﻿#include "ArenaBattleState.h"
-#include "ArenaWaitState.h"
-#include "ArenaResultState.h"
 #include "NetworkManager.h"
 #include "GameManager.h"
 #include "Renderer.h"
-#include "Packet.h"
 #include "DATABASE.h"
 
-/// <summary>
-/// 아레나 배틀스테이트 진입 시 작동하는 함수
-/// </summary>
 void ArenaBattleState::Enter()
 {
     Renderer::ClearAllCenterLeftUI();
-    //턴 대기
     CurrentStep = BattleUIStep::WaitingTurn;
     CurrentTurnName = "";
     LastAttackLog = "";
-
-    // 스냅샷 빌드 + 전송 + 로컬 복사
-    Player* player = GameManager::GetInstance().GetPlayer();
-    NetworkManager::GetInstance().SendArenaPlayerSnapshotPacket(player);
+    PlayerList.clear();
+    ItemSnapshot.clear();
 }
 
 void ArenaBattleState::Update(int ch, std::string& lastCommand)
 {
+    Renderer::ClearAllCenterLeftUI();
+    (void)lastCommand;
+    DrawMyStatus();
+
     DrawPlayerList();
 
-    //내 턴인지 체크하는 함수(CurrentTurnName == Client::playerName)
     bool isMyTurn = (CurrentTurnName == Client::playerName);
 
     switch (CurrentStep)
     {
-    case BattleUIStep::WaitingTurn:  //턴 대기중일 시
+    case BattleUIStep::WaitingTurn:
     {
-        if (isMyTurn) // 내 턴이면
+        if (isMyTurn)
         {
             CurrentStep = BattleUIStep::MainMenu;
         }
@@ -42,21 +36,34 @@ void ArenaBattleState::Update(int ch, std::string& lastCommand)
         {
             Renderer::DisplayUI(UIPart::CenterLeft, 8,
                 CurrentTurnName.empty()
-                ? "대기 중..."
+                ? "전투 데이터 수신 대기 중..."
                 : CurrentTurnName + "의 턴입니다.");
         }
         break;
     }
 
-    case BattleUIStep::MainMenu: // 내 턴일 때
+    case BattleUIStep::MainMenu:
     {
         DrawMainMenu();
-        if (ch == 1)      CurrentStep = BattleUIStep::SelectTarget; // 1번 타겟 선택
-        else if (ch == 2) CurrentStep = BattleUIStep::SelectItem; // 2번 아이템 선택
+        if (ch == 1)
+        {
+            CurrentStep = BattleUIStep::SelectTarget;
+        }
+        else if (ch == 2)
+        {
+            if (HasUsableArenaItems())
+            {
+                CurrentStep = BattleUIStep::SelectItem;
+            }
+            else
+            {
+                Renderer::DisplayUITimed(UIPart::CenterLeft, 11,
+                    "사용 가능한 아이템이 없습니다.", 2.0f);
+            }
+        }
         break;
     }
 
-    // 타겟 선택 시
     case BattleUIStep::SelectTarget:
     {
         DrawTargetList();
@@ -69,7 +76,7 @@ void ArenaBattleState::Update(int ch, std::string& lastCommand)
             ++idx;
             if (ch == idx)
             {
-                //TODO:: 어택포켓 받아오기 NetworkManager::GetInstance().SendArenaAttackPacket(p.playerName);
+                NetworkManager::GetInstance().SendArenaAttackPacket(p.playerName);
                 CurrentStep = BattleUIStep::WaitingTurn;
                 break;
             }
@@ -77,24 +84,28 @@ void ArenaBattleState::Update(int ch, std::string& lastCommand)
         break;
     }
 
-    //아이템 사용 선택 시
     case BattleUIStep::SelectItem:
     {
         DrawItemList();
 
-        if (ch >= 1 && ch <= (int)ItemSnapshot.size())
+        int itemMenuIdx = 0;
+        for (size_t i = 0; i < ItemSnapshot.size(); ++i)
         {
-            auto& slot = ItemSnapshot[ch - 1];
+            if (ItemSnapshot[i].count <= 0) continue;
+            ++itemMenuIdx;
+            if (ch != itemMenuIdx) continue;
+
+            auto& slot = ItemSnapshot[i];
             if (slot.count > 0)
             {
-                //아이템 사용 포켓 가져오기 NetworkManager::GetInstance().SendArenaItemUsePacket(slot.itemName, "");
-                slot.count--;
+                NetworkManager::GetInstance().SendArenaItemUsePacket(slot.itemName, Client::playerName);
                 CurrentStep = BattleUIStep::WaitingTurn;
             }
             else
             {
                 Renderer::DisplayUI(UIPart::CenterLeft, 15, "해당 아이템이 없습니다.");
             }
+            break;
         }
         break;
     }
@@ -107,6 +118,7 @@ void ArenaBattleState::Exit()
     ItemSnapshot.clear();
     CurrentTurnName = "";
     LastAttackLog = "";
+    CurrentStep = BattleUIStep::WaitingTurn;
 }
 
 // S2C 콜백 ================================================
@@ -120,12 +132,20 @@ void ArenaBattleState::OnTurnStart(const std::string& turnPlayerName)
 {
     CurrentTurnName = turnPlayerName;
     CurrentStep = BattleUIStep::WaitingTurn;
-    Renderer::ClearAllCenterLeftUI();
 }
 
-void ArenaBattleState::OnHPSync(const std::vector<ArenaPlayerListEntry>& playerStats)
+void ArenaBattleState::OnHpSync(const std::string& playerName, int32_t currentHp, int32_t maxHp)
 {
-    PlayerList.assign(playerStats.begin(), playerStats.end());
+    for (auto& p : PlayerList)
+    {
+        if (std::string(p.playerName) == playerName)
+        {
+            p.hp = currentHp;
+            p.maxHp = maxHp;
+            p.isAlive = currentHp > 0 ? 1 : 0;
+            return;
+        }
+    }
 }
 
 void ArenaBattleState::OnAttackResult(const std::string& attacker, const std::string& target, int damage)
@@ -145,16 +165,30 @@ void ArenaBattleState::OnPlayerDie(const std::string& playerName)
         if (std::string(p.playerName) == playerName)
         {
             p.isAlive = 0;
+            p.hp = 0;
             return;
         }
     }
 }
 
-// 드로우 함수 ================================================
+bool ArenaBattleState::HasUsableArenaItems() const
+{
+    for (const auto& slot : ItemSnapshot)
+    {
+        if (slot.count > 0) return true;
+    }
+    return false;
+}
 
 void ArenaBattleState::DrawPlayerList()
 {
     Renderer::DisplayUI(UIPart::Top, 0, "=== 아레나 전투 ===");
+
+    if (PlayerList.empty())
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, 1, "플레이어 목록 대기 중...");
+        return;
+    }
 
     int row = 1;
     for (const auto& p : PlayerList)
@@ -163,12 +197,12 @@ void ArenaBattleState::DrawPlayerList()
             + "  HP: " + std::to_string(p.hp)
             + " / " + std::to_string(p.maxHp);
         if (!p.isAlive) line += "  [탈락]";
-        Renderer::DisplayUI(UIPart::Top, row++, line);
+        Renderer::DisplayUI(UIPart::CenterLeft, row++, line);
     }
 
     if (!LastAttackLog.empty())
     {
-        Renderer::DisplayUI(UIPart::Top, row + 1, "[" + LastAttackLog + "]");
+        Renderer::DisplayUI(UIPart::CenterLeft, row + 1, "[" + LastAttackLog + "]");
     }
 }
 
@@ -198,13 +232,31 @@ void ArenaBattleState::DrawTargetList()
 void ArenaBattleState::DrawItemList()
 {
     Renderer::DisplayUI(UIPart::CenterLeft, 8, "--- 아이템 선택 ---");
-    for (int i = 0; i < (int)ItemSnapshot.size(); ++i)
+    int displayIdx = 1;
+    for (size_t i = 0; i < ItemSnapshot.size(); ++i)
     {
         const auto& slot = ItemSnapshot[i];
         if (slot.count <= 0) continue;
-        Renderer::DisplayUI(UIPart::CenterLeft, 9 + i,
-            std::to_string(i + 1) + ". "
+        Renderer::DisplayUI(UIPart::CenterLeft, 8 + displayIdx,
+            std::to_string(displayIdx) + ". "
             + slot.itemName
             + "  x" + std::to_string(slot.count));
+        ++displayIdx;
+    }
+}
+
+void ArenaBattleState::DrawMyStatus()
+{
+    for (const auto& p : PlayerList)
+    {
+        if (std::string(p.playerName) == Client::playerName)
+        {
+            Renderer::DisplayUI(UIPart::CenterRight, 0, "[ 내 정보 ]");
+            Renderer::DisplayUI(UIPart::CenterRight, 1, "이름: " + std::string(p.playerName));
+            Renderer::DisplayUI(UIPart::CenterRight, 2, "HP: " + std::to_string(p.hp) + "/" + std::to_string(p.maxHp));
+            Renderer::DisplayUI(UIPart::CenterRight, 3, "공격력: " + std::to_string(p.attack));
+            Renderer::DisplayUI(UIPart::CenterRight, 4, "레벨: " + std::to_string(p.level));
+            return;
+        }
     }
 }

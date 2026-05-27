@@ -6,6 +6,7 @@
 
 void ArenaResultState::Enter() {
     Renderer::ClearAllCenterLeftUI();
+    GameManager::GetInstance().GetPlayer()->PrintStatus();
 }
 
 // ArenaBattleManager에 저장된 RankList(S2C) 순위 표시

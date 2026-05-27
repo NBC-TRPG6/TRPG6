@@ -36,6 +36,9 @@ enum class PacketType : uint16_t {
     PKT_S2C_ARENA_ITEM_LIST,       // 턴 보유자 아이템 목록 (최대 MAX_ARENA_ITEM_SLOTS)
     PKT_S2C_ARENA_DIE,             // 사망 통지
     PKT_S2C_ARENA_RANK_LIST,       // 아레나 종료 순위
+    PKT_S2C_ARENA_SNAPSHOT_REQUEST,  // 방장 전투 시작 시 게스트에게 스냅샷 전송 요청
+    PKT_S2C_ARENA_SESSION_APPLY,     // 전투 종료 후 로컬 Player에 HP/인벤/보상 반영
+    PKT_S2C_ARENA_LOBBY_STATE,       // 아레나 로비 상태
 
     // 아이템 거래
     PKT_C2S_TRADE_REQUEST,    // 거래 신청 (클라 -> 서버)
@@ -150,6 +153,12 @@ struct Pkt_ArenaReady {
     }
 };
 
+struct ArenaLobbyPlayerEntry {
+    char playerName[32];
+    uint8_t hasArrived;  // 0 = 대기, 1 = 로비 도착
+};
+
+
 // Client_PlayerObjectSend — 고정 헤더 뒤에 ArenaItemSlot[itemSlotCount] 가변 tail
 // header.size = ArenaSnapshotPacketSize(itemSlotCount), itemSlotCount는 0~MAX_ARENA_ITEM_SLOTS
 struct Pkt_ArenaPlayerSnapshotHeader {
@@ -189,9 +198,33 @@ struct Pkt_ArenaItemUse {
     }
 };
 
-#pragma endregion
-
 #pragma region Arena S2C
+
+
+// 아레나 로비 상태
+struct Pkt_ArenaLobbyState {
+    PacketHeader header;
+    uint8_t playerCount;
+    ArenaLobbyPlayerEntry players[MAX_ARENA_PLAYERS];
+    Pkt_ArenaLobbyState()
+    {
+        header.size = sizeof(Pkt_ArenaLobbyState);
+        header.type = PacketType::PKT_S2C_ARENA_LOBBY_STATE;
+        playerCount = 0;
+        std::memset(players, 0, sizeof(players));
+    }
+};
+
+// 방장 전투 시작 시 게스트에게 C2S 스냅샷 전송 요청
+struct Pkt_ArenaSnapshotRequest {
+    PacketHeader header;
+
+    Pkt_ArenaSnapshotRequest()
+    {
+        header.size = sizeof(Pkt_ArenaSnapshotRequest);
+        header.type = PacketType::PKT_S2C_ARENA_SNAPSHOT_REQUEST;
+    }
+};
 
 struct Pkt_ArenaPlayerList {
     PacketHeader header;
@@ -297,6 +330,17 @@ struct Pkt_ArenaRankList {
         std::memset(entries, 0, sizeof(entries));
     }
 };
+
+// 전투 종료 시 해당 클라이언트 Player에 반영 (가변: battleSlots + rewardSlots)
+struct Pkt_ArenaSessionApplyHeader {
+    PacketHeader header;
+    int32_t hp;
+    int32_t maxHp;
+    int32_t attack;
+    uint8_t battleSlotCount;
+    uint8_t rewardSlotCount;
+};
+
 
 #pragma endregion
 #pragma pack(pop)
@@ -407,5 +451,29 @@ inline void CopyStringToPacketField(char* dest, size_t destSize, const std::stri
 std::vector<char> BuildArenaPlayerSnapshotPacket(Player* player);
 
 const ArenaItemSlot* GetArenaSnapshotItems(const Pkt_ArenaPlayerSnapshotHeader* snapshotHeader);
+
+inline constexpr size_t ArenaSessionApplyHeaderSize()
+{
+    return sizeof(Pkt_ArenaSessionApplyHeader);
+}
+
+inline size_t ArenaSessionApplyPacketSize(uint8_t battleSlotCount, uint8_t rewardSlotCount)
+{
+    return ArenaSessionApplyHeaderSize()
+        + static_cast<size_t>(battleSlotCount) * sizeof(ArenaItemSlot)
+        + static_cast<size_t>(rewardSlotCount) * sizeof(ArenaItemSlot);
+}
+
+inline bool IsValidArenaSessionApplySize(uint16_t packetSize, uint8_t battleSlotCount, uint8_t rewardSlotCount)
+{
+    if (battleSlotCount > MAX_ARENA_ITEM_SLOTS || rewardSlotCount > MAX_ARENA_ITEM_SLOTS) return false;
+    return packetSize == ArenaSessionApplyPacketSize(battleSlotCount, rewardSlotCount);
+}
+
+const ArenaItemSlot* GetArenaSessionApplyBattleSlots(const Pkt_ArenaSessionApplyHeader* hdr);
+const ArenaItemSlot* GetArenaSessionApplyRewardSlots(const Pkt_ArenaSessionApplyHeader* hdr);
+
+// S2C ArenaSessionApply 수신 후 로컬 Player HP/공격력/인벤(전투 소모+보상) 반영
+void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size_t packetSize);
 
 #pragma endregion
