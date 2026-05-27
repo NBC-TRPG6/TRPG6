@@ -1,0 +1,475 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="페이지-1" id="xheC12wTMjRRXhWMCERJ">
+    <mxGraphModel dx="3735" dy="2209" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-3" edge="1" parent="1" source="r1LW7F4eFlzuaMc3Vcgi-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-13" connectable="0" parent="r1LW7F4eFlzuaMc3Vcgi-3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="단체 상태 변경&lt;br&gt;(Server)" vertex="1">
+          <mxGeometry relative="1" x="-0.0371" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="GameStartState" vertex="1">
+          <mxGeometry height="60" width="120" x="90" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-5" edge="1" parent="1" source="r1LW7F4eFlzuaMc3Vcgi-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-14" connectable="0" parent="r1LW7F4eFlzuaMc3Vcgi-5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="각 플레이어&lt;br&gt;아이템 등록" vertex="1">
+          <mxGeometry relative="1" x="-0.0026" y="-2" as="geometry">
+            <mxPoint y="-2" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="ArenaReadyState" vertex="1">
+          <mxGeometry height="60" width="120" x="290" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-7" edge="1" parent="1" source="r1LW7F4eFlzuaMc3Vcgi-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-6" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-15" connectable="0" parent="r1LW7F4eFlzuaMc3Vcgi-7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="서버가 Arena&lt;br&gt;시작" vertex="1">
+          <mxGeometry relative="1" x="-0.0543" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="ArenaLobbyState" vertex="1">
+          <mxGeometry height="60" width="120" x="490" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-9" edge="1" parent="1" source="r1LW7F4eFlzuaMc3Vcgi-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-12" connectable="0" parent="r1LW7F4eFlzuaMc3Vcgi-9" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="해당 플레이어 체력 0일시" vertex="1">
+          <mxGeometry relative="1" x="0.101" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-10" edge="1" parent="1" source="r1LW7F4eFlzuaMc3Vcgi-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-11">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="880" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-16" connectable="0" parent="r1LW7F4eFlzuaMc3Vcgi-10" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="BattleState의&amp;nbsp;&lt;br&gt;인원 1명만 남으면" vertex="1">
+          <mxGeometry relative="1" x="0.1797" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="ArenaBattleState" vertex="1">
+          <mxGeometry height="60" width="120" x="690" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="ArenaWaitState" vertex="1">
+          <mxGeometry height="60" width="120" x="890" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-19" edge="1" parent="1" source="r1LW7F4eFlzuaMc3Vcgi-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1120" y="340" />
+              <mxPoint x="150" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="AremaResultState" vertex="1">
+          <mxGeometry height="60" width="120" x="1060" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-17" edge="1" parent="1" source="r1LW7F4eFlzuaMc3Vcgi-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.465;entryY=0.056;entryDx=0;entryDy=0;entryPerimeter=0;" target="r1LW7F4eFlzuaMc3Vcgi-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-18" connectable="0" parent="r1LW7F4eFlzuaMc3Vcgi-17" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="BattleState의 인원 1명 남으면" vertex="1">
+          <mxGeometry relative="1" x="0.0438" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-22" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-weight: 400;&quot;&gt;ArenaReadyState&lt;/span&gt;" vertex="1">
+          <mxGeometry height="450" width="700" x="80" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-28" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-22" source="r1LW7F4eFlzuaMc3Vcgi-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-27" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-20" parent="r1LW7F4eFlzuaMc3Vcgi-22" style="rounded=0;whiteSpace=wrap;html=1;" value="Client" vertex="1">
+          <mxGeometry height="60" width="120" x="20" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-25" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-22" source="r1LW7F4eFlzuaMc3Vcgi-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="520" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-23" parent="r1LW7F4eFlzuaMc3Vcgi-22" style="rounded=0;whiteSpace=wrap;html=1;" value="Server" vertex="1">
+          <mxGeometry height="60" width="120" x="20" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-29" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-22" source="r1LW7F4eFlzuaMc3Vcgi-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="260" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-30" connectable="0" parent="r1LW7F4eFlzuaMc3Vcgi-29" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Server에 저장" vertex="1">
+          <mxGeometry relative="1" x="0.1363" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-32" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-22" source="r1LW7F4eFlzuaMc3Vcgi-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-31" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-27" parent="r1LW7F4eFlzuaMc3Vcgi-22" style="rounded=0;whiteSpace=wrap;html=1;" value="아이템 서버 등록&lt;br&gt;Client_RewardItemRegistration" vertex="1">
+          <mxGeometry height="60" width="180" x="170" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-33" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-22" source="r1LW7F4eFlzuaMc3Vcgi-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="450.0000000000002" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-36" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-22" source="r1LW7F4eFlzuaMc3Vcgi-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="610" y="80" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-31" parent="r1LW7F4eFlzuaMc3Vcgi-22" style="rounded=0;whiteSpace=wrap;html=1;" value="아레나 준비 완료 패킷" vertex="1">
+          <mxGeometry height="60" width="120" x="390" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-37" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-22" source="r1LW7F4eFlzuaMc3Vcgi-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="80" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-35" parent="r1LW7F4eFlzuaMc3Vcgi-22" style="rounded=0;whiteSpace=wrap;html=1;" value="해당 Client 상태&lt;br&gt;ArenaLobbyState&lt;br&gt;로 변경" vertex="1">
+          <mxGeometry height="60" width="120" x="520" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-38" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="ArenaLobbyState" vertex="1">
+          <mxGeometry height="450" width="760" x="810" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-49" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-38" source="r1LW7F4eFlzuaMc3Vcgi-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-48" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-39" parent="r1LW7F4eFlzuaMc3Vcgi-38" style="rounded=0;whiteSpace=wrap;html=1;" value="Client" vertex="1">
+          <mxGeometry height="60" width="120" x="17" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-42" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-38" source="r1LW7F4eFlzuaMc3Vcgi-40" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-41" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-40" parent="r1LW7F4eFlzuaMc3Vcgi-38" style="rounded=0;whiteSpace=wrap;html=1;" value="Server" vertex="1">
+          <mxGeometry height="60" width="120" x="17" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-44" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-38" source="r1LW7F4eFlzuaMc3Vcgi-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-43" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-45" connectable="0" parent="r1LW7F4eFlzuaMc3Vcgi-44" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="TRUE" vertex="1">
+          <mxGeometry relative="1" x="-0.05" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-41" parent="r1LW7F4eFlzuaMc3Vcgi-38" style="rounded=0;whiteSpace=wrap;html=1;" value="모든 플레이어&lt;br&gt;LobbyState인지 확인" vertex="1">
+          <mxGeometry height="60" width="120" x="190" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-47" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-38" source="r1LW7F4eFlzuaMc3Vcgi-43" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-46" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-43" parent="r1LW7F4eFlzuaMc3Vcgi-38" style="rounded=0;whiteSpace=wrap;html=1;" value="ArenaBattleState&lt;br&gt;이동 가능 활성화" vertex="1">
+          <mxGeometry height="60" width="120" x="390" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-50" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-38" source="r1LW7F4eFlzuaMc3Vcgi-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-48">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-46" parent="r1LW7F4eFlzuaMc3Vcgi-38" style="rounded=0;whiteSpace=wrap;html=1;" value="ArenaBattleState로&lt;br&gt;모든 플레이어 상태 변경" vertex="1">
+          <mxGeometry height="60" width="120" x="590" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-48" parent="r1LW7F4eFlzuaMc3Vcgi-38" style="rounded=0;whiteSpace=wrap;html=1;" value="Client" vertex="1">
+          <mxGeometry height="60" width="120" x="590" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-51" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-weight: 400;&quot;&gt;ArenaBattleState&lt;/span&gt;" vertex="1">
+          <mxGeometry height="1720" width="1320" x="1710" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-72" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-71" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-53" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="Client" vertex="1">
+          <mxGeometry height="60" width="120" x="68" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-75" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-74" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-55" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="Server" vertex="1">
+          <mxGeometry height="60" width="120" x="930" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-76" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-71" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-74">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-80" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-71" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-79" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-71" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="Client_PlayerObjectSend&lt;br&gt;플레이어 객체 복사하여&lt;br&gt;Arena 용으로 서버에 전송" vertex="1">
+          <mxGeometry height="60" width="216" x="20" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-78" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-74" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-77" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-74" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="ArenaBattleManager&lt;br&gt;플레이어 객체 전송" vertex="1">
+          <mxGeometry height="60" width="120" x="930" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-81" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-77" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-79">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-83" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-77" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-82" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-77" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="플레이어 객체 정보&lt;br&gt;모든 클라이언트에 전송" vertex="1">
+          <mxGeometry height="60" width="140" x="920" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-85" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-79" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-84" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-79" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="플레이어 정보 받고&lt;br&gt;UI 표기" vertex="1">
+          <mxGeometry height="60" width="216" x="20" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-87" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-82" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-86" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-126" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-82" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-124">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-82" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="플레이어 객체 중&lt;br&gt;하나에게 턴을 넘김" vertex="1">
+          <mxGeometry height="60" width="140" x="920" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-123" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-84" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="128" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-84" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="플레이어 정보 받고&lt;br&gt;UI 표기" vertex="1">
+          <mxGeometry height="60" width="216" x="20" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-94" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-86" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-93" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-86" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="해당 플레이어&lt;br&gt;턴 입력 대기" vertex="1">
+          <mxGeometry height="60" width="140" x="920" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-95" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-88" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-93">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-100" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-88" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-99" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-88" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="턴 입력 ( 공격 )" vertex="1">
+          <mxGeometry height="60" width="216" x="20" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-97" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-93" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-96" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-93" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="공격 대상의 스탯에&lt;br&gt;공격 적용" vertex="1">
+          <mxGeometry height="60" width="140" x="920" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-101" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-96" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-99">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-103" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-96" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-102" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-108" connectable="0" parent="r1LW7F4eFlzuaMc3Vcgi-103" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=default;labelPosition=center;verticalLabelPosition=middle;" value="&lt;span style=&quot;font-size: 12px; text-wrap-mode: wrap;&quot;&gt;HP&amp;lt;=&lt;/span&gt;&lt;span style=&quot;font-size: 12px; white-space: normal; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;0&lt;/span&gt;&lt;div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 12px; text-wrap-mode: wrap;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.42" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-112" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-96" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-111" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-96" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="모든 플레이어에게&lt;br&gt;HP 정보 반환" vertex="1">
+          <mxGeometry height="60" width="140" x="920" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-116" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-99" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-127" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-99" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="플레이어 HP UI 적용" vertex="1">
+          <mxGeometry height="60" width="216" x="20" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-105" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-102" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-104" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-102" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="해당 플레이어 사망 패킷" vertex="1">
+          <mxGeometry height="60" width="140" x="1080" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-110" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-104" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-109" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-104" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="해당 플레이어&lt;br&gt;ArenaWaitState&lt;br&gt;로 변경" vertex="1">
+          <mxGeometry height="60" width="140" x="1080" y="960" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-109" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="해당 플레이어 객체&lt;br&gt;데이터 제거" vertex="1">
+          <mxGeometry height="60" width="140" x="1080" y="1080" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-114" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-111" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-113" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-129" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-111" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-127">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-111" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="다음 플레이어에게&lt;br&gt;턴 넘김" vertex="1">
+          <mxGeometry height="60" width="140" x="920" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-120" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-113" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-119" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-113" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="턴 입력 대기" vertex="1">
+          <mxGeometry height="60" width="140" x="920" y="939" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-118" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-115" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-117" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-130" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-115" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-119">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900" y="1070" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-115" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="아이템 사용 선택지" vertex="1">
+          <mxGeometry height="60" width="216" x="20" y="1070" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-135" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-117" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-134" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-117" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="아이템 목록 출력" vertex="1">
+          <mxGeometry height="60" width="216" x="20" y="1210" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-132" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-119" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-131" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-119" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="해당 플레이어 소유&lt;br&gt;아이템 찾기" vertex="1">
+          <mxGeometry height="60" width="140" x="920" y="1090" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-125" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-124" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-88" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-124" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="턴 기능 활성화" vertex="1">
+          <mxGeometry height="60" width="216" x="20" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-128" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-127" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-115">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-127" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="턴 기능 활성화" vertex="1">
+          <mxGeometry height="60" width="216" x="20" y="970" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-133" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-131" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-117">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-137" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-131" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-136" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-131" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="해당 아이템 목록 전달" vertex="1">
+          <mxGeometry height="60" width="140" x="920" y="1190" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-138" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-134" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-136">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-143" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-134" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-142" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-134" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="아이템 선택" vertex="1">
+          <mxGeometry height="60" width="216" x="20" y="1350" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-140" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-136" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-139" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-136" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="아이템 효과 적용" vertex="1">
+          <mxGeometry height="60" width="140" x="920" y="1370" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-144" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-139" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-142">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-146" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-139" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-145" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-139" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="해당 플레이어에게 적용&lt;br&gt;스탯 반환" vertex="1">
+          <mxGeometry height="60" width="140" x="920" y="1470" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-148" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-142" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-147" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-142" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="해당 플레이어 HP , Damage&lt;br&gt;업데이트" vertex="1">
+          <mxGeometry height="60" width="216" x="20" y="1490" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-149" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-51" source="r1LW7F4eFlzuaMc3Vcgi-145" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-147">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-145" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="모든 플레이어에게&lt;br&gt;체력 반환" vertex="1">
+          <mxGeometry height="60" width="140" x="920" y="1610" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-147" parent="r1LW7F4eFlzuaMc3Vcgi-51" style="rounded=0;whiteSpace=wrap;html=1;" value="모든 플레이어 HP 업데이트" vertex="1">
+          <mxGeometry height="60" width="216" x="20" y="1630" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-65" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-weight: 400;&quot;&gt;ArenaWaitState&lt;/span&gt;" vertex="1">
+          <mxGeometry height="580" width="700" x="810" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-151" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-65" source="r1LW7F4eFlzuaMc3Vcgi-66" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-150" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-66" parent="r1LW7F4eFlzuaMc3Vcgi-65" style="rounded=0;whiteSpace=wrap;html=1;" value="Client" vertex="1">
+          <mxGeometry height="60" width="120" x="20" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-153" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-65" source="r1LW7F4eFlzuaMc3Vcgi-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-152" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-67" parent="r1LW7F4eFlzuaMc3Vcgi-65" style="rounded=0;whiteSpace=wrap;html=1;" value="Server" vertex="1">
+          <mxGeometry height="60" width="120" x="20" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-150" parent="r1LW7F4eFlzuaMc3Vcgi-65" style="rounded=0;whiteSpace=wrap;html=1;" value="플레이어 체력 업데이트" vertex="1">
+          <mxGeometry height="60" width="140" x="310" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-154" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-65" source="r1LW7F4eFlzuaMc3Vcgi-152" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-150">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-156" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-65" source="r1LW7F4eFlzuaMc3Vcgi-152" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-155" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-152" parent="r1LW7F4eFlzuaMc3Vcgi-65" style="rounded=0;whiteSpace=wrap;html=1;" value="모든 플레이어에게&lt;br&gt;체력 반환" vertex="1">
+          <mxGeometry height="60" width="120" x="220" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-155" parent="r1LW7F4eFlzuaMc3Vcgi-65" style="rounded=0;whiteSpace=wrap;html=1;" value="Battle 종료 패킷 받을 시&lt;div&gt;모든 플레이어ArenaResultState 로&lt;br&gt;상태 변경&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="190" x="420" y="355" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-68" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-weight: 400;&quot;&gt;ArenaResultState&lt;/span&gt;" vertex="1">
+          <mxGeometry height="450" width="900" x="630" y="1560" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-160" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-68" source="r1LW7F4eFlzuaMc3Vcgi-69" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-159" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-69" parent="r1LW7F4eFlzuaMc3Vcgi-68" style="rounded=0;whiteSpace=wrap;html=1;" value="Client" vertex="1">
+          <mxGeometry height="60" width="120" x="20" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-158" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-68" source="r1LW7F4eFlzuaMc3Vcgi-70" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-157" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-70" parent="r1LW7F4eFlzuaMc3Vcgi-68" style="rounded=0;whiteSpace=wrap;html=1;" value="Server" vertex="1">
+          <mxGeometry height="60" width="120" x="20" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-161" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-68" source="r1LW7F4eFlzuaMc3Vcgi-157" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-159">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-163" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-68" source="r1LW7F4eFlzuaMc3Vcgi-157" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-162" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-157" parent="r1LW7F4eFlzuaMc3Vcgi-68" style="rounded=0;whiteSpace=wrap;html=1;" value="아레나 순위 패킷으로&lt;br&gt;순위 정보&lt;br&gt;모든 플레이어에게 전달" vertex="1">
+          <mxGeometry height="60" width="160" x="220" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-166" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-68" source="r1LW7F4eFlzuaMc3Vcgi-159" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="r1LW7F4eFlzuaMc3Vcgi-164">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-159" parent="r1LW7F4eFlzuaMc3Vcgi-68" style="rounded=0;whiteSpace=wrap;html=1;" value="순위 정보 출력" vertex="1">
+          <mxGeometry height="60" width="120" x="250" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-165" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-68" source="r1LW7F4eFlzuaMc3Vcgi-162" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-164" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-168" edge="1" parent="r1LW7F4eFlzuaMc3Vcgi-68" source="r1LW7F4eFlzuaMc3Vcgi-162" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="r1LW7F4eFlzuaMc3Vcgi-167" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-162" parent="r1LW7F4eFlzuaMc3Vcgi-68" style="rounded=0;whiteSpace=wrap;html=1;" value="1위에게&lt;br&gt;ArenaReadyState에서&lt;br&gt;등록한 아이템 전달" vertex="1">
+          <mxGeometry height="60" width="160" x="460" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-164" parent="r1LW7F4eFlzuaMc3Vcgi-68" style="rounded=0;whiteSpace=wrap;html=1;" value="아이템 등록" vertex="1">
+          <mxGeometry height="60" width="160" x="470" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="r1LW7F4eFlzuaMc3Vcgi-167" parent="r1LW7F4eFlzuaMc3Vcgi-68" style="rounded=0;whiteSpace=wrap;html=1;" value="모든 플레이어 상태&lt;br&gt;GameStartState로 변경" vertex="1">
+          <mxGeometry height="60" width="160" x="700" y="370" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

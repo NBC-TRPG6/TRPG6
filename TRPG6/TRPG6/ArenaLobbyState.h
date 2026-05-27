@@ -1,13 +1,9 @@
 ﻿#pragma once
 #include "IGameState.h"
-#include "Player.h"
 
-class ShopBranchState : public IGameState
-{
+class ArenaLobbyState : public IGameState {
 public:
     void Enter() override;
     void Update(int ch, std::string& lastCommand) override;
-
-private:
-    Player* player;
+    void Exit() override;
 };

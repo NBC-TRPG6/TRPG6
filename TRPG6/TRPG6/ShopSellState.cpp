@@ -24,7 +24,6 @@ void ShopSellState::Update(int ch, std::string& lastCommand)
     }
 
     Renderer::DisplayUI(UIPart::CenterLeft, 0, "==== [ 아이템 판매 ] ====");
-    Renderer::DisplayUI(UIPart::CenterLeft, 1, "현재 보유 골드: " + std::to_string(player->GetMoney()) + "G");
 
     auto& inventory = player->GetInventory();
     const auto& slots = inventory.GetSlots();
@@ -32,7 +31,7 @@ void ShopSellState::Update(int ch, std::string& lastCommand)
 
     if (size == 0)
     {
-        Renderer::DisplayUI(UIPart::CenterLeft, 3, "판매 가능한 아이템이 없습니다.");
+        Renderer::DisplayUI(UIPart::CenterLeft, 2, "판매 가능한 아이템이 없습니다.");
     }
     else
     {
@@ -42,11 +41,11 @@ void ShopSellState::Update(int ch, std::string& lastCommand)
             int count = slots[i].count;
             int sellPrice = slots[i].item->GetSellPrice();
             std::string info = std::to_string(i + 1) + ". " + name + " (x" + std::to_string(count) + ") | 가격: " + std::to_string(sellPrice) + "G";
-            Renderer::DisplayUI(UIPart::CenterLeft, i + 3, info);
+            Renderer::DisplayUI(UIPart::CenterLeft, i + 2, info);
         }
     }
 
-    int menuStartLine = size + 5;
+    int menuStartLine = size + 4;
     Renderer::DisplayUI(UIPart::CenterLeft, menuStartLine, "0. 이전으로 돌아가기");
 
     if (size > 0)
