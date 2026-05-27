@@ -38,6 +38,7 @@ enum class PacketType : uint16_t {
     PKT_S2C_ARENA_RANK_LIST,       // 아레나 종료 순위
     PKT_S2C_ARENA_SNAPSHOT_REQUEST,  // 방장 전투 시작 시 게스트에게 스냅샷 전송 요청
     PKT_S2C_ARENA_SESSION_APPLY,     // 전투 종료 후 로컬 Player에 HP/인벤/보상 반영
+    PKT_S2C_ARENA_LOBBY_STATE,       // 아레나 로비 상태
 };
 
 #pragma pack(push, 1)
@@ -147,6 +148,12 @@ struct Pkt_ArenaReady {
     }
 };
 
+struct ArenaLobbyPlayerEntry {
+    char playerName[32];
+    uint8_t hasArrived;  // 0 = 대기, 1 = 로비 도착
+};
+
+
 // Client_PlayerObjectSend — 고정 헤더 뒤에 ArenaItemSlot[itemSlotCount] 가변 tail
 // header.size = ArenaSnapshotPacketSize(itemSlotCount), itemSlotCount는 0~MAX_ARENA_ITEM_SLOTS
 struct Pkt_ArenaPlayerSnapshotHeader {
@@ -187,6 +194,21 @@ struct Pkt_ArenaItemUse {
 };
 
 #pragma region Arena S2C
+
+
+// 아레나 로비 상태
+struct Pkt_ArenaLobbyState {
+    PacketHeader header;
+    uint8_t playerCount;
+    ArenaLobbyPlayerEntry players[MAX_ARENA_PLAYERS];
+    Pkt_ArenaLobbyState()
+    {
+        header.size = sizeof(Pkt_ArenaLobbyState);
+        header.type = PacketType::PKT_S2C_ARENA_LOBBY_STATE;
+        playerCount = 0;
+        std::memset(players, 0, sizeof(players));
+    }
+};
 
 // 방장 전투 시작 시 게스트에게 C2S 스냅샷 전송 요청
 struct Pkt_ArenaSnapshotRequest {
@@ -313,6 +335,7 @@ struct Pkt_ArenaSessionApplyHeader {
     uint8_t battleSlotCount;
     uint8_t rewardSlotCount;
 };
+
 
 #pragma endregion
 
