@@ -143,6 +143,7 @@ void COOPBattleState::Update(int ch, std::string& lastCommand)
         else if (currentSubState == SubState::HealSelect)
         {
             Renderer::DisplayUI(UIPart::CenterLeft, 0, "--- 치료할 대상 선택 ---");
+            for (int i = 1; i <= 12; ++i) Renderer::DisplayUI(UIPart::CenterLeft, i, ""); // 기존 UI 초기화
             std::vector<std::string> alivePlayers;
             for (const auto& pair : coop.players)
             {
