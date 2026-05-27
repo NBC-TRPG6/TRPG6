@@ -1,6 +1,7 @@
 ﻿#include "WeaponTable.h"
+#include "WeaponItem.h"
 #include <random>
-#include <vector>
+#include <algorithm>
 const WeaponData WeaponTable::weaponTable[30] = {
     // 검
     {"나무 검",       "검", 0, 3,  2,  100},
@@ -103,6 +104,14 @@ WeaponData WeaponTable::GetRandomWeapon(int price1, int price2)
 
 }
 
+WeaponItem* WeaponTable::Craft(int price1, int price2)
+{
+    WeaponData data = GetRandomWeapon(price1, price2);
+    return new WeaponItem(
+        data.Name, data.BaseName, data.UpgradeCount,
+        data.AttackBonus, data.HPBonus, data.Price);
+}
+
 std::string WeaponTable::GetBaseName(WeaponData& weapon) const
 {
     return weapon.BaseName;
@@ -112,4 +121,41 @@ int WeaponTable::GetUpgradeCount(WeaponData& weapon) const
     return weapon.UpgradeCount;
 }
 
+
+WeaponItem* WeaponTable::Upgrade(WeaponItem* weapon1, WeaponItem* weapon2)
+{
+    // 다른 무기 종류면 강화 불가
+    if (weapon1->GetBaseName() != weapon2->GetBaseName())
+        return nullptr;
+    else if(weapon1->GetUpgradeCount() >= 4 || weapon2->GetUpgradeCount() >= 4) // 이미 최대 강화된 무기는 강화 불가
+        return nullptr;
+
+    // 강화 단계 합산 + 1, 최대 4 클램프
+    int newUpgrade = weapon1->GetUpgradeCount() + weapon2->GetUpgradeCount() + 1;
+    newUpgrade = std::min<int>(newUpgrade, 4);
+
+    // 새 무기 이름 조합해서 테이블 조회
+    std::string baseName = weapon1->GetBaseName();
+    std::string newName = "";
+    // 무기 테이블에서 baseName과 newUpgrade에 맞는 무기 찾기 (예: "검" + 2 → "철 검")
+    for (const auto& w : weaponTable)
+    {
+        if (w.BaseName == baseName && w.UpgradeCount == newUpgrade)
+        {
+            newName = w.Name;
+            break;
+        }
+    }
+
+    if (newName.empty())
+        return nullptr;
+
+    const WeaponData* data = GetWeaponDataByName(newName);
+    if (data == nullptr)
+        return nullptr;
+
+    return new WeaponItem(
+        data->Name, data->BaseName, data->UpgradeCount,
+        data->AttackBonus, data->HPBonus, data->Price);
+}
 

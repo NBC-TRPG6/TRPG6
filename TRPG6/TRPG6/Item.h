@@ -7,7 +7,8 @@ enum class ItemType
 {
     HP_POTION,      // 체력 회복
     ATTACK_BUFF,    // 공격력 일시 증가 (전투용)
-    MONSTER_PART    // 몬스터의 신체 일부(사용 불가능한 아이템)
+    MONSTER_PART,    // 몬스터의 신체 일부(조합 & 판매용아이템)
+    WEAPON //무기
 };
 
 class Item
