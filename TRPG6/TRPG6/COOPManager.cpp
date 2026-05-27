@@ -148,8 +148,6 @@ void COOPManager::BossAction()
     }
 
     int currentHp = players[target].hp - damage;
-    // ... (이하 기존 로직 동일)
-    int currentHp = players[target].hp - damage;
     if (currentHp < 0) currentHp = 0;
     bool isDead = (currentHp == 0);
 
