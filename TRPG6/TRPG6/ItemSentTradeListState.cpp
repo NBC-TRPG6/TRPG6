@@ -27,6 +27,7 @@ void ItemSentTradeListState::Update(int ch, std::string & lastCommand)
     if (sentTrades.empty())
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 2, "보낸 거래 신청이 없습니다.");
+        Renderer::DisplayUI(UIPart::CenterLeft, 4, "0. 뒤로 가기");
     }
     else
     {

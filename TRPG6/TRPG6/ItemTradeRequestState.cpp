@@ -37,10 +37,11 @@ void ItemTradeRequestState::Update(int ch, std::string & lastCommand)
     Renderer::DisplayUI(UIPart::Top, 0, "=== [ 거래 신청서 작성 ] ===");
     Renderer::DisplayUI(UIPart::CenterLeft, 2, "형식: [받을사람]/[줄아이템이름]/[받을아이템이름]");
     Renderer::DisplayUI(UIPart::CenterLeft, 4, "0. 아이템 거래 센터로 이동");
-
+    READ_MODE = true;
     if (lastCommand == "0")
     {
         GameManager::GetInstance().SetCurrentState(new ItemTradeState());
+        READ_MODE = false;
         return;
     }
     else if (lastCommand.empty())
@@ -111,4 +112,5 @@ void ItemTradeRequestState::Update(int ch, std::string & lastCommand)
     NetworkManager::GetInstance().SendTradeRequest(pkt);
 
     Renderer::DisplayUITimed(UIPart::CenterLeft, 10, receiverName + "님에게 거래를 신청했습니다!", 2.0f);
+    READ_MODE = false;
 }

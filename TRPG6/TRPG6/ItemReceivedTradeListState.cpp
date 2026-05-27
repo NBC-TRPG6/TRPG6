@@ -27,6 +27,7 @@ void ItemReceivedTradeListState::Update(int ch, std::string & lastCommand)
     if (currentDisplayedTrades.empty())
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 2, "도착한 거래 제안이 없습니다.");
+        Renderer::DisplayUI(UIPart::CenterLeft, 4, "0. 뒤로 가기");
     }
     else
     {
