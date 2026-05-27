@@ -312,7 +312,7 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
             TradeManager::GetInstance().SyncTrade(pkt->info);
             break;
         }
-
+        
         default:
             break;
     }
