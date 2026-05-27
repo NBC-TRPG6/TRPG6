@@ -24,6 +24,7 @@ public:
     void OnAttackResult(const std::string& attacker, const std::string& target, int damage);
     void OnItemList(const std::vector<ArenaItemSlot>& items);
     void OnPlayerDie(const std::string& playerName);
+    void DrawMyStatus();
 
 private:
     void DrawPlayerList();
