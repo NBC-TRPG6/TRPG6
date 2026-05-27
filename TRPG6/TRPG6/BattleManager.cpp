@@ -16,6 +16,7 @@ void BattleManager::StartBattle(Player* player)
     std::uniform_int_distribution<int> dist(0, 99);
     int nimochance = dist(rng);
     isNIMO = false;
+    useItemName = "";
 
     bool isPlayerTurn = dist(rng) >= 5; // 95% 확률로 플레이어가 선공, 5% 확률로 몬스터가 선공
 
@@ -112,29 +113,32 @@ void BattleManager::PlayerTurn(Player* player, Monster& monster)
     {
         if (player->GetHp() == player->GetMaxHp()) // 최대 체력이면
         {
-            //player->useItem(AttackPotion) //TODO:: 최대 체력이면 무조건 공격력 포션
+            player->GetInventory().UseItem(player, "공격력 포션", 1); //무조건 공격력 포션 사용
+            useItemName = "공격력 포션";
         }
         else if (player->GetHp() < player->GetMaxHp() / 2) // 반피 이하면
         {
-            //player->useItem(HealPotion) //TODO:: 반피 이하면 무조건 회복 포션
-            
+            player->GetInventory().UseItem(player, "HP 포션", 1);//반피 이하면 무조건 회복 포션
+            useItemName = "HP 포션";
         }
         else // 그 사이 (반피 ~ 최대 미만)
         {
             int UseItemType = dist(rng) < 50 ? 0 : 1; // 50% 확률로 공격력 또는 회복 포션
             if (UseItemType == 0)
             {
-                //player->useItem(AttackPotion) //TODO
-               
+                player->GetInventory().UseItem(player, "공격력 포션", 1); //공격력 포션 사용
+                useItemName = "공격력 포션";
+
             }
             else
             {
-                //player->useItem(HealPotion) //TODO
+                player->GetInventory().UseItem(player, "HP 포션", 1);
+                useItemName = "HP 포션";
+
             }
         }
 
-        Renderer::DisplayUI(UIPart::CenterLeft, 4, player->GetName() + "이 아이템을 사용했습니다!");
-        // Renderer::DisplayUI(UIPart::CenterLeft, 5, player->GetName() + "이 아이템을 사용했습니다!"); TODO::사용한 아이템 출력
+        Renderer::DisplayUI(UIPart::CenterLeft, 4, player->GetName() + "이" + useItemName + "을 사용했습니다!");
 
         return; // 아이템 사용 후 공격하지 않고 턴 종료
     }
@@ -254,7 +258,7 @@ void BattleManager::BattleEnd(Player* player)
     }
 
 
-    Item* item = currentMonster.DropItem(); //30%확률로 아이템 드랍
+    Item* item = currentMonster.DropItem(); //80%확률로 아이템 드랍
     if (item != nullptr)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 6, item->GetName() + "을(를) 획득했다!");

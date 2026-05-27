@@ -27,6 +27,7 @@ public:
     {
         AddItem(new Item("HP 포션", ItemType::HP_POTION, 50, 15), 3);
         AddItem(new Item("공격력 포션", ItemType::ATTACK_BUFF, 10, 30), 3);
+        AddItem(new Item("실험용 말랑젤리", ItemType::MONSTER_PART, 0, 100), 100);
     }
 
     ~Inventory()
@@ -106,6 +107,34 @@ public:
         return true;
     }
 
+    /// <summary>
+    /// 아이템 제거 함수, 위의 수량 관리부분을 따로 빼서 만든 함수입니다.
+    /// </summary>
+    /// <param name="itemName">아이템이름</param>
+    /// <param name="amount">사용 수량</param>
+    /// <returns></returns>
+    bool RemoveItem(const std::string& itemName, int amount = 1)
+    {
+        auto* slot = GetItemSlot(itemName);
+        if (!slot || slot->count < amount)
+            return false;
+
+        slot->count -= amount;
+        if (slot->count <= 0)
+        {
+            auto it = std::find_if(slots.begin(), slots.end(), [&](const auto& s) {
+                return s.item->GetName() == itemName;
+                });
+            if (it != slots.end())
+            {
+                delete it->item;
+                slots.erase(it);
+            }
+        }
+        return true;
+    }
+
+
     /*
      * @brief 인벤토리 출력 메서드
      * @param formatter 아이템과 수량을 어떻게 출력할지 정의하는 함수
@@ -148,3 +177,6 @@ public:
 private:
     std::vector<InventorySlot<T>> slots;
 };
+
+
+

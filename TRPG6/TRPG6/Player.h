@@ -2,10 +2,14 @@
 #include <string>
 #include "Character.h"
 #include "Inventory.h"
+#include "WeaponItem.h"
 
 class Player : public Character {
 private:
     Inventory<Item> inventory;
+    //장착 장비
+    WeaponItem* equippedWeapon = nullptr;
+
 public:
     Player(const std::string& name)
         : Character(name), Exp(0), MaxExp(100), Level(1) {
@@ -30,6 +34,7 @@ public:
     int GetExp() const { return Exp; }
     int GetMaxExp() const { return MaxExp; }
     int GetLevel() const { return Level; }
+    WeaponItem* GetEquippedWeapon() const { return equippedWeapon; }
 
     // Setters        
     void SetHp(int hp) {
@@ -44,4 +49,9 @@ public:
     void LevelUp();
 
     void PrintStatus() const;
+
+    //무기 장착,해제 함수
+    void EquipWeapon(WeaponItem* weapon);
+    //아이템 삭제 함수(강화,조합등에서 사용)
+    bool RemoveItem(const std::string& itemName, int amount = 1);
 };

@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "Utils.h"
 #include "GameStartState.h"
+#include "WeaponItem.h"
 
 void InventoryState::Enter()
 {
@@ -19,6 +20,8 @@ void InventoryState::Update(int ch, std::string& lastCommand)
 {
     Renderer::DisplayUI(UIPart::Top, 0, "인벤토리");
     Renderer::DisplayUI(UIPart::CenterLeft, 1, "[ 소지한 물품 ]");
+    Renderer::DisplayUI(UIPart::CenterLeft, 2, "[ 무기를 선택하면 장착이 가능합니다.]");
+
 
     Player* player = GameManager::GetInstance().GetPlayer();
     auto& inventory = player->GetInventory();
@@ -40,4 +43,18 @@ void InventoryState::Update(int ch, std::string& lastCommand)
     {
         GameManager::GetInstance().SetCurrentState(new GameStartState());
     }
+    if (ch > 0 && ch <= size)
+    {
+        auto* selectedItem = slots[ch - 1].item;
+        if (selectedItem->GetType() == ItemType::WEAPON)
+        {
+            WeaponItem* weapon = dynamic_cast<WeaponItem*>(selectedItem);
+            if (weapon != nullptr)
+                player->EquipWeapon(weapon);
+        }
+    }
+    {
+
+        }
+
 }

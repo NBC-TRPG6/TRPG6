@@ -31,6 +31,39 @@ void Player::LevelUp()
     }
 }
 
+
+void Player::EquipWeapon(WeaponItem* weapon)
+{
+    // 기존 무기 해제
+    if (equippedWeapon != nullptr)
+    {
+        Attack -= equippedWeapon->GetValue();
+        MaxHp -= equippedWeapon->GetHPBonus();
+        Hp -= equippedWeapon->GetHPBonus();
+    }
+
+    // 새 무기 장착
+    equippedWeapon = weapon;
+    if (weapon != nullptr)
+    {
+        Attack += weapon->GetValue();
+        MaxHp += weapon->GetHPBonus();
+        Hp += weapon->GetHPBonus();
+    }
+}
+
+bool Player::RemoveItem(const std::string& itemName, int amount)
+{
+    // 장착 무기면 먼저 해제
+    if (equippedWeapon != nullptr
+        && equippedWeapon->GetName() == itemName)
+    {
+        EquipWeapon(nullptr);
+    }
+    return inventory.RemoveItem(itemName, amount);
+}
+
+
 void Player::PrintStatus() const
 {
     Renderer::DisplayUI(UIPart::CenterRight, 0, "[ 캐릭터 정보 ]");
@@ -40,4 +73,6 @@ void Player::PrintStatus() const
     Renderer::DisplayUI(UIPart::CenterRight, 4, "HP: " + std::to_string(Hp) + "/" + std::to_string(MaxHp));
     Renderer::DisplayUI(UIPart::CenterRight, 5, "공격력: " + std::to_string(Attack));
     Renderer::DisplayUI(UIPart::CenterRight, 6, "보유 골드: " + std::to_string(Money));
+    if (equippedWeapon != nullptr)
+        Renderer::DisplayUI(UIPart::CenterRight, 7,  equippedWeapon->GetName());
 }
