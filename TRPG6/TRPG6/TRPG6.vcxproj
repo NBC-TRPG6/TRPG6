@@ -49,6 +49,10 @@
     <ClCompile Include="InventoryState.cpp" />
     <ClCompile Include="IPCManager.cpp" />
     <ClCompile Include="Item.cpp" />
+    <ClCompile Include="ItemReceivedTradeListState.cpp" />
+    <ClCompile Include="ItemSentTradeListState.cpp" />
+    <ClCompile Include="ItemTradeRequestState.cpp" />
+    <ClCompile Include="ItemTradeState.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="NetworkManager.cpp" />
@@ -61,6 +65,7 @@
     <ClCompile Include="ShopSellState.cpp" />
     <ClCompile Include="ShopState.cpp" />
     <ClCompile Include="ShopStockState.cpp" />
+    <ClCompile Include="TradeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArenaBattleManager.h" />
@@ -85,6 +90,10 @@
     <ClInclude Include="IGameState.h" />
     <ClInclude Include="InventoryState.h" />
     <ClInclude Include="IPCManager.h" />
+    <ClInclude Include="ItemReceivedTradeListState.h" />
+    <ClInclude Include="ItemSentTradeListState.h" />
+    <ClInclude Include="ItemTradeRequestState.h" />
+    <ClInclude Include="ItemTradeState.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="NetworkManager.h" />
     <ClInclude Include="Packet.h" />
@@ -97,6 +106,7 @@
     <ClInclude Include="ShopSellState.h" />
     <ClInclude Include="ShopState.h" />
     <ClInclude Include="ShopStockState.h" />
+    <ClInclude Include="TradeManager.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

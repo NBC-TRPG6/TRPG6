@@ -98,6 +98,11 @@ public:
 
 #pragma endregion
 
+#pragma region Item
+    void SendTradeRequest(const Pkt_TradeRequest& pkt);
+    void SendTradeResponse(const Pkt_TradeResponse& pkt);
+    void BroadcastTradeSync(const Pkt_TradeSync& pkt);
+#pragma endregion
 // 브로드 캐스팅 함수=======================================================================================
 public:
     void BroadcastChangeState(EGameState stateType);
