@@ -8,7 +8,7 @@
 #include "Utils.h"
 
 void COOPRewardState::Enter() {
-    auto art = LoadImageAsASCII("..\\..\\Resources\\dragon.png");
+    auto art = LoadImageAsASCII("..\\..\\Resources\\RAIDReward.jpg");
     Renderer::SetTopASCIIImage(art);
     Player* p = GameManager::GetInstance().GetPlayer();
     if (p) NetworkManager::GetInstance().SendCOOPUpdateStatus(Client::playerName, p->GetAttack(), p->GetHp(), static_cast<int>(COOPManager::GetInstance().GetMyJob()), false);

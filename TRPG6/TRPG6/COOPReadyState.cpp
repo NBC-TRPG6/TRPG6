@@ -9,7 +9,7 @@
 
 void COOPReadyState::Enter()
 {
-    auto art = LoadImageAsASCII("..\\..\\Resources\\dragon.png");
+    auto art = LoadImageAsASCII("..\\..\\Resources\\DungeonDoor.png");
     Renderer::SetTopASCIIImage(art);
 }
 
@@ -66,21 +66,26 @@ void COOPReadyState::Update(int ch, std::string& lastCommand)
         Player* p = GameManager::GetInstance().GetPlayer();
         if (p)
         {
+            int level = p->GetLevel();
+            // [수정] 배율을 퍼센트 정수로 계산 (예: 50렙이면 100 + 500 = 600%)
+            int multiplierPercent = 100 + (level * COOP_DB::STAT_MULTIPLIER_PERCENT_PER_LEVEL);
+
             int finalAtk = p->GetAttack();
             int finalHp = p->GetHp();
 
             if (myJob == PlayerJob::Tanker)
             {
-                finalHp += 200; // 탱커: 추가 체력 200
+                // [수정] 먼저 곱한 뒤 100으로 나누어 소수점 오차 원천 차단
+                finalHp += (COOP_DB::TANKER_BONUS_HP * multiplierPercent) / 100;
             }
             else if (myJob == PlayerJob::None)
             {
-                finalAtk += 30; // 기본(딜러): 추가 공격력 30
+                finalAtk += (COOP_DB::DEALER_BONUS_ATK * multiplierPercent) / 100;
             }
 
             NetworkManager::GetInstance().SendCOOPUpdateStatus(Client::playerName, finalAtk, finalHp, static_cast<int>(myJob), false);
             COOPManager::GetInstance().UpdatePlayerStatus(Client::playerName, finalAtk, finalHp, myJob, false);
-            // 로컬 플레이어의 준비 상태도 UI에 즉시 반영되도록 명시적 처리
+
             COOPManager::GetInstance().SetPlayerReady(Client::playerName, true);
         }
         NetworkManager::GetInstance().SendCOOPReady(true);

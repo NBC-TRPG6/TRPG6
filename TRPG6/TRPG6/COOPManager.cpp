@@ -8,8 +8,8 @@
 
 void COOPManager::Reset() {
     players.clear();
-    currentBossName = "드래곤";
-    currentBossHp = 3000;
+    currentBossName = "이승재";
+    currentBossHp = COOP_DB::BOSS_MAX_HP;
     currentTurnPlayer = "";
     currentTurnCount = 0;
     currentBlockSource = "";
@@ -134,7 +134,7 @@ void COOPManager::BossAction()
         target = currentBlockSource;
     }
 
-    int damage = get_normal_int(90, 30) + 30;
+    int damage = get_normal_int(COOP_DB::BOSS_DMG_MEAN, COOP_DB::BOSS_DMG_STDDEV) + COOP_DB::BOSS_DMG_BASE;
     int currentHp = players[target].hp - damage;
     if (currentHp < 0) currentHp = 0;
     bool isDead = (currentHp == 0);
