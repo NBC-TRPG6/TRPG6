@@ -15,7 +15,7 @@ void Item::Use(Character* target)
         target->SetHp(target->GetHp() + target->GetMaxHp()*value/100);
         break;
     case ItemType::ATTACK_BUFF:
-        target->SetAttack(target->GetAttack() + value);
+        target->SetAttack(target->GetAttack() + target->GetAttack() * value / 100);
         break;
     default:
         break;
