@@ -12,7 +12,7 @@ void Item::Use(Character* target)
     switch (type)
     {
     case ItemType::HP_POTION:
-        target->SetHp(target->GetHp() + value);
+        target->SetHp(target->GetHp() + target->GetMaxHp()*value/100);
         break;
     case ItemType::ATTACK_BUFF:
         target->SetAttack(target->GetAttack() + value);
