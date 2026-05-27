@@ -256,7 +256,7 @@ void BattleManager::BattleEnd(Player* player)
     }
 
 
-    Item* item = currentMonster.DropItem(100); //80%확률로 아이템 드랍
+    Item* item = currentMonster.DropItem(); //80%확률로 아이템 드랍
     if (item != nullptr)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 6, item->GetName() + "을(를) 획득했다!");
