@@ -2,6 +2,7 @@
 #include "WeaponItem.h"
 #include <random>
 #include <algorithm>
+#include "IPCManager.h"
 const WeaponData WeaponTable::weaponTable[30] = {
     // 검
     {"나무 검",       "검", 0, 3,  2,  100},
@@ -75,7 +76,7 @@ WeaponData WeaponTable::GetRandomWeapon(int price1, int price2)
     {
         MaxUpgrade = 2;
     }
-    else if (PriceSum >= 200)
+    else if (PriceSum > 100)
     {
         MaxUpgrade = 3;
     }
@@ -85,31 +86,31 @@ WeaponData WeaponTable::GetRandomWeapon(int price1, int price2)
     int randomUpgrade = upgradeDist(rng);
 
     // 무기 테이블에서 랜덤으로 무기 선택
-    std::vector<WeaponData> candidates;
+    std::vector<const WeaponData*> candidates;
     for (const auto& weapon : weaponTable)
     {
         if (weapon.UpgradeCount == randomUpgrade)
-        {
-            //업그레이드 수치가 같은 6종 무기 추가
-            candidates.push_back(weapon);
-        }
+            candidates.push_back(&weapon);  // 포인터만 저장
     }
     if (candidates.empty())
-    {
-        return weaponTable[0]; // 후보가 없으면 기본 무기 반환
-    }
-    //6종의 무기중 랜덤으로 하나 선택해서 리턴
+        return weaponTable[0];
+
     std::uniform_int_distribution<int> candidateDist(0, candidates.size() - 1);
-    return candidates[candidateDist(rng)];
+    const WeaponData* result = candidates[candidateDist(rng)];
+    return *result;  // 마지막에 한 번만 복사
 
 }
 
 WeaponItem* WeaponTable::Craft(int price1, int price2)
 {
-    WeaponData data = GetRandomWeapon(price1, price2);
-    return new WeaponItem(
+      WeaponData data = GetRandomWeapon(price1, price2);
+
+    WeaponItem* result = new WeaponItem(
         data.Name, data.BaseName, data.UpgradeCount,
         data.AttackBonus, data.HPBonus, data.Price);
+
+    return result;
+
 }
 
 std::string WeaponTable::GetBaseName(WeaponData& weapon) const
@@ -122,15 +123,19 @@ int WeaponTable::GetUpgradeCount(WeaponData& weapon) const
 }
 
 
+/// <summary>
+/// 처음 넣은 무기를 베이스, 두번째 무기를 재료로 업그레이드 하는 함수입니다. 
+/// </summary>
+/// <param name="weapon1"></param>
+/// <param name="weapon2"></param>
+/// <returns></returns>
 WeaponItem* WeaponTable::Upgrade(WeaponItem* weapon1, WeaponItem* weapon2)
 {
-    // 다른 무기 종류면 강화 불가
-    if (weapon1->GetBaseName() != weapon2->GetBaseName())
-        return nullptr;
-    else if(weapon1->GetUpgradeCount() >= 4 || weapon2->GetUpgradeCount() >= 4) // 이미 최대 강화된 무기는 강화 불가
+
+    if (weapon1->GetUpgradeCount() >= 4 || weapon2->GetUpgradeCount() >= 4) // 이미 최대 강화된 무기는 강화 불가
         return nullptr;
 
-    // 강화 단계 합산 + 1, 최대 4 클램프
+    // 강화 단계 합산 +, 최대 4 클램프
     int newUpgrade = weapon1->GetUpgradeCount() + weapon2->GetUpgradeCount() + 1;
     newUpgrade = std::min<int>(newUpgrade, 4);
 

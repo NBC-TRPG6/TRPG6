@@ -65,6 +65,7 @@
     <ClCompile Include="ShopSellState.cpp" />
     <ClCompile Include="ShopState.cpp" />
     <ClCompile Include="ShopStockState.cpp" />
+    <ClCompile Include="SmithState.cpp" />
     <ClCompile Include="TradeManager.cpp" />
     <ClCompile Include="WeaponTable.cpp" />
   </ItemGroup>
@@ -107,6 +108,7 @@
     <ClInclude Include="ShopSellState.h" />
     <ClInclude Include="ShopState.h" />
     <ClInclude Include="ShopStockState.h" />
+    <ClInclude Include="SmithState.h" />
     <ClInclude Include="TradeManager.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="WeaponItem.h" />
