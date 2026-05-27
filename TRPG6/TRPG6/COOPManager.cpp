@@ -191,7 +191,13 @@ void COOPManager::OnPlayerItem(const std::string& targetName, const std::string&
         if (itemName == "HP 포션") {
             players[targetName].hp += amount;
         } else if (itemName == "공격력 포션") {
-            players[targetName].atk += amount;
+            int currentAtk = players[targetName].atk;
+
+            // 2. 넘어온 amount(4)를 퍼센트로 환산하여 증가량을 계산하고 반올림합니다.
+            int bonusAtk = (int)std::round(currentAtk * amount / 100.0f);
+
+            // 3. 계산된 버프 수치를 기존 공격력에 더해줍니다.
+            players[targetName].atk = currentAtk + bonusAtk;
         }
         
         UpdatePlayerStatus(targetName, players[targetName].atk, players[targetName].hp, players[targetName].job, players[targetName].isDead);
