@@ -13,6 +13,7 @@
 #include "IGameState.h"
 #include "DATABASE.h"
 #include "ArenaBattleState.h"
+#include "GoldTradePacket.h"
 #include <algorithm>
 #include <set>
 
@@ -278,6 +279,21 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
                 SendArenaPlayerSnapshotPacket(player);
                 IPCManager::GetInstance().SendLog("[아레나] 방장 요청으로 스냅샷 전송");
             }
+            break;
+        }
+
+        //--------------골드 전송 처리 부문----------------
+        case static_cast<PacketType>(210): // GoldTradePacketType::PKT_C2S_GOLD_TRADE_REQ
+        {
+            Pkt_GoldTradeRequest* pkt = reinterpret_cast<Pkt_GoldTradeRequest*>(header);
+            HandleGoldTradeRequest(sock, pkt);
+            break;
+        }
+
+        case static_cast<PacketType>(211): // GoldTradePacketType::PKT_S2C_GOLD_TRADE_ACK
+        {
+            Pkt_GoldTradeAck* pkt = reinterpret_cast<Pkt_GoldTradeAck*>(header);
+            HandleGoldTradeAck(pkt);
             break;
         }
 
@@ -1619,3 +1635,87 @@ void NetworkManager::ReceiveLoop(SOCKET sock)
     }
 }
 #pragma endregion
+
+// 골드 거래
+// [서버] 클라이언트 소켓으로부터 골드 송금 요청 패킷을 받았을 때 실행되는 함수
+void NetworkManager::HandleGoldTradeRequest(SOCKET sock, Pkt_GoldTradeRequest* pkt) {
+    if (!Client::isServer) return; // 서버(방장)가 아니라면 즉시 차단
+
+    std::string senderName = GetPlayerNameForSocket(sock); // 보낸 사람 이름 찾기
+    std::string receiverName = pkt->receiverName;          // 받을 사람 이름
+    int32_t amount = pkt->goldAmount;                      // 보낼 액수
+
+    // 클라이언트들에게 돌려줄 결과 알림 패킷 생성 및 데이터 복사
+    Pkt_GoldTradeAck ackPkt;
+    std::strncpy(ackPkt.senderName, senderName.c_str(), sizeof(ackPkt.senderName) - 1);
+    std::strncpy(ackPkt.receiverName, receiverName.c_str(), sizeof(ackPkt.receiverName) - 1);
+    ackPkt.goldAmount = amount;
+
+    bool isTransactionValid = false;
+
+    // 기초적인 예외 검사 (자기 자신에게 보낼 수 없고, 0원 이하는 전송 불가)
+    if (senderName != receiverName && amount > 0) {
+        isTransactionValid = true;
+    }
+
+    if (isTransactionValid) {
+        ackPkt.isSuccess = 1; // 성공 판정
+        IPCManager::GetInstance().SendLog("[골드 거래] " + senderName + " -> " + receiverName + " [" + std::to_string(amount) + " Gold] 서버 승인");
+    }
+    else {
+        ackPkt.isSuccess = 0; // 실패 판정
+        IPCManager::GetInstance().SendLog("[골드 거래] " + senderName + "님의 요청 실패 (조건 부적합)");
+    }
+
+    // 방에 접속해 있는 모든 클라이언트 소켓에 결과를 뿌림 (브로드캐스팅)
+    std::lock_guard<std::mutex> lock(clientsMutex);
+    for (SOCKET cSock : connectedClients) {
+        send(cSock, reinterpret_cast<char*>(&ackPkt), ackPkt.header.size, 0);
+    }
+
+    // 호스트(방장) 본인의 메모리(화면)에도 실시간 반영하기 위해 연동 함수 직접 실행
+    HandleGoldTradeAck(&ackPkt);
+}
+
+// [클라이언트 공통] 서버가 최종 승인하여 브로드캐스트한 결과를 수신했을 때 데이터를 실제 깎고 더하는 함수
+void NetworkManager::HandleGoldTradeAck(Pkt_GoldTradeAck* pkt) {
+    // 서버가 실패 처리한 거래라면 로그만 띄우고 취소
+    if (pkt->isSuccess == 0) {
+        if (Client::playerName == std::string(pkt->senderName)) {
+            IPCManager::GetInstance().SendLog("[골드 거래] 잘못된 거래 요청이거나 실패했습니다.");
+        }
+        return;
+    }
+
+    std::string sender = pkt->senderName;
+    std::string receiver = pkt->receiverName;
+    int32_t amount = pkt->goldAmount;
+
+    // 게임매니저를 통해 내 캐릭터 데이터(메모리) 주소 가져오기
+    Player* myPlayer = GameManager::GetInstance().GetPlayer();
+    if (!myPlayer) return;
+
+    // [Case A] 내가 돈을 보낸 사람(Sender)인 경우 -> 내 소지금 삭감 처리
+    if (Client::playerName == sender) {
+        int currentMoney = myPlayer->GetMoney(); // 상속받은 Character의 GetMoney 함수 활용
+        if (currentMoney >= amount) {
+            myPlayer->SetMoney(currentMoney - amount); // SetMoney 함수로 데이터 갱신
+            myPlayer->PrintStatus(); // UI 상태창 새로고침
+            IPCManager::GetInstance().SendLog("[거래 완료] " + std::to_string(amount) + " 골드를 송금했습니다. (현재 잔액: " + std::to_string(myPlayer->GetMoney()) + " 골드)");
+        }
+        else {
+            IPCManager::GetInstance().SendLog("[거래 실패] 보유하신 골드가 부족합니다.");
+        }
+    }
+    // [Case B] 내가 돈을 받은 사람(Receiver)인 경우 -> 내 소지금 증가 처리
+    else if (Client::playerName == receiver) {
+        int currentMoney = myPlayer->GetMoney();
+        myPlayer->SetMoney(currentMoney + amount); // 소지금 합산
+        myPlayer->PrintStatus(); // UI 상태창 새로고침
+        IPCManager::GetInstance().SendLog("[거래 완료] " + sender + "님으로부터 " + std::to_string(amount) + " 골드가 입금되었습니다! (현재 잔액: " + std::to_string(myPlayer->GetMoney()) + " 골드)");
+    }
+    // [Case C] 나랑 관련 없는 제3자 유저들인 경우 -> 귓속말이나 알림처럼 구경만 하도록 시스템 메세지만 출력
+    else {
+        IPCManager::GetInstance().SendLog("[시스템] " + sender + "님이 " + receiver + "님에게 " + std::to_string(amount) + " 골드를 전달했습니다.");
+    }
+}

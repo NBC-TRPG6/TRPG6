@@ -40,6 +40,11 @@ public:
 public:
     void SendChatPacket(const std::string& sender, const std::string& message);
 
+    //골드 전송 처리부문
+    void HandleGoldTradeRequest(SOCKET sock, struct Pkt_GoldTradeRequest* pkt);
+    void HandleGoldTradeAck(struct Pkt_GoldTradeAck* pkt);
+    SOCKET GetClientSocket() const { return clientSocket; }
+
 #pragma region Arena
 
     // ---------- C2S (클라이언트 → 호스트) ----------
