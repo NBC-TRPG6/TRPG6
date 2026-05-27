@@ -98,7 +98,7 @@ void GoldTradeState::Update(int ch, std::string& lastCommand)
 
         // 서버에 요청 패킷 전송
         NetworkManager::GetInstance().SendGoldTradeRequest(receiverName, amount);
-        errorMessage = receiverName + "님에게 " + std::to_string(amount) + " 골드 전송 요청 중...";
+        errorMessage = receiverName + "님에게 " + std::to_string(amount) + " 골드 전송 완료!";
     }
 
     if (!errorMessage.empty())
