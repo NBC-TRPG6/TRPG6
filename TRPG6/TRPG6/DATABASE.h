@@ -86,6 +86,6 @@ namespace COOP_DB
     inline constexpr int HEALER_HEAL_MEAN = 55;   // 힐량 평균 (만렙 시 평균 330)
     inline constexpr int HEALER_HEAL_STDDEV = 15; // 힐량 표준편차 (만렙 시 표준편차 90)
 
-    // 플레이어 레벨 비례 배율 (예: 50레벨일 때 100 + 500 = 600% 적용)
-    inline constexpr int STAT_MULTIPLIER_PERCENT_PER_LEVEL = 50;
+    // 플레이어 레벨 비례 배율 (예: 50레벨일 때 100 + 300 = 400% 적용)
+    inline constexpr int STAT_MULTIPLIER_PERCENT_PER_LEVEL = 30;
 }
