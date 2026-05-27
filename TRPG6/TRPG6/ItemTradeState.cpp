@@ -23,7 +23,7 @@ void ItemTradeState::Update(int ch, std::string & lastCommand)
         player->PrintStatus();
     }
 
-    Renderer::DisplayUI(UIPart::CenterLeft, 0, "=== [ 아이템 거래 센터 ] ===");
+    Renderer::DisplayUI(UIPart::Top, 0, "=== [ 아이템 거래 센터 ] ===");
     Renderer::DisplayUI(UIPart::CenterLeft, 2, "1. 거래 신청하기 (신규 제안)");
     Renderer::DisplayUI(UIPart::CenterLeft, 3, "2. 내가 보낸 거래 목록 보기");
     Renderer::DisplayUI(UIPart::CenterLeft, 4, "3. 나에게 온 거래 목록 보기");
