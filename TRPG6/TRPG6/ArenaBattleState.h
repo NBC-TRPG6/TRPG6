@@ -25,6 +25,7 @@ public:
     void OnItemList(const std::vector<ArenaItemSlot>& items);
     void OnItemResult(const std::string& userName, const std::string& itemName, int itemType, int value);
     void OnPlayerDie(const std::string& playerName);
+    void DrawMyStatus();
 
 private:
     void DrawPlayerList();
