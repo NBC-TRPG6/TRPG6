@@ -1,5 +1,6 @@
 ﻿#include "COOPManager.h"
 #include "NetworkManager.h"
+#include "IPCManager.h"
 #include "GameManager.h"
 #include "DATABASE.h"
 #include "Player.h"
@@ -134,7 +135,20 @@ void COOPManager::BossAction()
         target = currentBlockSource;
     }
 
+    // 기존 데미지 계산
     int damage = get_normal_int(COOP_DB::BOSS_DMG_MEAN, COOP_DB::BOSS_DMG_STDDEV) + COOP_DB::BOSS_DMG_BASE;
+
+    // 10% 확률로 2배 데미지 (크리티컬)
+    bool isCritical = (rand() % 100) < 10;
+    if (isCritical)
+    {
+        damage *= 2;
+        // (선택) 크리티컬 발생 시 로컬 창에 로그 출력
+        IPCManager::GetInstance().SendLog("[경고] 보스의 치명적인 공격! (데미지 2배)");
+    }
+
+    int currentHp = players[target].hp - damage;
+    // ... (이하 기존 로직 동일)
     int currentHp = players[target].hp - damage;
     if (currentHp < 0) currentHp = 0;
     bool isDead = (currentHp == 0);
