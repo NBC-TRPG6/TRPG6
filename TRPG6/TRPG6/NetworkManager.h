@@ -95,6 +95,16 @@ public:
     void BroadcastArenaRankList(const Pkt_ArenaRankList& pkt);
     // S2C PKT_S2C_ARENA_LOBBY_STATE: 로비 참가자·도착 여부 명단 갱신
     void BroadcastArenaLobbyState();
+    // S2C PKT_S2C_ARENA_ITEM_RESULT: 사용한 아이템의 정보 갱신
+    void BroadcastArenaItemResult(const Pkt_ArenaItemResult& pkt);
+    // S2C 턴 시작 + 해당 턴 아이템 목록을 한 번에 브로드캐스트
+    void BroadcastArenaTurnAndItems(const std::string& playerName);
+    // S2C PKT_S2C_ARENA_REWARD_POOL: 보상 화면용 패킷(순위별 보상 아이템 목록)
+    void BroadcastArenaRewardPool();
+    // S2C 스냅샷 기준 PlayerList 재브로드캐스트(HP·버프 변경 후 UI 동기화)
+    void BroadcastArenaPlayerListFromSnapshots();
+    // S2C PKT_S2C_ARENA_SNAPSHOT_REQUEST: 게스트에게 스냅샷 C2S 전송 요청
+    void BroadcastArenaSnapshotRequest();
 
 #pragma endregion
 
@@ -109,8 +119,6 @@ private:
 
     // ---------- S2C (호스트 → 클라이언트) ----------
 
-    // S2C PKT_S2C_ARENA_SNAPSHOT_REQUEST: 게스트에게 스냅샷 C2S 전송 요청
-    void BroadcastArenaSnapshotRequest();
     // S2C PKT_S2C_ARENA_LOBBY_STATE: 수신 패킷을 arenaLobbyDisplay 캐시에 반영
     void ApplyArenaLobbyStateCache(const Pkt_ArenaLobbyState& pkt);
     // S2C PKT_S2C_ARENA_LOBBY_STATE: arenaLobbyArrived 기준으로 송신 패킷 조립
@@ -122,12 +130,10 @@ private:
     // S2C PKT_S2C_ARENA_SESSION_APPLY: 순위·보상 반영용 종료 패킷(플레이어별 가변)
     bool BuildArenaSessionApplyPacket(const std::string& playerName, const Pkt_ArenaRankList& rankPkt,
         std::vector<char>& outBuffer) const;
-    // S2C: 스냅샷 기준 PlayerList 재브로드캐스트(HP·버프 변경 후 UI 동기화)
-    void BroadcastArenaPlayerListFromSnapshots();
     // S2C PKT_S2C_ARENA_SESSION_APPLY: 전원에게 종료·인벤 동기화 패킷 전송
     void SendArenaSessionApplyToAllPlayers(const Pkt_ArenaRankList& rankPkt);
-    // S2C: 턴 시작 + 해당 턴 아이템 목록을 한 번에 브로드캐스트
-    void BroadcastArenaTurnAndItems(const std::string& playerName);
+    // S2C PKT_S2C_ARENA_REWARD_POOL: arenaPlayerSnapshots + rankPkt에서 보상 풀 패킷 생성
+    void BuildArenaRewardPoolPacket(Pkt_ArenaRewardPool& out) const;
 
     // ---------- 호스트 권한 검증·턴 (패킷 직접 송수신 아님) ----------
 
@@ -199,6 +205,8 @@ private:
     void NotifyArenaBattleItemList(const Pkt_ArenaItemList& pkt);
     // S2C PKT_S2C_ARENA_DIE → 사망자 UI 처리
     void NotifyArenaBattleDie(const std::string& playerName);
+    // S2C PKT_S2C_ARENA_ITEM_RESULT → 아이템 사용 결과 갱신
+    void NotifyArenaItemResult(const Pkt_ArenaItemResult& pkt);
 
     // ---------- 아레나 세션 데이터 ----------
 
