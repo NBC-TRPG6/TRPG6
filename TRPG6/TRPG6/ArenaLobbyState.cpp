@@ -22,6 +22,7 @@ void ArenaLobbyState::Update(int ch, std::string& lastCommand)
     NetworkManager& net = NetworkManager::GetInstance();
     const int arrived = net.GetArenaLobbyArrivedCount();
     const int expected = net.GetExpectedArenaPlayerCount();
+    const auto& lobbyPlayers = net.GetArenaLobbyPlayers();
 
     Renderer::DisplayUI(UIPart::Top, 0, "아레나 로비");
     Renderer::DisplayUI(UIPart::CenterLeft, 0,
@@ -36,11 +37,28 @@ void ArenaLobbyState::Update(int ch, std::string& lastCommand)
         Renderer::DisplayUI(UIPart::CenterLeft, 1, "다른 플레이어 대기 중...");
     }
 
+    int row = 2;
+    Renderer::DisplayUI(UIPart::CenterLeft, row++, "--- 참가자 ---");
+    if (lobbyPlayers.empty())
+    {
+        Renderer::DisplayUI(UIPart::CenterLeft, row++, "목록 대기 중...");
+    }
+    else
+    {
+        for (const auto& p : lobbyPlayers)
+        {
+            if (row > 10) break;
+            std::string line = std::string(p.playerName);
+            line += (p.hasArrived != 0) ? "  [도착]" : "  [대기]";
+            Renderer::DisplayUI(UIPart::CenterLeft, row++, line);
+        }
+    }
+
     if (Client::isServer)
     {
         if (net.IsArenaSnapshotCollecting())
         {
-            Renderer::DisplayUI(UIPart::CenterLeft, 2, "스냅샷 수집 중...");
+            Renderer::DisplayUI(UIPart::CenterLeft, 10, "스냅샷 수집 중...");
         }
 
         Renderer::DisplayUI(UIPart::CenterLeft, 9, "1. 전투 시작");
