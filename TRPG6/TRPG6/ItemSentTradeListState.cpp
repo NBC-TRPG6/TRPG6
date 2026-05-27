@@ -54,8 +54,8 @@ void ItemSentTradeListState::Update(int ch, std::string & lastCommand)
                 + std::string(trade.itemReceiveName) + " | "
                 + statusStr;
             Renderer::DisplayUI(UIPart::CenterLeft, line++, tradeLine);
-            Renderer::DisplayUI(UIPart::CenterLeft, line + 1, "0. 뒤로 가기");
         }
+        Renderer::DisplayUI(UIPart::CenterLeft, line + 1, "0. 뒤로 가기");
     }
 
     // 0번 입력 시 이전 화면(거래 메인)으로 이동
