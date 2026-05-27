@@ -34,9 +34,7 @@ void ArenaBattleState::Update(int ch, std::string& lastCommand)
         else
         {
             Renderer::DisplayUI(UIPart::CenterLeft, 8,
-                CurrentTurnName.empty()
-                ? "전투 데이터 수신 대기 중..."
-                : CurrentTurnName + "의 턴입니다.");
+                CurrentTurnName.empty() ? "전투 데이터 수신 대기 중..." : CurrentTurnName + "의 턴입니다.");
         }
         break;
     }
@@ -155,6 +153,12 @@ void ArenaBattleState::OnAttackResult(const std::string& attacker, const std::st
 void ArenaBattleState::OnItemList(const std::vector<ArenaItemSlot>& items)
 {
     ItemSnapshot.assign(items.begin(), items.end());
+}
+
+void ArenaBattleState::OnItemResult(const std::string& userName, const std::string& itemName, int itemType, int value)
+{
+    LastAttackLog = userName + "이(가) " + itemName + " 사용! 효과: " +
+        (itemType == 0 ? "HP 회복 " : "버프 ") + std::to_string(value);
 }
 
 void ArenaBattleState::OnPlayerDie(const std::string& playerName)
