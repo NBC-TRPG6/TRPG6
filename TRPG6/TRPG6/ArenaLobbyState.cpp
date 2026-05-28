@@ -2,7 +2,7 @@
 #include "ArenaBattleState.h"
 #include "GameManager.h"
 #include "Renderer.h"
-#include "NetworkManager.h"
+#include "ArenaNetworkManager.h"
 #include "Player.h"
 #include "DATABASE.h"
 #include "Utils.h"
@@ -12,14 +12,14 @@ void ArenaLobbyState::Enter()
     Renderer::ClearAllCenterLeftUI();
     auto art = LoadImageAsASCII("..\\..\\Resources\\colosseum2.png");
     Renderer::SetTopASCIIImage(art);
-    NetworkManager::GetInstance().SendArenaLobbyArrivedPacket();
+    ArenaNetworkManager::GetInstance().SendArenaLobbyArrivedPacket();
 }
 
 void ArenaLobbyState::Update(int ch, std::string& lastCommand)
 {
     (void)lastCommand;
 
-    NetworkManager& net = NetworkManager::GetInstance();
+    ArenaNetworkManager& net = ArenaNetworkManager::GetInstance();
     const int arrived = net.GetArenaLobbyArrivedCount();
     const int expected = net.GetExpectedArenaPlayerCount();
     const auto& lobbyPlayers = net.GetArenaLobbyPlayers();

@@ -190,7 +190,6 @@ int ArenaBattleManager::GetAliveCount() const
 bool ArenaBattleManager::TryBuildRankList(Pkt_ArenaRankList& out) const
 {
     out = Pkt_ArenaRankList();
-    if (spectatorPlayers.size() < 2) return false;
 
     const auto alive = GetAlivePlayerNames();
     std::string firstPlace;

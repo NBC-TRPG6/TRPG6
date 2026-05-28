@@ -1,5 +1,5 @@
 ﻿#include "ArenaBattleState.h"
-#include "NetworkManager.h"
+#include "ArenaNetworkManager.h"
 #include "GameManager.h"
 #include "Renderer.h"
 #include "DATABASE.h"
@@ -74,7 +74,7 @@ void ArenaBattleState::Update(int ch, std::string& lastCommand)
             ++idx;
             if (ch == idx)
             {
-                NetworkManager::GetInstance().SendArenaAttackPacket(p.playerName);
+                ArenaNetworkManager::GetInstance().SendArenaAttackPacket(p.playerName);
                 CurrentStep = BattleUIStep::WaitingTurn;
                 break;
             }
@@ -87,6 +87,13 @@ void ArenaBattleState::Update(int ch, std::string& lastCommand)
         DrawItemList();
 
         int itemMenuIdx = 0;
+
+        if (ch == 0)
+        {
+            CurrentStep = BattleUIStep::MainMenu;
+            break;
+        }
+
         for (size_t i = 0; i < ItemSnapshot.size(); ++i)
         {
             if (ItemSnapshot[i].count <= 0) continue;
@@ -96,7 +103,7 @@ void ArenaBattleState::Update(int ch, std::string& lastCommand)
             auto& slot = ItemSnapshot[i];
             if (slot.count > 0)
             {
-                NetworkManager::GetInstance().SendArenaItemUsePacket(slot.itemName, Client::playerName);
+                ArenaNetworkManager::GetInstance().SendArenaItemUsePacket(slot.itemName, Client::playerName);
                 CurrentStep = BattleUIStep::WaitingTurn;
             }
             else
@@ -241,12 +248,16 @@ void ArenaBattleState::DrawItemList()
     {
         const auto& slot = ItemSnapshot[i];
         if (slot.count <= 0) continue;
-        Renderer::DisplayUI(UIPart::CenterLeft, 8 + displayIdx,
-            std::to_string(displayIdx) + ". "
-            + slot.itemName
-            + "  x" + std::to_string(slot.count));
-        ++displayIdx;
+        if (slot.itemType == 0 || slot.itemType == 1)
+        {
+            Renderer::DisplayUI(UIPart::CenterLeft, 8 + displayIdx,
+                std::to_string(displayIdx) + ". "
+                + slot.itemName
+                + "  x" + std::to_string(slot.count));
+            ++displayIdx;
+        }
     }
+    Renderer::DisplayUI(UIPart::CenterLeft, 8 + displayIdx + 1, "0. 뒤로");
 }
 
 void ArenaBattleState::DrawMyStatus()

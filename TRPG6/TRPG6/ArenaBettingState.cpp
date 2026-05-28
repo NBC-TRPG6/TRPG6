@@ -6,7 +6,7 @@
 #include "Player.h"
 #include "Utils.h"
 #include "ArenaReadyState.h"
-#include "NetworkManager.h"
+#include "ArenaNetworkManager.h"
 
 void ArenaBettingState::Enter()
 {
@@ -44,7 +44,7 @@ void ArenaBettingState::Update(int ch, std::string& lastCommand)
         const ItemType itemType = selectedSlot.item->GetType();
         const int32_t itemValue = static_cast<int32_t>(selectedSlot.item->GetValue());
 
-        NetworkManager::GetInstance().SendArenaItemRegisterPacket(
+        ArenaNetworkManager::GetInstance().SendArenaItemRegisterPacket(
             itemName, 1, itemType, itemValue);
         
         // 로컬 인벤토리에서 제거 (무기는 RemoveItem이 장착 해제 포함)

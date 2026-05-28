@@ -4,7 +4,7 @@
 #include "GameManager.h"
 #include "Renderer.h"
 #include "DATABASE.h"
-#include "NetworkManager.h"
+#include "ArenaNetworkManager.h"
 #include "IPCManager.h"
 #include "Utils.h"
 #include "Player.h"
@@ -34,12 +34,12 @@ void ArenaReadyState::Update(int ch, std::string& lastCommand) {
 
         if (ch == 3)
         {
-            NetworkManager::GetInstance().CancelArenaPreparation();
+            ArenaNetworkManager::GetInstance().CancelArenaPreparation();
         }
     }
 
     if (ch == 1) {
-        if (hasBet && NetworkManager::GetInstance().GetExpectedArenaPlayerCount() > 1)
+        if (hasBet && ArenaNetworkManager::GetInstance().GetExpectedArenaPlayerCount() > 1)
         {
             GameManager::GetInstance().SetCurrentState(new ArenaLobbyState());
         }
