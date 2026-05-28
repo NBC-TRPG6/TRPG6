@@ -35,7 +35,7 @@ void COOPReadyState::Update(int ch, std::string& lastCommand)
         if (pair.second.isReady) readyCount++;
     }
     // 아레나의 기대 인원 계산 로직(방장+클라이언트 수)을 재사용
-    int expected = NetworkManager::GetInstance().GetExpectedArenaPlayerCount();
+    int expected = ArenaNetworkManager::GetInstance().GetExpectedArenaPlayerCount();
 
     Renderer::DisplayUI(UIPart::CenterLeft, 0, "준비 완료: " + std::to_string(readyCount) + " / " + std::to_string(expected));
     Renderer::DisplayUI(UIPart::CenterLeft, 6, "--- 참가자 목록 ---");
@@ -82,9 +82,11 @@ void COOPReadyState::Update(int ch, std::string& lastCommand)
             {
                 finalAtk += (COOP_DB::DEALER_BONUS_ATK * multiplierPercent) / 100;
             }
+            p->SetMaxHp(finalHp);
+            p->SetHp(finalHp);
 
-            NetworkManager::GetInstance().SendCOOPUpdateStatus(Client::playerName, finalAtk, finalHp, static_cast<int>(myJob), false);
-            COOPManager::GetInstance().UpdatePlayerStatus(Client::playerName, finalAtk, finalHp, myJob, false);
+            NetworkManager::GetInstance().SendCOOPUpdateStatus(Client::playerName, finalAtk, finalHp, p->GetMaxHp(), static_cast<int>(myJob), false);
+            COOPManager::GetInstance().UpdatePlayerStatus(Client::playerName, finalAtk, finalHp, p->GetMaxHp(), myJob, false);
 
             COOPManager::GetInstance().SetPlayerReady(Client::playerName, true);
         }

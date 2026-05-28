@@ -16,6 +16,7 @@
 #include "InventoryState.h" // 인벤토리
 #include "ItemTradeState.h" 
 #include "ArenaReadyState.h"
+#include "ArenaBattleManager.h"
 #include "SmithState.h"
 
 void GameStartState::Enter()
@@ -24,7 +25,7 @@ void GameStartState::Enter()
     IPCManager::GetInstance().SendLog("게임 진입");
     auto art = LoadImageAsASCII("..\\..\\Resources\\DungeonDoor.png");
     Renderer::SetTopASCIIImage(art);
-    
+    ArenaBattleManager::GetInstance().ResetSession();
     GameManager::GetInstance().SetFps(30.f);
 
 }

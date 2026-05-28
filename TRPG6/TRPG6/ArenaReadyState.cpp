@@ -5,6 +5,8 @@
 #include "Renderer.h"
 #include "DATABASE.h"
 #include "ArenaNetworkManager.h"
+#include "NetworkManager.h"
+#include "ArenaBattleManager.h"
 #include "IPCManager.h"
 #include "Utils.h"
 #include "Player.h"
@@ -39,17 +41,27 @@ void ArenaReadyState::Update(int ch, std::string& lastCommand) {
     }
 
     if (ch == 1) {
-        if (hasBet && ArenaNetworkManager::GetInstance().GetExpectedArenaPlayerCount() > 1)
+        if (ArenaBattleManager::GetInstance().GetHasBet())
         {
-            GameManager::GetInstance().SetCurrentState(new ArenaLobbyState());
+            if (Client::isServer)
+            {
+                if (NetworkManager::GetInstance().GetConnectedClientCount() >= 1)
+                {
+                    GameManager::GetInstance().SetCurrentState(new ArenaLobbyState());
+                }
+                else
+                {
+                    Renderer::DisplayUITimed(UIPart::CenterLeft, 12, "참여 인원이 부족합니다!", 2.0f);
+                }
+            }
+            else
+            {
+                GameManager::GetInstance().SetCurrentState(new ArenaLobbyState());
+            }
         }
-        else if(!hasBet)
+        else if(!ArenaBattleManager::GetInstance().GetHasBet())
         {
             Renderer::DisplayUITimed(UIPart::CenterLeft, 12, "먼저 아이템을 베팅해야 합니다!", 2.0f);
-        }
-        else
-        {
-            Renderer::DisplayUITimed(UIPart::CenterLeft, 12, "참여 인원이 부족합니다!", 2.0f);
         }
     }
     else if (ch == 2) {

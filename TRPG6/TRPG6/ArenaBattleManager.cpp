@@ -10,8 +10,11 @@ ArenaBattleManager& ArenaBattleManager::GetInstance()
 // bettedItems, spectatorPlayers, eliminationOrder 등 전부 비움
 void ArenaBattleManager::ResetSession()
 {
-    bettedItems.clear();
-    betsByPlayer.clear();
+    {
+        std::lock_guard<std::mutex> lk(betMutex);
+        bettedItems.clear();
+        betsByPlayer.clear();
+    }
     spectatorPlayers.clear();
     currentTurnPlayer.clear();
     combatLog.clear();
@@ -19,11 +22,14 @@ void ArenaBattleManager::ResetSession()
     eliminationOrder.clear();
     rewardPoolDisplay.clear();
     battleEnded = false;
+    hasBet = false;
 }
 
 void ArenaBattleManager::RegisterPlayerBet(const std::string& playerName, const ArenaItemSlot& slot)
 {
     if (slot.count <= 0) return;
+
+    std::lock_guard<std::mutex> lk(betMutex);
 
     betsByPlayer[playerName].push_back(slot);
 
@@ -38,13 +44,27 @@ void ArenaBattleManager::RegisterPlayerBet(const std::string& playerName, const 
     bettedItems.push_back(slot);
 }
 
+std::vector<ArenaItemSlot> ArenaBattleManager::GetBettedItems() const
+{
+    std::lock_guard<std::mutex> lk(betMutex);
+    return bettedItems;
+}
+
+std::map<std::string, std::vector<ArenaItemSlot>> ArenaBattleManager::GetBetsByPlayer() const
+{
+    std::lock_guard<std::mutex> lk(betMutex);
+    return betsByPlayer;
+}
+
 void ArenaBattleManager::ClearBettedItems()
 {
+    std::lock_guard<std::mutex> lk(betMutex);
     bettedItems.clear();
 }
 
 void ArenaBattleManager::ClearAllArenaBets()
 {
+    std::lock_guard<std::mutex> lk(betMutex);
     bettedItems.clear();
     betsByPlayer.clear();
 }

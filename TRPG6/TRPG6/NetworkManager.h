@@ -57,12 +57,6 @@ public:
     // 호스트: 접속 중인 게스트 플레이어 이름 집합
     std::set<std::string> GetConnectedPlayerNames() const;
 
-    // COOP 대기실 UI: 아레나와 동일한 참가 예정 인원 수
-    int GetExpectedArenaPlayerCount() const
-    {
-        return ArenaNetworkManager::GetInstance().GetExpectedArenaPlayerCount();
-    }
-
 #pragma region Item
     void SendTradeRequest(const Pkt_TradeRequest& pkt);
     void SendTradeResponse(const Pkt_TradeResponse& pkt);
@@ -79,14 +73,14 @@ public:
 #pragma region COOP
     // COOP Send Functions
     void SendCOOPReady(bool isReady);
-    void SendCOOPUpdateStatus(const std::string& name, int atk, int hp, int job, bool isDead);
+    void SendCOOPUpdateStatus(const std::string& name, int atk, int hp, int maxhp, int job, bool isDead);
     void SendCOOPUseItem(const std::string& targetName, const std::string& itemName, int amount);
     void SendCOOPUseAttack(const std::string& sourceName, const std::string& targetName, int amount);
     void SendCOOPUseBlock(const std::string& sourceName, const std::string& targetName);
     void SendCOOPUseHeal(const std::string& sourceName, const std::string& targetName, int amount);
     
     // COOP Broadcast Functions
-    void BroadcastCOOPUpdateStatus(const std::string& name, int atk, int hp, int job, bool isDead);
+    void BroadcastCOOPUpdateStatus(const std::string& name, int atk, int hp, int maxhp, int job, bool isDead);
     void BroadcastCOOPUpdateTurn(const std::string& targetName, int turn);
     void BroadcastCOOPUpdateMonster(const std::string& targetName, int hp);
     void BroadcastCOOPTakeItem(const std::string& targetName, const std::string& itemName);

@@ -444,7 +444,7 @@ void ArenaNetworkManager::BuildArenaRewardPoolPacket(Pkt_ArenaRewardPool& out) c
 {
     out = Pkt_ArenaRewardPool();
 
-    const std::vector<ArenaItemSlot>& bettedItems =
+    const auto bettedItems =
         ArenaBattleManager::GetInstance().GetBettedItems();
 
     uint8_t idx = 0;
@@ -1314,7 +1314,7 @@ void ArenaNetworkManager::CancelArenaPreparation()
     if (!Client::isServer) return;
 
     ArenaBattleManager& arena = ArenaBattleManager::GetInstance();
-    const std::map<std::string, std::vector<ArenaItemSlot>>& betsByPlayer = arena.GetBetsByPlayer();
+    const auto betsByPlayer = arena.GetBetsByPlayer();
 
     for (const auto& pair : betsByPlayer)
     {
