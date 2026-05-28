@@ -51,6 +51,7 @@
     <ClCompile Include="GameLobbyState.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameStartState.cpp" />
+    <ClCompile Include="GoldTradeState.cpp" />
     <ClCompile Include="IGameState.cpp" />
     <ClCompile Include="InventoryState.cpp" />
     <ClCompile Include="IPCManager.cpp" />
@@ -72,6 +73,7 @@
     <ClCompile Include="ShopState.cpp" />
     <ClCompile Include="ShopStockState.cpp" />
     <ClCompile Include="TradeManager.cpp" />
+    <ClCompile Include="TradeState.cpp" />
     <ClCompile Include="WeaponItem.cpp" />
     <ClCompile Include="SmithState.cpp" />
     <ClCompile Include="WeaponTable.cpp" />
@@ -102,6 +104,7 @@
     <ClInclude Include="GameLobbyState.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameStartState.h" />
+    <ClInclude Include="GoldTradeState.h" />
     <ClInclude Include="IGameState.h" />
     <ClInclude Include="InventoryState.h" />
     <ClInclude Include="IPCManager.h" />
@@ -124,6 +127,7 @@
     <ClInclude Include="ShopStockState.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="TradeManager.h" />
+    <ClInclude Include="TradeState.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="SmithState.h" />
     <ClInclude Include="WeaponItem.h" />

@@ -186,6 +186,12 @@
     <ClCompile Include="GameStartState.cpp">
       <Filter>소스 파일\State</Filter>
     </ClCompile>
+    <ClCompile Include="TradeState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="GoldTradeState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Controller.h">
@@ -339,6 +345,12 @@
       <Filter>헤더 파일\Arena</Filter>
     </ClInclude>
     <ClInclude Include="GameStartState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="TradeState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="GoldTradeState.h">
       <Filter>헤더 파일\State</Filter>
     </ClInclude>
   </ItemGroup>
