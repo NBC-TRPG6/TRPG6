@@ -22,6 +22,7 @@ void ArenaBattleManager::ResetSession()
     eliminationOrder.clear();
     rewardPoolDisplay.clear();
     battleEnded = false;
+    hasBet = false;
 }
 
 void ArenaBattleManager::RegisterPlayerBet(const std::string& playerName, const ArenaItemSlot& slot)

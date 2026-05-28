@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "Utils.h"
 #include "ArenaReadyState.h"
+#include "ArenaBattleManager.h"
 #include "ArenaNetworkManager.h"
 
 void ArenaBettingState::Enter()
@@ -64,7 +65,7 @@ void ArenaBettingState::Update(int ch, std::string& lastCommand)
 
         // ArenaReadyState로 돌아가기 전에 hasBet 설정
         ArenaReadyState* readyState = new ArenaReadyState();
-        readyState->SetHasBet(true);
+        ArenaBattleManager::GetInstance().SetHasBet(true);
         GameManager::GetInstance().SetCurrentState(readyState);
     }
     else if (ch == 0)

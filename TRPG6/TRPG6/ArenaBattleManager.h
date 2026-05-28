@@ -52,6 +52,8 @@ public:
     bool IsBattleEnded() const { return battleEnded; }
     // spectatorPlayers 전원 순위. 1위=유일 생존자 또는 최후 탈락자, 2위~=탈락 늦은 순. 2인 미만 false
     bool TryBuildRankList(Pkt_ArenaRankList& out) const;
+    void SetHasBet(bool val) { hasBet = val; }
+    bool GetHasBet() const { return hasBet; }
 
 private:
     ArenaBattleManager() = default;
@@ -81,6 +83,7 @@ private:
     std::vector<ArenaItemSlot> rewardPoolDisplay;
     // 전투 종료 여부(RankList 수신 시 true)
     bool battleEnded = false;
+    bool hasBet = false;
 
     // combatLog에 보관할 최대 줄 수
     static constexpr size_t MaxCombatLogLines = 8;
