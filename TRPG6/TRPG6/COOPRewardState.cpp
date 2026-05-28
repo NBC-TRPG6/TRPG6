@@ -11,7 +11,7 @@ void COOPRewardState::Enter() {
     auto art = LoadImageAsASCII("..\\..\\Resources\\RAIDReward.jpg");
     Renderer::SetTopASCIIImage(art);
     Player* p = GameManager::GetInstance().GetPlayer();
-    if (p) NetworkManager::GetInstance().SendCOOPUpdateStatus(Client::playerName, p->GetAttack(), p->GetHp(), static_cast<int>(COOPManager::GetInstance().GetMyJob()), false);
+    if (p) NetworkManager::GetInstance().SendCOOPUpdateStatus(Client::playerName, p->GetAttack(), p->GetHp(), p->GetMaxHp(), static_cast<int>(COOPManager::GetInstance().GetMyJob()), false);
     
     if (Client::isServer) {
         for (auto& pair : COOPManager::GetInstance().players) {

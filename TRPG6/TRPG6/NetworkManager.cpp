@@ -208,7 +208,7 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         if (Client::isServer)
         {
             auto* pkt = reinterpret_cast<Pkt_C2S_COOP_Update_Status*>(header);
-            COOPManager::GetInstance().UpdatePlayerStatus(pkt->name, pkt->atk, pkt->hp, pkt->job, pkt->isDead);
+            COOPManager::GetInstance().UpdatePlayerStatus(pkt->name, pkt->atk, pkt->hp, pkt->maxhp, pkt->job, pkt->isDead);
         }
         break;
     }
@@ -248,7 +248,7 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         if (!Client::isServer)
         {
             auto* pkt = reinterpret_cast<Pkt_S2C_COOP_Update_Status*>(header);
-            COOPManager::GetInstance().UpdatePlayerStatus(pkt->name, pkt->atk, pkt->hp, pkt->job, pkt->isDead);
+            COOPManager::GetInstance().UpdatePlayerStatus(pkt->name, pkt->atk, pkt->hp, pkt->maxhp, pkt->job, pkt->isDead);
         }
         break;
     }
@@ -483,17 +483,18 @@ void NetworkManager::SendCOOPReady(bool isReady)
     }
 }
 
-void NetworkManager::SendCOOPUpdateStatus(const std::string& name, int atk, int hp, int job, bool isDead)
+void NetworkManager::SendCOOPUpdateStatus(const std::string& name, int atk, int hp, int maxhp, int job, bool isDead)
 {
     Pkt_C2S_COOP_Update_Status pkt;
     std::strncpy(pkt.name, name.c_str(), sizeof(pkt.name) - 1);
     pkt.atk = atk;
     pkt.hp = hp;
+    pkt.maxhp = maxhp;
     pkt.job = static_cast<PlayerJob>(job);
     pkt.isDead = isDead;
     if (Client::isServer)
     {
-        COOPManager::GetInstance().UpdatePlayerStatus(name, atk, hp, static_cast<PlayerJob>(job), isDead);
+        COOPManager::GetInstance().UpdatePlayerStatus(name, atk, hp, maxhp, static_cast<PlayerJob>(job), isDead);
     }
     else
     {
@@ -564,11 +565,12 @@ void NetworkManager::SendCOOPUseHeal(const std::string& sourceName, const std::s
     }
 }
 
-void NetworkManager::BroadcastCOOPUpdateStatus(const std::string& name, int atk, int hp, int job, bool isDead)
+void NetworkManager::BroadcastCOOPUpdateStatus(const std::string& name, int atk, int hp, int maxhp, int job, bool isDead)
 {
     Pkt_S2C_COOP_Update_Status pkt;
     std::strncpy(pkt.name, name.c_str(), sizeof(pkt.name) - 1);
-    pkt.atk = atk; pkt.hp = hp; pkt.job = static_cast<PlayerJob>(job);
+    pkt.atk = atk; pkt.hp = hp; pkt.maxhp = maxhp; // 추가!
+    pkt.job = static_cast<PlayerJob>(job);
     pkt.isDead = isDead;
     BroadcastToClients(&pkt, pkt.header.size);
 }

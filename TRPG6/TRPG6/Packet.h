@@ -508,6 +508,7 @@ struct Pkt_C2S_COOP_Update_Status {
     char name[32];
     int32_t atk;
     int32_t hp;
+    int32_t maxhp;
     PlayerJob job;
     bool isDead;
     
@@ -515,7 +516,7 @@ struct Pkt_C2S_COOP_Update_Status {
         header.size = sizeof(Pkt_C2S_COOP_Update_Status);
         header.type = PacketType::PKT_C2S_COOP_UPDATE_STATUS;
         std::memset(name, 0, sizeof(name));
-        atk = 0; hp = 0; job = PlayerJob::None; isDead = false;
+        atk = 0; hp = 0; maxhp = 0; job = PlayerJob::None; isDead = false;
     }
 };
 
@@ -582,6 +583,7 @@ struct Pkt_S2C_COOP_Update_Status {
     char name[32];
     int32_t atk;
     int32_t hp;
+    int32_t maxhp;
     PlayerJob job;
     bool isDead;
     
@@ -589,7 +591,7 @@ struct Pkt_S2C_COOP_Update_Status {
         header.size = sizeof(Pkt_S2C_COOP_Update_Status);
         header.type = PacketType::PKT_S2C_COOP_UPDATE_STATUS;
         std::memset(name, 0, sizeof(name));
-        atk = 0; hp = 0; job = PlayerJob::None; 
+        atk = 0; hp = 0; maxhp = 0; job = PlayerJob::None;
         isDead = false;
     }
 };

@@ -72,14 +72,14 @@ public:
 #pragma region COOP
     // COOP Send Functions
     void SendCOOPReady(bool isReady);
-    void SendCOOPUpdateStatus(const std::string& name, int atk, int hp, int job, bool isDead);
+    void SendCOOPUpdateStatus(const std::string& name, int atk, int hp, int maxhp, int job, bool isDead);
     void SendCOOPUseItem(const std::string& targetName, const std::string& itemName, int amount);
     void SendCOOPUseAttack(const std::string& sourceName, const std::string& targetName, int amount);
     void SendCOOPUseBlock(const std::string& sourceName, const std::string& targetName);
     void SendCOOPUseHeal(const std::string& sourceName, const std::string& targetName, int amount);
     
     // COOP Broadcast Functions
-    void BroadcastCOOPUpdateStatus(const std::string& name, int atk, int hp, int job, bool isDead);
+    void BroadcastCOOPUpdateStatus(const std::string& name, int atk, int hp, int maxhp, int job, bool isDead);
     void BroadcastCOOPUpdateTurn(const std::string& targetName, int turn);
     void BroadcastCOOPUpdateMonster(const std::string& targetName, int hp);
     void BroadcastCOOPTakeItem(const std::string& targetName, const std::string& itemName);
