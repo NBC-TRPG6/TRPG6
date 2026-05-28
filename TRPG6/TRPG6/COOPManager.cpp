@@ -38,6 +38,7 @@ void COOPManager::UpdatePlayerStatus(const std::string& name, int atk, int hp, P
     if (name == Client::playerName) {
         Player* p = GameManager::GetInstance().GetPlayer();
         if (p) {
+            info.maxhp = p->GetMaxHp();
             p->SetHp(info.hp);
             p->SetAttack(info.atk);
         }
@@ -255,7 +256,8 @@ void COOPManager::OnPlayerHeal(const std::string& sourceName, const std::string&
 void COOPManager::OnPlayerItem(const std::string& targetName, const std::string& itemName, int amount) {
     if (Client::isServer) {
         if (itemName == "HP 포션") {
-            players[targetName].hp += amount;
+            int maxHp = players[targetName].maxhp;
+            players[targetName].hp = min(players[targetName].hp + maxHp * amount / 100, maxHp);
         } else if (itemName == "공격력 포션") {
             int currentAtk = players[targetName].atk;
 

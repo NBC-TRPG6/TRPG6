@@ -8,6 +8,7 @@ struct COOPPlayerInfo {
     std::string name;
     int atk;
     int hp;
+    int maxhp;
     PlayerJob job;
     bool isDead;
     bool isReady;
