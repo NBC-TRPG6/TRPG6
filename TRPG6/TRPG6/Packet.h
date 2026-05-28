@@ -61,6 +61,9 @@ enum class PacketType : uint16_t {
     PKT_S2C_COOP_UPDATE_MONSTER,
     PKT_S2C_COOP_TAKE_ITEM,
 #pragma endregion
+    // 골드 전송
+    PKT_C2S_GOLD_TRADE_REQ,
+    PKT_S2C_GOLD_TRADE_ACK,
 };
 
 #pragma pack(push, 1)
@@ -634,6 +637,46 @@ struct Pkt_S2C_COOP_Take_Item {
 };
 
 #pragma endregion
+
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+
+// 1. 클라이언트가 서버에 골드 송금을 요청하는 패킷
+struct Pkt_GoldTradeRequest
+{
+    PacketHeader header;
+    char receiverName[32]; // 골드를 받을 대상 유저 이름
+    int32_t goldAmount;     // 보낼 골드 액수
+
+    Pkt_GoldTradeRequest()
+    {
+        header.size = sizeof(Pkt_GoldTradeRequest);
+        header.type = PacketType::PKT_C2S_GOLD_TRADE_REQ;
+        std::memset(receiverName, 0, sizeof(receiverName));
+        goldAmount = 0;
+    }
+};
+
+// 2. 서버가 검증 후 결과를 처리하여 브로드캐스트하는 패킷
+struct Pkt_GoldTradeAck
+{
+    PacketHeader header;
+    char senderName[32];   // 보낸 사람 이름
+    char receiverName[32]; // 받은 사람 이름
+    int32_t goldAmount;    // 거래된 골드 액수
+    uint8_t isSuccess;     // 1: 성공, 0: 실패 (잔액 부족 등)
+
+    Pkt_GoldTradeAck()
+    {
+        header.size = sizeof(Pkt_GoldTradeAck);
+        header.type = PacketType::PKT_S2C_GOLD_TRADE_ACK;
+        std::memset(senderName, 0, sizeof(senderName));
+        std::memset(receiverName, 0, sizeof(receiverName));
+        goldAmount = 0;
+        isSuccess = 0;
+    }
+};
 
 #pragma pack(pop)
 
