@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -32,6 +32,7 @@
     <ClCompile Include="ArenaBattleState.cpp" />
     <ClCompile Include="ArenaBettingState.cpp" />
     <ClCompile Include="ArenaLobbyState.cpp" />
+    <ClCompile Include="ArenaNetworkManager.cpp" />
     <ClCompile Include="ArenaReadyState.cpp" />
     <ClCompile Include="ArenaResultState.cpp" />
     <ClCompile Include="ArenaWaitState.cpp" />
@@ -40,6 +41,11 @@
     <ClCompile Include="BossMonster.cpp" />
     <ClCompile Include="ClearState.cpp" />
     <ClCompile Include="Controller.cpp" />
+    <ClCompile Include="COOPBattleState.cpp" />
+    <ClCompile Include="COOPManager.cpp" />
+    <ClCompile Include="COOPReadyState.cpp" />
+    <ClCompile Include="COOPRewardState.cpp" />
+    <ClCompile Include="COOPSelectJobState.cpp" />
     <ClCompile Include="DieState.cpp" />
     <ClCompile Include="GameCreateState.cpp" />
     <ClCompile Include="GameLobbyState.cpp" />
@@ -66,12 +72,16 @@
     <ClCompile Include="ShopState.cpp" />
     <ClCompile Include="ShopStockState.cpp" />
     <ClCompile Include="TradeManager.cpp" />
+    <ClCompile Include="WeaponItem.cpp" />
+    <ClCompile Include="SmithState.cpp" />
+    <ClCompile Include="WeaponTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArenaBattleManager.h" />
     <ClInclude Include="ArenaBattleState.h" />
     <ClInclude Include="ArenaBettingState.h" />
     <ClInclude Include="ArenaLobbyState.h" />
+    <ClInclude Include="ArenaNetworkManager.h" />
     <ClInclude Include="ArenaReadyState.h" />
     <ClInclude Include="ArenaResultState.h" />
     <ClInclude Include="ArenaWaitState.h" />
@@ -81,6 +91,11 @@
     <ClInclude Include="Character.h" />
     <ClInclude Include="ClearState.h" />
     <ClInclude Include="Controller.h" />
+    <ClInclude Include="COOPBattleState.h" />
+    <ClInclude Include="COOPManager.h" />
+    <ClInclude Include="COOPReadyState.h" />
+    <ClInclude Include="COOPRewardState.h" />
+    <ClInclude Include="COOPSelectJobState.h" />
     <ClInclude Include="DATABASE.h" />
     <ClInclude Include="DieState.h" />
     <ClInclude Include="GameCreateState.h" />
@@ -101,13 +116,18 @@
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Shop.h" />
     <ClInclude Include="ShopBranchState.h" />
     <ClInclude Include="ShopBuyState.h" />
     <ClInclude Include="ShopSellState.h" />
     <ClInclude Include="ShopState.h" />
     <ClInclude Include="ShopStockState.h" />
+    <ClInclude Include="stb_image.h" />
     <ClInclude Include="TradeManager.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="SmithState.h" />
+    <ClInclude Include="WeaponItem.h" />
+    <ClInclude Include="WeaponTable.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

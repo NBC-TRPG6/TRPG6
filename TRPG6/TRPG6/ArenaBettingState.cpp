@@ -6,11 +6,14 @@
 #include "Player.h"
 #include "Utils.h"
 #include "ArenaReadyState.h"
-#include "NetworkManager.h"
+#include "ArenaNetworkManager.h"
 
 void ArenaBettingState::Enter()
 {
     Renderer::ClearAllCenterLeftUI();
+
+    auto art = LoadImageAsASCII("..\\..\\Resources\\Betting.png");
+    Renderer::SetTopASCIIImage(art);
 }
 
 void ArenaBettingState::Update(int ch, std::string& lastCommand)
@@ -41,11 +44,18 @@ void ArenaBettingState::Update(int ch, std::string& lastCommand)
         const ItemType itemType = selectedSlot.item->GetType();
         const int32_t itemValue = static_cast<int32_t>(selectedSlot.item->GetValue());
 
-        NetworkManager::GetInstance().SendArenaItemRegisterPacket(
+        ArenaNetworkManager::GetInstance().SendArenaItemRegisterPacket(
             itemName, 1, itemType, itemValue);
         
-        // 로컬 인벤토리에서 제거
-        inventory.UseItem(nullptr, itemName, 1);
+        // 로컬 인벤토리에서 제거 (무기는 RemoveItem이 장착 해제 포함)
+        if (itemType == ItemType::WEAPON)
+        {
+            player->RemoveItem(itemName, 1);
+        }
+        else
+        {
+            inventory.UseItem(nullptr, itemName, 1);
+        }
 
         Renderer::DisplayUITimed(UIPart::CenterLeft, 14, itemName + "을(를) 베팅했습니다!", 2.0f);
 

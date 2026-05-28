@@ -1,17 +1,68 @@
 ﻿#include "Packet.h"
 #include "Player.h"
 #include "Item.h"
+#include "WeaponItem.h"
+#include "WeaponTable.h"
 #include "IPCManager.h"
+#include <cstring>
 
 namespace
 {
-    void SetLocalInventoryItemCount(Inventory<Item>& inventory, const std::string& itemName,
-        ItemType itemType, int32_t value, int32_t count)
+    std::string ArenaSlotItemName(const ArenaItemSlot& slot)
+    {
+        return std::string(slot.itemName, strnlen(slot.itemName, sizeof(slot.itemName)));
+    }
+
+    Item* CreateItemFromArenaSlot(const std::string& itemName, ItemType itemType, int32_t value)
+    {
+        if (itemType == ItemType::WEAPON)
+        {
+            const WeaponData* data = WeaponTable::GetInstance().GetWeaponDataByName(itemName);
+            if (data != nullptr)
+            {
+                return new WeaponItem(
+                    data->Name,
+                    data->BaseName,
+                    data->UpgradeCount,
+                    data->AttackBonus,
+                    data->HPBonus,
+                    data->Price);
+            }
+
+            IPCManager::GetInstance().SendLog(
+                "[아레나] 무기 테이블에 없는 이름, 일반 Item으로 반환: " + itemName);
+        }
+
+        return new Item(itemName, itemType, value, 0);
+    }
+
+    Item* CreateItemFromArenaSlot(const ArenaItemSlot& slot)
+    {
+        return CreateItemFromArenaSlot(
+            ArenaSlotItemName(slot),
+            static_cast<ItemType>(slot.itemType),
+            slot.value);
+    }
+
+    void UnequipWeaponIfMatches(Player* player, const std::string& itemName)
+    {
+        if (player == nullptr) return;
+
+        WeaponItem* equipped = player->GetEquippedWeapon();
+        if (equipped != nullptr && equipped->GetName() == itemName)
+        {
+            player->EquipWeapon(nullptr);
+        }
+    }
+
+    void SetLocalInventoryItemCount(Player* player, Inventory<Item>& inventory,
+        const std::string& itemName, ItemType itemType, int32_t value, int32_t count)
     {
         InventorySlot<Item>* slot = inventory.GetItemSlot(itemName);
 
         if (count <= 0)
         {
+            UnequipWeaponIfMatches(player, itemName);
             if (slot != nullptr && slot->count > 0)
             {
                 inventory.UseItem(nullptr, itemName, slot->count);
@@ -23,17 +74,22 @@ namespace
         {
             if (slot->count > count)
             {
+                if (count == 0)
+                {
+                    UnequipWeaponIfMatches(player, itemName);
+                }
                 inventory.UseItem(nullptr, itemName, slot->count - count);
             }
             else if (slot->count < count)
             {
-                inventory.AddItem(new Item(itemName, itemType, value, 0), count - slot->count);
+                inventory.AddItem(CreateItemFromArenaSlot(itemName, itemType, value), count - slot->count);
             }
             return;
         }
 
-        inventory.AddItem(new Item(itemName, itemType, value, 0), count);
+        inventory.AddItem(CreateItemFromArenaSlot(itemName, itemType, value), count);
     }
+
 }
 
 std::vector<char> BuildArenaPlayerSnapshotPacket(Player* player)
@@ -113,10 +169,6 @@ void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size
     const ArenaItemSlot* battleSlots = GetArenaSessionApplyBattleSlots(hdr);
     const ArenaItemSlot* rewardSlots = GetArenaSessionApplyRewardSlots(hdr);
 
-    //player->SetMaxHp(hdr->maxHp);
-    //player->SetHp(hdr->hp);
-    //player->SetAttack(hdr->attack);
-
     Inventory<Item>& inventory = player->GetInventory();
 
     for (uint8_t i = 0; i < hdr->battleSlotCount; ++i)
@@ -124,7 +176,7 @@ void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size
         const ArenaItemSlot& slot = battleSlots[i];
         const std::string itemName = slot.itemName;
         const ItemType itemType = static_cast<ItemType>(slot.itemType);
-        SetLocalInventoryItemCount(inventory, itemName, itemType, slot.value, slot.count);
+        SetLocalInventoryItemCount(player, inventory, itemName, itemType, slot.value, slot.count);
     }
 
     for (uint8_t i = 0; i < hdr->rewardSlotCount; ++i)
@@ -132,10 +184,9 @@ void ApplyArenaSessionToLocalPlayer(Player* player, const char* packetData, size
         const ArenaItemSlot& slot = rewardSlots[i];
         if (slot.count <= 0) continue;
 
-        const std::string itemName = slot.itemName;
-        const ItemType itemType = static_cast<ItemType>(slot.itemType);
-        inventory.AddItem(new Item(itemName, itemType, slot.value, 0), slot.count);
+        inventory.AddItem(CreateItemFromArenaSlot(slot), slot.count);
     }
+
 
     IPCManager::GetInstance().SendLog("[아레나] 로컬 플레이어 반영 완료");
 }
@@ -151,9 +202,7 @@ void ApplyArenaBetRefundToLocalPlayer(Player* player, const Pkt_ArenaBetRefund& 
         const ArenaItemSlot& slot = pkt.slots[i];
         if (slot.count <= 0) continue;
 
-        const std::string itemName = slot.itemName;
-        const ItemType itemType = static_cast<ItemType>(slot.itemType);
-        inventory.AddItem(new Item(itemName, itemType, slot.value, 0), slot.count);
+        inventory.AddItem(CreateItemFromArenaSlot(slot), slot.count);
     }
 
     IPCManager::GetInstance().SendLog("[아레나] 베팅 아이템이 인벤토리로 반환되었습니다.");

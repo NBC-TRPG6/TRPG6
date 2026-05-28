@@ -4,8 +4,10 @@
 #include "GameManager.h"
 #include "Renderer.h"
 #include "DATABASE.h"
-#include "NetworkManager.h"
+#include "ArenaNetworkManager.h"
 #include "IPCManager.h"
+#include "Utils.h"
+#include "Player.h"
 
 
 // 아레나 준비 상태입니다.
@@ -14,6 +16,9 @@
 // 아레나에 소집되면 나가는 것을 불가능
 void ArenaReadyState::Enter() {
     Renderer::ClearAllCenterLeftUI();
+
+    auto art = LoadImageAsASCII("..\\..\\Resources\\ArenaReady.png");
+    Renderer::SetTopASCIIImage(art);
 }
 
 void ArenaReadyState::Update(int ch, std::string& lastCommand) {
@@ -21,18 +26,20 @@ void ArenaReadyState::Update(int ch, std::string& lastCommand) {
     Renderer::DisplayUI(UIPart::CenterLeft, 8, "1. 아레나 로비 입장");
     Renderer::DisplayUI(UIPart::CenterLeft, 9, "2. 아이템 베팅");
 
+    GameManager::GetInstance().GetPlayer()->PrintStatus();
+
     if(Client::isServer)
     {
         Renderer::DisplayUI(UIPart::CenterLeft, 10, "3. 아레나 준비 취소");
 
         if (ch == 3)
         {
-            NetworkManager::GetInstance().CancelArenaPreparation();
+            ArenaNetworkManager::GetInstance().CancelArenaPreparation();
         }
     }
 
     if (ch == 1) {
-        if (hasBet && NetworkManager::GetInstance().GetExpectedArenaPlayerCount() > 1)
+        if (hasBet && ArenaNetworkManager::GetInstance().GetExpectedArenaPlayerCount() > 1)
         {
             GameManager::GetInstance().SetCurrentState(new ArenaLobbyState());
         }

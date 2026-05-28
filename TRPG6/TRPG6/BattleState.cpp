@@ -3,6 +3,7 @@
 #include "GameManager.h"
 #include "ShopBranchState.h"
 #include "ClearState.h"
+#include "GameStartState.h"
 #include "DieState.h"
 #include "Utils.h"
 #include <chrono>
@@ -31,7 +32,7 @@ void BattleState::Update(int ch, std::string& lastCommand)
         auto now = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - lastActionTime).count();
 
-        if (duration >= 2)
+        if (duration >= 1)
         {
             waiting = false; 
         }
@@ -49,10 +50,12 @@ void BattleState::Update(int ch, std::string& lastCommand)
 
         if (BattleEnded && !isBattle)
         {
-            if (battleManager->GetIsBoss())
-                ChangeState(new ClearState());
-            else
-                ChangeState(new ShopBranchState());
+            //if (battleManager->GetIsBoss())
+            //    ChangeState(new ClearState());
+            //else
+            //    ChangeState(new ShopBranchState());
+
+            ChangeState(new ShopBranchState());
             return;
         }
 

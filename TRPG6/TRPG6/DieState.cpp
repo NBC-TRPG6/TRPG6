@@ -7,7 +7,7 @@
 
 void DieState::Enter()
 {
-    auto art = LoadImageAsASCII("..\\..\\Resources\\Die.png");
+    auto art = LoadImageAsASCIIColor("..\\..\\Resources\\Die.png");
     Renderer::SetTopASCIIImage(art);
 }
 

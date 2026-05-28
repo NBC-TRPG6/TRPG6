@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="소스 파일">
@@ -19,6 +19,30 @@
     <Filter Include="소스 파일\Core">
       <UniqueIdentifier>{6d88026c-4224-4288-ba54-ab63df3d73a2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\State">
+      <UniqueIdentifier>{6764831c-e4e0-49dd-b447-91c1d2a0e982}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\State">
+      <UniqueIdentifier>{9fa9b8c9-388e-4f8a-aac7-d2a44d89455a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Character">
+      <UniqueIdentifier>{09e4f2b6-1c60-4cd8-9763-c67cce3652f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Character">
+      <UniqueIdentifier>{1311df96-3b3b-4899-9049-35ad0780e856}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Item">
+      <UniqueIdentifier>{683b607a-cfac-4298-a38c-8658ba6ae75c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Item">
+      <UniqueIdentifier>{c5c1607f-85c8-439f-b50a-139e7e865384}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Arena">
+      <UniqueIdentifier>{4271f15e-2f9a-4c15-b585-cfcfb17bbdc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Arena">
+      <UniqueIdentifier>{d88af4cb-3139-45cd-9cac-4629b2bd31f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Controller.cpp">
@@ -27,99 +51,141 @@
     <ClCompile Include="GameManager.cpp">
       <Filter>소스 파일\Core</Filter>
     </ClCompile>
-    <ClCompile Include="GameStartState.cpp">
-      <Filter>소스 파일\Core</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>소스 파일\Core</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
       <Filter>소스 파일\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>소스 파일\Core</Filter>
-    </ClCompile>
     <ClCompile Include="IGameState.cpp">
       <Filter>소스 파일\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Monster.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="BattleManager.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="BossMonster.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="IPCManager.cpp">
       <Filter>소스 파일\Core</Filter>
     </ClCompile>
-    <ClCompile Include="GameCreateState.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="GameLobbyState.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="NetworkManager.cpp">
       <Filter>소스 파일\Core</Filter>
     </ClCompile>
-    <ClCompile Include="BattleState.cpp">
+    <ClCompile Include="COOPManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ClearState.cpp">
+    <ClCompile Include="TradeManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="DieState.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Item.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Shop.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ShopBranchState.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ShopState.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ShopBuyState.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ShopSellState.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ShopStockState.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="InventoryState.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="ArenaBattleState.cpp">
+      <Filter>소스 파일\State</Filter>
     </ClCompile>
     <ClCompile Include="ArenaBettingState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ArenaLobbyState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ArenaReadyState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ArenaResultState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ArenaWaitState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="BattleState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ClearState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="COOPBattleState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="COOPReadyState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="COOPRewardState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="COOPSelectJobState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="GameLobbyState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="DieState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="GameCreateState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="InventoryState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemReceivedTradeListState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemSentTradeListState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemTradeRequestState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemTradeState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ShopBranchState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ShopSellState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ShopBuyState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ShopStockState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="ShopState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="SmithState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Monster.cpp">
+      <Filter>소스 파일\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>소스 파일\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponItem.cpp">
+      <Filter>소스 파일\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponTable.cpp">
+      <Filter>소스 파일\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Shop.cpp">
+      <Filter>소스 파일\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>소스 파일\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="BossMonster.cpp">
+      <Filter>소스 파일\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="ArenaBattleManager.cpp">
+      <Filter>소스 파일\Arena</Filter>
+    </ClCompile>
+    <ClCompile Include="ArenaNetworkManager.cpp">
+      <Filter>소스 파일\Arena</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketArena.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-      <ClCompile Include="ArenaBattleManager.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
-      <ClCompile Include="ArenaBattleState.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
-      <ClCompile Include="ArenaLobbyState.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
-      <ClCompile Include="ArenaReadyState.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
-      <ClCompile Include="ArenaResultState.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
-      <ClCompile Include="ArenaWaitState.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
-      <ClCompile Include="PacketArena.cpp">
-          <Filter>소스 파일</Filter>
-      </ClCompile>
+    <ClCompile Include="GameStartState.cpp">
+      <Filter>소스 파일\State</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Controller.h">
@@ -131,9 +197,6 @@
     <ClInclude Include="GameManager.h">
       <Filter>헤더 파일\Core</Filter>
     </ClInclude>
-    <ClInclude Include="GameStartState.h">
-      <Filter>헤더 파일\Core</Filter>
-    </ClInclude>
     <ClInclude Include="IGameState.h">
       <Filter>헤더 파일\Core</Filter>
     </ClInclude>
@@ -143,35 +206,11 @@
     <ClInclude Include="Utils.h">
       <Filter>헤더 파일\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Character.h">
-      <Filter>헤더 파일\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>헤더 파일\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Monster.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Inventory.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Item.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="BattleManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="BossMonster.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="IPCManager.h">
       <Filter>헤더 파일\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="GameCreateState.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="GameLobbyState.h">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Packet.h">
       <Filter>헤더 파일</Filter>
@@ -179,53 +218,128 @@
     <ClInclude Include="NetworkManager.h">
       <Filter>헤더 파일\Core</Filter>
     </ClInclude>
-    <ClInclude Include="BattleState.h">
+    <ClInclude Include="COOPManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ClearState.h">
+    <ClInclude Include="stb_image.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="DieState.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ShopBranchState.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ShopState.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ShopBuyState.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ShopSellState.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ShopStockState.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="InventoryState.h">
-      <Filter>헤더 파일</Filter>
+    <ClInclude Include="ArenaBattleState.h">
+      <Filter>헤더 파일\State</Filter>
     </ClInclude>
     <ClInclude Include="ArenaBettingState.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\State</Filter>
     </ClInclude>
-      <ClInclude Include="ArenaBattleManager.h">
-          <Filter>헤더 파일</Filter>
-      </ClInclude>
-      <ClInclude Include="ArenaBattleState.h">
-          <Filter>헤더 파일</Filter>
-      </ClInclude>
-      <ClInclude Include="ArenaLobbyState.h">
-          <Filter>헤더 파일</Filter>
-      </ClInclude>
-      <ClInclude Include="ArenaReadyState.h">
-          <Filter>헤더 파일</Filter>
-      </ClInclude>
-      <ClInclude Include="ArenaResultState.h">
-          <Filter>헤더 파일</Filter>
-      </ClInclude>
-      <ClInclude Include="ArenaWaitState.h">
-          <Filter>헤더 파일</Filter>
-      </ClInclude>
+    <ClInclude Include="ArenaLobbyState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ArenaReadyState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ArenaResultState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ArenaWaitState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="BattleState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ClearState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="DieState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemTradeState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemTradeRequestState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemReceivedTradeListState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemSentTradeListState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="InventoryState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="GameLobbyState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="GameCreateState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="COOPSelectJobState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="COOPRewardState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="COOPReadyState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="COOPBattleState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ShopBranchState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ShopBuyState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ShopSellState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ShopState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="ShopStockState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="SmithState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>헤더 파일\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>헤더 파일\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="Character.h">
+      <Filter>헤더 파일\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="Inventory.h">
+      <Filter>헤더 파일\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>헤더 파일\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Shop.h">
+      <Filter>헤더 파일\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="WeaponItem.h">
+      <Filter>헤더 파일\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="WeaponTable.h">
+      <Filter>헤더 파일\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="TradeManager.h">
+      <Filter>헤더 파일\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="BossMonster.h">
+      <Filter>헤더 파일\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="ArenaBattleManager.h">
+      <Filter>헤더 파일\Arena</Filter>
+    </ClInclude>
+    <ClInclude Include="ArenaNetworkManager.h">
+      <Filter>헤더 파일\Arena</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStartState.h">
+      <Filter>헤더 파일\State</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

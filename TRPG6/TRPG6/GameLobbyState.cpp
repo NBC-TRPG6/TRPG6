@@ -16,12 +16,13 @@ void GameLobbyState::Enter()
     IPCManager::GetInstance().SendPlayerJoin(Client::isServer, Client::playerName);
     IPCManager::GetInstance().SendChat(Client::playerName, "로비에 입장했습니다.");
 
-    auto art = LoadImageAsASCII("..\\..\\Resources\\Lobby.jpg");
+    auto art = LoadImageAsASCIIColor("..\\..\\Resources\\Lobby.jpg");
     Renderer::SetTopASCIIImage(art);
 }
 
 void GameLobbyState::Update(int ch, std::string& lastCommand)
 {
+
     Renderer::DisplayUI(UIPart::Top, 0, "[ GAME LOBBY ]");
 
     std::string role = Client::isServer ? "HOST(SERVER)" : "GUEST(CLIENT)";

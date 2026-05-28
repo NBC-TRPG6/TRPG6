@@ -16,6 +16,7 @@
 #include "InventoryState.h" // 인벤토리
 #include "ItemTradeState.h" 
 #include "ArenaReadyState.h"
+#include "SmithState.h"
 
 void GameStartState::Enter()
 {
@@ -36,12 +37,14 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
     GameManager::GetInstance().GetPlayer()->PrintStatus();
 
     Renderer::DisplayUI(UIPart::Top, 0, "메인 화면");
-    Renderer::DisplayUI(UIPart::CenterLeft, 7, "1. 던전 입장");
-    Renderer::DisplayUI(UIPart::CenterLeft, 8, "2. 상점 입장");
-    Renderer::DisplayUI(UIPart::CenterLeft, 9, "3. 인벤토리 확인");
-    Renderer::DisplayUI(UIPart::CenterLeft, 10, "4. 킬로그 확인");
-    Renderer::DisplayUI(UIPart::CenterLeft, 11, "5. 아레나 개최");
-    Renderer::DisplayUI(UIPart::CenterLeft, 12, "6. 거래 센터");
+    Renderer::DisplayUI(UIPart::CenterLeft, 5, "1. 던전 입장");
+    Renderer::DisplayUI(UIPart::CenterLeft, 6, "2. 상점 입장");
+    Renderer::DisplayUI(UIPart::CenterLeft, 7, "3. 인벤토리 확인/장비 장착");
+    Renderer::DisplayUI(UIPart::CenterLeft, 8, "4. 거래 센터");
+    Renderer::DisplayUI(UIPart::CenterLeft, 9, "5. 아레나 개최");
+    Renderer::DisplayUI(UIPart::CenterLeft, 10, "6. 레이드 개최");
+    Renderer::DisplayUI(UIPart::CenterLeft, 11, "7. 킬로그 확인");
+    Renderer::DisplayUI(UIPart::CenterLeft, 12, "8. 대장간 입장");
 
     switch (ch) {
     case 1: {
@@ -50,7 +53,7 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
 
 
         break;
-    }
+
     case 2:
         GameManager::GetInstance().SetCurrentState(new ShopState());
         Renderer::ClearAllCenterLeftUI();
@@ -62,7 +65,7 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
         break;
 
     case 4:
-        GameManager::GetInstance().GetBattleManager()->GetAllKillCount();
+        GameManager::GetInstance().SetCurrentState(new TradeState());
         break;
 
     case 5:
@@ -77,8 +80,25 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
         break;
 
     case 6:
-        Renderer::ClearAllCenterLeftUI();
-        GameManager::GetInstance().SetCurrentState(new TradeState());
+        if (!Client::isServer)
+        {
+            Renderer::DisplayUITimed(UIPart::CenterLeft, 0, "\033[1;31m레이드는 방장만 시작할 수 있습니다!\033[0m", 2.0f);
+            break;
+        }
+        NetworkManager::GetInstance().ApplySyncedStateChange(EGameState::COOPReady);
+        IPCManager::GetInstance().SendLog("\033[1;34m방장이 레이드를 시작했습니다.\033[0m");
         break;
     }
+
+
+    case 7:
+        GameManager::GetInstance().GetBattleManager()->GetAllKillCount();
+        break;
+
+    case 8:
+        GameManager::GetInstance().SetCurrentState(new SmithState());
+
+    }
+    
+
 }

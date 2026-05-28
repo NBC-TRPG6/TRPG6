@@ -5,7 +5,7 @@
 
 void ClearState::Enter()
 {
-    auto art = LoadImageAsASCII("..\\..\\Resources\\Win.png");
+    auto art = LoadImageAsASCIIColor("..\\..\\Resources\\Win.png");
     Renderer::SetTopASCIIImage(art);
 }
 

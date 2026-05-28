@@ -176,7 +176,7 @@ void Renderer::Render()
     for (int i = 0; i < reservedAsciiHeight; ++i)
     {
         std::string asciiLine = (i < (int)topAsciiLines.size()) ? topAsciiLines[i] : "";
-        frameOutput += CenterText(asciiLine, SCREEN_WIDTH) + "\n";
+        frameOutput += asciiLine + "\n";
     }
 
     // 3. 상태 표시줄 섹션 (3줄)

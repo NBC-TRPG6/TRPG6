@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
     // 화면 세팅
     std::cout << "\033[2J";
     HideCursor();
-    auto art = LoadImageAsASCII("..\\..\\Resources\\mashutan.png");
+    auto art = LoadImageAsASCIIColor("..\\..\\Resources\\mashutan.png");
     Renderer::SetTopASCIIImage(art); // 여기서 이미지를 등록하고 내부 Height를 계산함
     Renderer::Init();
 

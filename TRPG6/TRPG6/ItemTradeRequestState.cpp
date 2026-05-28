@@ -24,7 +24,7 @@ std::vector<std::string> Split(const std::string & s, char delimiter)
 
 void ItemTradeRequestState::Enter()
 {
-    auto art = LoadImageAsASCII("..\\..\\Resources\\Potion.png");
+    auto art = LoadImageAsASCIIColor("..\\..\\Resources\\Potion.png");
     Renderer::SetTopASCIIImage(art);
 }
 
