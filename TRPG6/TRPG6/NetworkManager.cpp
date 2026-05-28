@@ -277,6 +277,21 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
         break;
     }
 
+    //골드 거래
+    case PacketType::PKT_C2S_GOLD_TRADE_REQ:
+    {
+        Pkt_GoldTradeRequest* pkt = reinterpret_cast<Pkt_GoldTradeRequest*>(header);
+        HandleGoldTradeRequest(sock, pkt);
+        break;
+    }
+
+    case PacketType::PKT_S2C_GOLD_TRADE_ACK:
+    {
+        Pkt_GoldTradeAck* pkt = reinterpret_cast<Pkt_GoldTradeAck*>(header);
+        HandleGoldTradeAck(pkt);
+        break;
+    }
+
     default:
         break;
     }
@@ -809,6 +824,7 @@ void NetworkManager::ReceiveLoop(SOCKET sock)
 }
 #pragma endregion
 
+#pragma region Gold
 // 골드 거래
 // [서버] 클라이언트 소켓으로부터 골드 송금 요청 패킷을 받았을 때 실행되는 함수
 void NetworkManager::HandleGoldTradeRequest(SOCKET sock, Pkt_GoldTradeRequest* pkt) {
@@ -918,4 +934,4 @@ void NetworkManager::SendGoldTradeRequest(const std::string& receiverName, int32
         }
     }
 }
-
+#pragma endregion
