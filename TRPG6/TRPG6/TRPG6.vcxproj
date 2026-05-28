@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -32,7 +32,9 @@
     <ClCompile Include="ArenaBattleState.cpp" />
     <ClCompile Include="ArenaBettingState.cpp" />
     <ClCompile Include="ArenaLobbyState.cpp" />
+    <ClCompile Include="ArenaNetworkManager.cpp" />
     <ClCompile Include="ArenaReadyState.cpp" />
+    <ClCompile Include="ArenaStateS2C.cpp" />
     <ClCompile Include="ArenaResultState.cpp" />
     <ClCompile Include="ArenaWaitState.cpp" />
     <ClCompile Include="BattleManager.cpp" />
@@ -61,7 +63,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="NetworkManager.cpp" />
-    <ClCompile Include="PacketArena.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shop.cpp" />
@@ -80,6 +81,9 @@
     <ClInclude Include="ArenaBattleState.h" />
     <ClInclude Include="ArenaBettingState.h" />
     <ClInclude Include="ArenaLobbyState.h" />
+    <ClInclude Include="ArenaNetworkManager.h" />
+    <ClInclude Include="ArenaPacketUtil.h" />
+    <ClInclude Include="ArenaStateS2C.h" />
     <ClInclude Include="ArenaReadyState.h" />
     <ClInclude Include="ArenaResultState.h" />
     <ClInclude Include="ArenaWaitState.h" />
