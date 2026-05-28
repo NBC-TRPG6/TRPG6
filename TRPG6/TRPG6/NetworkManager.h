@@ -57,12 +57,6 @@ public:
     // 호스트: 접속 중인 게스트 플레이어 이름 집합
     std::set<std::string> GetConnectedPlayerNames() const;
 
-    // COOP 대기실 UI: 아레나와 동일한 참가 예정 인원 수
-    int GetExpectedArenaPlayerCount() const
-    {
-        return ArenaNetworkManager::GetInstance().GetExpectedArenaPlayerCount();
-    }
-
 #pragma region Item
     void SendTradeRequest(const Pkt_TradeRequest& pkt);
     void SendTradeResponse(const Pkt_TradeResponse& pkt);
