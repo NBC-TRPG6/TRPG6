@@ -18,7 +18,7 @@ void BattleManager::StartBattle(Player* player)
     isNIMO = false;
     useItemName = "";
 
-    bool isPlayerTurn = dist(rng) >= 5; // 95% 확률로 플레이어가 선공, 5% 확률로 몬스터가 선공
+   isPlayerTurn = dist(rng) >= 5; // 95% 확률로 플레이어가 선공, 5% 확률로 몬스터가 선공
 
     if (CurrentBattleState != EBattleState::Ready)
     {
