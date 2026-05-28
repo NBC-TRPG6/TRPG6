@@ -25,12 +25,13 @@ void COOPManager::SetPlayerReady(const std::string& name, bool isReady) {
     CheckAllReady();
 }
 
-void COOPManager::UpdatePlayerStatus(const std::string& name, int atk, int hp, PlayerJob job, bool isDead) {
+void COOPManager::UpdatePlayerStatus(const std::string& name, int atk, int hp, int maxhp, PlayerJob job, bool isDead) {
     // name별로 정보를 맵에 저장
     auto& info = players[name];
     info.name = name;
     info.atk = atk;
     info.hp = hp;
+    info.maxhp = maxhp;
     info.job = job;
     info.isDead = isDead;
     
@@ -45,7 +46,7 @@ void COOPManager::UpdatePlayerStatus(const std::string& name, int atk, int hp, P
     }
 
     if (Client::isServer) {
-        NetworkManager::GetInstance().BroadcastCOOPUpdateStatus(name, atk, hp, static_cast<int>(job), isDead);
+        NetworkManager::GetInstance().BroadcastCOOPUpdateStatus(name, atk, hp, maxhp, static_cast<int>(job), isDead);
     }
 }
 
@@ -159,7 +160,7 @@ void COOPManager::BossAction()
                 if (currentHp < 0) currentHp = 0;
                 bool isDead = (currentHp == 0);
 
-                UpdatePlayerStatus(target, players[target].atk, currentHp, players[target].job, isDead);
+                UpdatePlayerStatus(target, players[target].atk, currentHp, players[target].maxhp, players[target].job, isDead);
             }
         }
         else
@@ -214,7 +215,7 @@ void COOPManager::BossAction()
     if (currentHp < 0) currentHp = 0; //
     bool isDead = (currentHp == 0); //
 
-    UpdatePlayerStatus(target, players[target].atk, currentHp, players[target].job, isDead); //
+    UpdatePlayerStatus(target, players[target].atk, currentHp, players[target].maxhp, players[target].job, isDead);
     currentBlockSource = ""; //
     currentBlockTarget = ""; //
 }
@@ -247,7 +248,7 @@ void COOPManager::OnPlayerBlock(const std::string& sourceName, const std::string
 void COOPManager::OnPlayerHeal(const std::string& sourceName, const std::string& targetName, int amount) {
     if (Client::isServer) {
         players[targetName].hp += amount;
-        NetworkManager::GetInstance().BroadcastCOOPUpdateStatus(targetName, players[targetName].atk, players[targetName].hp, static_cast<int>(players[targetName].job), players[targetName].isDead);
+        NetworkManager::GetInstance().BroadcastCOOPUpdateStatus(targetName, players[targetName].atk, players[targetName].hp, players[targetName].maxhp, static_cast<int>(players[targetName].job), players[targetName].isDead);
         NetworkManager::GetInstance().SendChatPacket("[레이드]", sourceName + "이(가) " + targetName + "에게 " + std::to_string(amount) + "만큼 힐을 했습니다.");
         NextTurn();
     }
@@ -268,7 +269,7 @@ void COOPManager::OnPlayerItem(const std::string& targetName, const std::string&
             players[targetName].atk = currentAtk + bonusAtk;
         }
         
-        UpdatePlayerStatus(targetName, players[targetName].atk, players[targetName].hp, players[targetName].job, players[targetName].isDead);
+        UpdatePlayerStatus(targetName, players[targetName].atk, players[targetName].hp, players[targetName].maxhp, players[targetName].job, players[targetName].isDead);
         NextTurn();
     }
 }

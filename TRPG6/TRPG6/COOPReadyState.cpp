@@ -82,9 +82,11 @@ void COOPReadyState::Update(int ch, std::string& lastCommand)
             {
                 finalAtk += (COOP_DB::DEALER_BONUS_ATK * multiplierPercent) / 100;
             }
+            p->SetMaxHp(finalHp);
+            p->SetHp(finalHp);
 
-            NetworkManager::GetInstance().SendCOOPUpdateStatus(Client::playerName, finalAtk, finalHp, static_cast<int>(myJob), false);
-            COOPManager::GetInstance().UpdatePlayerStatus(Client::playerName, finalAtk, finalHp, myJob, false);
+            NetworkManager::GetInstance().SendCOOPUpdateStatus(Client::playerName, finalAtk, finalHp, p->GetMaxHp(), static_cast<int>(myJob), false);
+            COOPManager::GetInstance().UpdatePlayerStatus(Client::playerName, finalAtk, finalHp, p->GetMaxHp(), myJob, false);
 
             COOPManager::GetInstance().SetPlayerReady(Client::playerName, true);
         }

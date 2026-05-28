@@ -27,7 +27,7 @@ public:
 
     // C2S processing
     void SetPlayerReady(const std::string& name, bool isReady);
-    void UpdatePlayerStatus(const std::string& name, int atk, int hp, PlayerJob job, bool isDead);
+    void UpdatePlayerStatus(const std::string& name, int atk, int hp, int maxhp, PlayerJob job, bool isDead);
     void OnPlayerAttack(const std::string& sourceName, const std::string& targetName, int amount);
     void OnPlayerBlock(const std::string& sourceName, const std::string& targetName);
     void OnPlayerHeal(const std::string& sourceName, const std::string& targetName, int amount);
