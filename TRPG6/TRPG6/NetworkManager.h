@@ -69,6 +69,13 @@ public:
     void BroadcastTradeSync(const Pkt_TradeSync& pkt);
 #pragma endregion
 
+#pragma region Gold
+    void HandleGoldTradeRequest(SOCKET sock, struct Pkt_GoldTradeRequest* pkt);
+    void HandleGoldTradeAck(struct Pkt_GoldTradeAck* pkt);
+    void SendGoldTradeRequest(const std::string& receiverName, int32_t amount);
+    SOCKET GetClientSocket() const { return clientSocket; }
+#pragma endregion
+
 #pragma region COOP
     // COOP Send Functions
     void SendCOOPReady(bool isReady);

@@ -11,6 +11,7 @@
 #include "ShopState.h"
 #include "ShopStockState.h"
 #include "IPCManager.h"
+#include "TradeState.h"
 #include "Utils.h" //아스키 아트를 위한 include
 #include "InventoryState.h" // 인벤토리
 #include "ItemTradeState.h" 
@@ -39,7 +40,7 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
     Renderer::DisplayUI(UIPart::CenterLeft, 5, "1. 던전 입장");
     Renderer::DisplayUI(UIPart::CenterLeft, 6, "2. 상점 입장");
     Renderer::DisplayUI(UIPart::CenterLeft, 7, "3. 인벤토리 확인/장비 장착");
-    Renderer::DisplayUI(UIPart::CenterLeft, 8, "4. 아이템 거래 센터");
+    Renderer::DisplayUI(UIPart::CenterLeft, 8, "4. 거래 센터");
     Renderer::DisplayUI(UIPart::CenterLeft, 9, "5. 아레나 개최");
     Renderer::DisplayUI(UIPart::CenterLeft, 10, "6. 레이드 개최");
     Renderer::DisplayUI(UIPart::CenterLeft, 11, "7. 킬로그 확인");
@@ -64,7 +65,7 @@ void GameStartState::Update(int ch, std::string& lastCommand) {
         break;
 
     case 4:
-        GameManager::GetInstance().SetCurrentState(new ItemTradeState());
+        GameManager::GetInstance().SetCurrentState(new TradeState());
         break;
 
     case 5:

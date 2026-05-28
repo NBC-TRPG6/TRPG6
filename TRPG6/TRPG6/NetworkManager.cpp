@@ -58,53 +58,53 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
 
     switch (header->type)
     {
-        case PacketType::PKT_C2S_JOIN: {
-            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
+    case PacketType::PKT_C2S_JOIN: {
+        Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
 
-            // [추가] 방장이 클라이언트의 이름을 맵에 기억해둠
+        // [추가] 방장이 클라이언트의 이름을 맵에 기억해둠
+        {
+            std::lock_guard<std::mutex> lock(clientsMutex);
+            clientNames[sock] = pkt->name;
+        }
+
+        IPCManager::GetInstance().SendPlayerJoin(false, pkt->name);
+
+        Pkt_Join ackPkt(PacketType::PKT_S2C_JOIN_ACK);
+        strcpy_s(ackPkt.name, sizeof(ackPkt.name), Client::playerName.c_str());
+        send(sock, reinterpret_cast<char*>(&ackPkt), ackPkt.header.size, 0);
+        break;
+    }
+
+    case PacketType::PKT_S2C_JOIN_ACK: {
+        Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
+        IPCManager::GetInstance().SendPlayerJoin(true, pkt->name);
+        break;
+    }
+
+                                     // [추가] 방장으로부터 누군가 나갔다는 퇴장 패킷을 받았을 때의 처리
+    case PacketType::PKT_S2C_LEAVE: {
+        Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
+        IPCManager::GetInstance().SendPlayerLeave(pkt->name); // 로컬 창 갱신
+        break;
+    }
+
+    case PacketType::PKT_CHAT: {
+        Pkt_Chat* pkt = reinterpret_cast<Pkt_Chat*>(header);
+        IPCManager::GetInstance().SendChat(pkt->sender, pkt->message);
+
+        if (Client::isServer)
+        {
+            std::lock_guard<std::mutex> lock(clientsMutex);
+            for (SOCKET clientSock : connectedClients)
             {
-                std::lock_guard<std::mutex> lock(clientsMutex);
-                clientNames[sock] = pkt->name;
-            }
-
-            IPCManager::GetInstance().SendPlayerJoin(false, pkt->name);
-
-            Pkt_Join ackPkt(PacketType::PKT_S2C_JOIN_ACK);
-            strcpy_s(ackPkt.name, sizeof(ackPkt.name), Client::playerName.c_str());
-            send(sock, reinterpret_cast<char*>(&ackPkt), ackPkt.header.size, 0);
-            break;
-        }
-
-        case PacketType::PKT_S2C_JOIN_ACK: {
-            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
-            IPCManager::GetInstance().SendPlayerJoin(true, pkt->name);
-            break;
-        }
-
-                                         // [추가] 방장으로부터 누군가 나갔다는 퇴장 패킷을 받았을 때의 처리
-        case PacketType::PKT_S2C_LEAVE: {
-            Pkt_Join* pkt = reinterpret_cast<Pkt_Join*>(header);
-            IPCManager::GetInstance().SendPlayerLeave(pkt->name); // 로컬 창 갱신
-            break;
-        }
-
-        case PacketType::PKT_CHAT: {
-            Pkt_Chat* pkt = reinterpret_cast<Pkt_Chat*>(header);
-            IPCManager::GetInstance().SendChat(pkt->sender, pkt->message);
-
-            if (Client::isServer)
-            {
-                std::lock_guard<std::mutex> lock(clientsMutex);
-                for (SOCKET clientSock : connectedClients)
+                if (clientSock != sock)
                 {
-                    if (clientSock != sock)
-                    {
-                        send(clientSock, reinterpret_cast<char*>(pkt), pkt->header.size, 0);
-                    }
+                    send(clientSock, reinterpret_cast<char*>(pkt), pkt->header.size, 0);
                 }
             }
-            break;
         }
+        break;
+    }
 
         case PacketType::PKT_S2C_CHANGE_STATE: {
             Pkt_ChangeState* pkt = reinterpret_cast<Pkt_ChangeState*>(header);
@@ -274,6 +274,21 @@ void NetworkManager::ProcessPacket(SOCKET sock, PacketHeader* header)
             auto* pkt = reinterpret_cast<Pkt_S2C_COOP_Take_Item*>(header);
             COOPManager::GetInstance().TakeItem(pkt->targetName, pkt->itemName);
         }
+        break;
+    }
+
+    //골드 거래
+    case PacketType::PKT_C2S_GOLD_TRADE_REQ:
+    {
+        Pkt_GoldTradeRequest* pkt = reinterpret_cast<Pkt_GoldTradeRequest*>(header);
+        HandleGoldTradeRequest(sock, pkt);
+        break;
+    }
+
+    case PacketType::PKT_S2C_GOLD_TRADE_ACK:
+    {
+        Pkt_GoldTradeAck* pkt = reinterpret_cast<Pkt_GoldTradeAck*>(header);
+        HandleGoldTradeAck(pkt);
         break;
     }
 
@@ -806,6 +821,118 @@ void NetworkManager::ReceiveLoop(SOCKET sock)
             {
                 break;
             }
+        }
+    }
+}
+#pragma endregion
+
+#pragma region Gold
+// 골드 거래
+// [서버] 클라이언트 소켓으로부터 골드 송금 요청 패킷을 받았을 때 실행되는 함수
+void NetworkManager::HandleGoldTradeRequest(SOCKET sock, Pkt_GoldTradeRequest* pkt) {
+    if (!Client::isServer) return; // 서버(방장)가 아니라면 즉시 차단
+
+    std::string senderName = GetPlayerNameForSocket(sock); // 보낸 사람 이름 찾기
+    std::string receiverName = pkt->receiverName;          // 받을 사람 이름
+    int32_t amount = pkt->goldAmount;                      // 보낼 액수
+
+    // 클라이언트들에게 돌려줄 결과 알림 패킷 생성 및 데이터 복사
+    Pkt_GoldTradeAck ackPkt;
+    std::strncpy(ackPkt.senderName, senderName.c_str(), sizeof(ackPkt.senderName) - 1);
+    std::strncpy(ackPkt.receiverName, receiverName.c_str(), sizeof(ackPkt.receiverName) - 1);
+    ackPkt.goldAmount = amount;
+
+    // 이미 클라이언트가 자기 돈을 깎고 보냈으므로, 여기서는 무조건 승인 처리
+    bool isTransactionValid = false;
+    if (senderName != receiverName && amount > 0) {
+        isTransactionValid = true;
+    }
+
+    if (isTransactionValid) {
+        ackPkt.isSuccess = 1; // 성공 판정
+        IPCManager::GetInstance().SendLog("[골드 거래] " + senderName + " -> " + receiverName + " [" + std::to_string(amount) + " Gold] 서버 승인");
+    }
+    else {
+        ackPkt.isSuccess = 0; // 실패 판정
+        IPCManager::GetInstance().SendLog("[골드 거래] " + senderName + "님의 요청 실패 (조건 부적합)");
+    }
+
+    // 방에 접속해 있는 모든 클라이언트 소켓에 결과를 뿌림 (브로드캐스팅)
+    std::lock_guard<std::mutex> lock(clientsMutex);
+    for (SOCKET cSock : connectedClients) {
+        send(cSock, reinterpret_cast<char*>(&ackPkt), ackPkt.header.size, 0);
+    }
+
+    // 호스트(방장) 본인의 메모리(화면)에도 실시간 반영하기 위해 연동 함수 직접 실행
+    HandleGoldTradeAck(&ackPkt);
+}
+
+// [클라이언트 공통] 서버가 최종 승인하여 브로드캐스트한 결과를 수신했을 때 데이터를 깎고 더하는 함수
+void NetworkManager::HandleGoldTradeAck(Pkt_GoldTradeAck* pkt) {
+    // 서버가 실패 처리한 거래라면 로그만 띄우고 취소
+    if (pkt->isSuccess == 0) {
+        if (Client::playerName == std::string(pkt->senderName)) {
+            IPCManager::GetInstance().SendLog("[골드 거래] 잘못된 거래 요청이거나 실패했습니다.");
+        }
+        return;
+    }
+
+    std::string sender = pkt->senderName;
+    std::string receiver = pkt->receiverName;
+    int32_t amount = pkt->goldAmount;
+
+    // 게임매니저를 통해 내 캐릭터 데이터(메모리) 주소 가져오기
+    Player* myPlayer = GameManager::GetInstance().GetPlayer();
+    if (!myPlayer) return;
+
+    // [Case A] 내가 돈을 보낸 사람(Sender)인 경우 -> 이미 돈은 Request 보낼 때 깎았음
+    if (Client::playerName == sender) {
+        IPCManager::GetInstance().SendLog("[거래 완료] " + std::to_string(amount) + " 골드를 송금했습니다.");
+    }
+    // [Case B] 내가 돈을 받은 사람(Receiver)인 경우 -> 내 소지금 증가 처리
+    else if (Client::playerName == receiver) {
+        int currentMoney = myPlayer->GetMoney();
+        myPlayer->SetMoney(currentMoney + amount); // 소지금 합산
+        myPlayer->PrintStatus(); // UI 상태창 새로고침
+        IPCManager::GetInstance().SendLog("[거래 완료] " + sender + "님으로부터 " + std::to_string(amount) + " 골드가 입금되었습니다! (현재 잔액: " + std::to_string(myPlayer->GetMoney()) + " 골드)");
+    }
+    // [Case C] 나랑 관련 없는 제3자 유저들인 경우 -> 시스템 메세지만 출력
+    else {
+        IPCManager::GetInstance().SendLog("[시스템] " + sender + "님이 " + receiver + "님에게 " + std::to_string(amount) + " 골드를 전달했습니다.");
+    }
+}
+
+// [클라이언트] 유저가 UI 등에서 '골드 보내기'를 수행했을 때 호출하는 함수
+void NetworkManager::SendGoldTradeRequest(const std::string& receiverName, int32_t amount)
+{
+    if (amount <= 0) return;
+
+    // 1. 선 결제 로직 (보내는 사람 돈 먼저 깎기)
+    Player * myPlayer = GameManager::GetInstance().GetPlayer();
+    if (!myPlayer || myPlayer->GetMoney() < amount)
+    {
+        IPCManager::GetInstance().SendLog("[오류] 골드가 부족합니다.");
+        return;
+    }
+
+    myPlayer->SetMoney(myPlayer->GetMoney() - amount);
+    myPlayer->PrintStatus();
+
+    // 2. 패킷 조립
+    Pkt_GoldTradeRequest pkt;
+    pkt.goldAmount = amount;
+    std::strncpy(pkt.receiverName, receiverName.c_str(), sizeof(pkt.receiverName) - 1);
+
+    // 3. 전송
+    if (Client::isServer)
+    {
+        HandleGoldTradeRequest(INVALID_SOCKET, &pkt);
+    }
+    else
+    {
+        if (clientSocket != INVALID_SOCKET)
+        {
+            send(clientSocket, reinterpret_cast<char*>(&pkt), pkt.header.size, 0);
         }
     }
 }
