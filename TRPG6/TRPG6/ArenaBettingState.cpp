@@ -23,11 +23,13 @@ void ArenaBettingState::Update(int ch, std::string& lastCommand)
 
     Player* player = GameManager::GetInstance().GetPlayer();
     auto& inventory = player->GetInventory();
-    const auto& slots = inventory.GetSlots();
+    const auto slots = inventory.GetSlots();
     int size = (int)slots.size();
 
     for (int i = 0; i < size; ++i)
     {
+        if (slots[i].item == nullptr) continue;
+
         std::string name = slots[i].item->GetName();
         int count = slots[i].count;
         std::string info = std::to_string(i + 1) + ". " + name + " (x" + std::to_string(count) + ")";
@@ -40,6 +42,7 @@ void ArenaBettingState::Update(int ch, std::string& lastCommand)
     {
         // 아이템 베팅 처리
         auto& selectedSlot = slots[ch - 1];
+        if (selectedSlot.item == nullptr) return;
         std::string itemName = selectedSlot.item->GetName();
         const ItemType itemType = selectedSlot.item->GetType();
         const int32_t itemValue = static_cast<int32_t>(selectedSlot.item->GetValue());

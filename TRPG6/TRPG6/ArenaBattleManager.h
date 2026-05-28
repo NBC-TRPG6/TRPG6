@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <mutex>
 #include "Packet.h"
 
 // 아레나 베팅 아이템, 관전 캐시, 순위 등 세션 단위 데이터 관리
@@ -19,8 +20,8 @@ public:
     void RegisterPlayerBet(const std::string& playerName, const ArenaItemSlot& slot);
     void ClearBettedItems();
     void ClearAllArenaBets();
-    const std::vector<ArenaItemSlot>& GetBettedItems() const { return bettedItems; }
-    const std::map<std::string, std::vector<ArenaItemSlot>>& GetBetsByPlayer() const { return betsByPlayer; }
+    std::vector<ArenaItemSlot> GetBettedItems() const;
+    std::map<std::string, std::vector<ArenaItemSlot>> GetBetsByPlayer() const;
 
     // S2C PlayerList: 관전용 플레이어 목록 갱신(전투 시작 시 1회)
     void OnSpectatorPlayerList(const Pkt_ArenaPlayerList& pkt);
@@ -61,6 +62,7 @@ private:
     // spectatorPlayers에서 이름 검색, 없으면 nullptr
     ArenaPlayerListEntry* FindSpectatorPlayer(const std::string& playerName);
 
+    mutable std::mutex betMutex;
     // 아레나 보상(베팅) 풀에 올라간 아이템 목록
     std::vector<ArenaItemSlot> bettedItems;
     // 플레이어별 베팅 내역(준비 취소 시 인벤 반환)
